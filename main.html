@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Accurate Tracker</title>
+
+        <link href="./bower_components/angular-material/angular-material.css" rel="stylesheet" />
+
+        <script src="./bower_components/angular/angular.js" type="text/javascript" ></script>
+        <script src="./bower_components/angular-animate/angular-animate.js" type="text/javascript" ></script>
+        <script src="./bower_components/angular-aria/angular-aria.js" type="text/javascript" ></script>
+        <script src="./bower_components/angular-material/angular-material.js" type="text/javascript" ></script>
+        <script src="./bower_components/angular-route/angular-route.js" type="text/javascript" ></script>
+        <script src="./bower_components/angular-messages/angular-messages.js" type="text/javascript" ></script>
+
+        <script src="./services.js"></script>
+        <script src="./controllers.js"></script>
+        <script src="./filters.js"></script>
+        <script>
+            // Create module "tracker"
+            var tracker = angular.module("tracker", ["ngMaterial", "ngRoute", "ngMessages"]);
+            tracker
+                .value("stop_details", {stops:{}, loaded: false})
+                .config(function($routeProvider){
+                    $routeProvider
+                        .when("/", {
+                            templateUrl: "pages/landing.html",
+                            controller: "Landing"
+                        })
+                        .when("/stop/:id", {
+                            templateUrl: "pages/stop_details.html",
+                            controller: "StopDetails"
+                        })
+                        .otherwise({
+                            redirectTo: "/"
+                        });
+                });
+
+            services(tracker);
+            controllers(tracker);
+            filters(tracker);
+        </script>
+    </head>
+    <body ng-app="tracker" ng-controller="Overall" ng-view></body>
+</html>

@@ -1,0 +1,66 @@
+<style>
+    .departures{
+        list-style: none;
+        display: block;
+        height: 52px;
+        margin-bottom: 23px;
+    }
+    .departure-info{
+        width: 585px;
+    }
+    .departure-info-container-left{
+        display: inline-block;
+        float: left;
+    }
+    .departure-info-container-left > *{
+        float: left;
+        clear: both;
+    }
+    .departure-info-container-right{
+        display: inline-block;
+        float: right;
+    }
+    .departure-info-container-right > *{
+        float: right;
+        clear: both;
+    }
+    .departures .headsign, .departures .expected_mins{
+        font-size: 28px;
+    }
+    .departures .destination, .departures .min_label{
+        font-size: 14px;
+    }
+</style>
+
+<md-toolbar>
+    <div class="md-toolbar-tools">
+        <md-button class="md-icon-button" ng-click="back()" aria-label="Back">
+            <md-icon md-svg-icon="icons/arrow-left.svg"></md-icon>
+        </md-button>
+        <h2>
+            <span>{{stop.stop_name}}</span>
+        </h2>
+    </div>
+</md-toolbar>
+<div flex layout="row">
+    <md-sidenav md-is-locked-open="false" md-component-id="left">Sidebar</md-sidenav>
+    <md-content flex id="content">
+        <h1>Well...........?</h1>
+        <span>You gonna pick a bus or what?</span>
+
+        <ul class="departures" ng-repeat="departure in departures">
+            <li class="departure-info">
+                <div>
+                    <div class="departure-info-container-left">
+                        <span class="headsign">{{departure.headsign}}</span>
+                        <span class="destination">To {{departure.destination.stop_id | stopID}}</span>
+                    </div>
+                    <div class="departure-info-container-right">
+                        <span class="expected_mins">{{departure.expected_mins}}</span>
+                        <span class="min_label">min</span>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </md-content>
+</div>
