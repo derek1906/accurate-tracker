@@ -1,4 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
-    <path d="M0 0h18v18h-18z" fill="none"/>
-    <path d="M2 13.5h14v-1.5h-14v1.5zm0-4h14v-1.5h-14v1.5zm0-5.5v1.5h14v-1.5h-14z"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="32px" height="24px" viewBox="0 0 32 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+    <title>menu</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Landing" sketch:type="MSArtboardGroup" transform="translate(-30.000000, -44.000000)" fill="#FFFFFF">
+            <path d="M32.0017433,44 C30.896211,44 30,44.8877296 30,46 C30,47.1045695 30.8892617,48 32.0017433,48 L59.9982567,48 C61.103789,48 62,47.1122704 62,46 C62,44.8954305 61.1107383,44 59.9982567,44 L32.0017433,44 Z M32.0017433,54 C30.896211,54 30,54.8877296 30,56 C30,57.1045695 30.8892617,58 32.0017433,58 L59.9982567,58 C61.103789,58 62,57.1122704 62,56 C62,54.8954305 61.1107383,54 59.9982567,54 L32.0017433,54 Z M32.0017433,64 C30.896211,64 30,64.8877296 30,66 C30,67.1045695 30.8892617,68 32.0017433,68 L59.9982567,68 C61.103789,68 62,67.1122704 62,66 C62,64.8954305 61.1107383,64 59.9982567,64 L32.0017433,64 Z" id="menu" sketch:type="MSShapeGroup"></path>
+        </g>
+    </g>
 </svg>
