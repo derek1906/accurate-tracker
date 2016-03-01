@@ -3,9 +3,38 @@
         display: none;
     }
 
+    .nearbyStops{
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .nearbyStop-info{
+        width: 585px;
+        display: block;
+        height: 34px;
+        margin-bottom: 23px;
+        font-size: 28px;
+    }
+    .nearbyStop-info a{
+        color: white !important;
+        text-decoration: none !important;
+    }
+    .favorite-button{
+        padding: 0;
+    }
+    .favorite-button md-icon{
+        color: white;
+    }
+
+    .nearbyStop-info > *{
+        vertical-align: center !important;
+        display: inline-block;
+    }
+
 </style>
 
-<md-toolbar>
+<md-toolbar class="toolbar">
     <div class="md-toolbar-tools">
         <md-button class="md-icon-button" ng-click="toggleSidebar()" aria-label="Toggle Sidebar">
             <md-icon md-svg-icon="icons/menu.svg"></md-icon>
@@ -19,12 +48,17 @@
 </md-toolbar>
 <div flex layout="row">
     <md-sidenav md-is-locked-open="false" md-component-id="left">Sidebar</md-sidenav>
-    <md-content flex id="content">
-        <h1>Near as fuck.</h1>
-        <span>These are the closest bus stops I could fucking find.</span>
+    <md-content flex class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Near as fuck.</h1>
+            <span class="page-subtitle">These are the closest bus stops I could fucking find.</span>
+        </div>
 
-        <ul ng-repeat="stop in nearbyStops track by $index">
-            <li><a href="#/stop/{{stop.stop_id}}">{{stop.stop_name}}</a></li>
+        <ul class="nearbyStops">
+            <li class="nearbyStop-info" ng-repeat="stop in nearbyStops track by $index">
+                <md-button class="favorite-button md-icon-button"><md-icon md-svg-src="icons/heart.svg"></md-icon></md-button>
+                <a href="#/stop/{{stop.stop_id}}">{{stop.stop_name}}</a>
+            </li>
         </ul>
 
     </md-content>

@@ -20,10 +20,11 @@ function services(tracker){
 		return function(){
 			var deferred = $q.defer();
 
-			if(storage.exists(DATA_STORAGE_KEY) && !stop_details.loaded){
-				stop_details.stops = storage.get(DATA_STORAGE_KEY).stops;
-				stop_details.loaded = true;
-
+			if(storage.exists(DATA_STORAGE_KEY)){
+				if(!stop_details.loaded){
+					stop_details.stops = storage.get(DATA_STORAGE_KEY).stops;
+					stop_details.loaded = true;
+				}
 				deferred.resolve();
 			}
 			if(!storage.exists(DATA_STORAGE_KEY) || storage.get(DATA_STORAGE_KEY).last_updated - Date.now() > 7*24*60*60*1000){

@@ -1,12 +1,14 @@
 <style>
     .departures{
         list-style: none;
-        display: block;
-        height: 52px;
-        margin-bottom: 23px;
+        padding: 0;
+        margin-top: 0;
     }
     .departure-info{
         width: 585px;
+        display: block;
+        height: 52px;
+        margin-bottom: 23px;
     }
     .departure-info-container-left{
         display: inline-block;
@@ -32,7 +34,7 @@
     }
 </style>
 
-<md-toolbar>
+<md-toolbar class="toolbar">
     <div class="md-toolbar-tools">
         <md-button class="md-icon-button" ng-click="back()" aria-label="Back">
             <md-icon md-svg-icon="icons/arrow-left.svg"></md-icon>
@@ -44,12 +46,14 @@
 </md-toolbar>
 <div flex layout="row">
     <md-sidenav md-is-locked-open="false" md-component-id="left">Sidebar</md-sidenav>
-    <md-content flex id="content">
-        <h1>Well...........?</h1>
-        <span>You gonna pick a bus or what?</span>
+    <md-content flex class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Well...........?</h1>
+            <span class="page-subtitle">You gonna pick a bus or what?</span>
+        </div>
 
-        <ul class="departures" ng-repeat="departure in departures">
-            <li class="departure-info">
+        <ul class="departures">
+            <li class="departure-info" ng-repeat="departure in departures">
                 <div>
                     <div class="departure-info-container-left">
                         <span class="headsign">{{departure.headsign}}</span>
