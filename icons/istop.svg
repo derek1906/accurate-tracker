@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="22px" height="22px" viewBox="0 0 22 22" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+    <title>Rectangle 37</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Landing" sketch:type="MSArtboardGroup" transform="translate(-485.000000, -269.000000)" fill="#FFFFFF">
+            <g id="Group-2" sketch:type="MSLayerGroup" transform="translate(93.000000, 261.000000)">
+                <g id="Group" sketch:type="MSShapeGroup">
+                    <path d="M395.339286,30 L392,30 L392,8 L395.339286,8 L392,8 L392,14.6785714 L398.678571,8 L395.339286,8 L414,8 L407.326032,8.00020381 L414,14.6741718 L414,30 L410.660714,30 L407.321429,30 L414,23.3214286 L414,30 L410.660714,30 L395.339286,30 L398.678571,30 L392,23.3214286 L392,30 L395.339286,30 Z M403,18.6900991 C404.844237,18.6900991 406.339286,17.19505 406.339286,15.3508134 C406.339286,13.5065768 404.844237,12.0115277 403,12.0115277 C401.155763,12.0115277 399.660714,13.5065768 399.660714,15.3508134 C399.660714,17.19505 401.155763,18.6900991 403,18.6900991 Z M399.660714,23.1302535 C399.660714,21.2831155 401.159516,19.7857143 403,19.7857143 C404.844237,19.7857143 406.339286,21.2709591 406.339286,23.1302535 L406.339286,30 L399.660714,30 L399.660714,23.1302535 Z" id="Rectangle-37"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
