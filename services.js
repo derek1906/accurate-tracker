@@ -15,6 +15,19 @@ function services(tracker){
 
 		return methods;
 	})
+	.service("geolocation", function($q){
+		return function(){
+			var deferred = $q.defer();
+
+				navigator.geolocation.getCurrentPosition(function(pos){
+					deferred.resolve({lat: pos.coords.latitude, lon: pos.coords.longitude});
+				}, function(){
+					deferred.reject();
+				});
+
+			return deferred.promise;
+		};
+	})
 	.service("loadStopsDetails", function($q, stop_details, storage, getData){
 		var DATA_STORAGE_KEY = "stop_data";
 		return function(){
@@ -66,6 +79,10 @@ function services(tracker){
 				params: data
 			})
 				.then(function(res){
+					if(res.data.status.code != 200){
+						console.error("[" + method + "]", res.data.status.msg);
+						deferred.reject([]);
+					}
 					deferred.resolve(res.data);
 				}, function(){
 					deferred.reject([]);
@@ -74,23 +91,24 @@ function services(tracker){
 			return deferred.promise;
 		};
 	})
-	.service("getNearbyStops", function($q, getData){
+	.service("getNearbyStops", function($q, getData, geolocation){
 		return function(count){
 			var deferred = $q.defer();
 			var data = {};
 
 			if(count != undefined)	data.count = count;
 
-			navigator.geolocation.getCurrentPosition(function(pos){
-				data.lat = pos.coords.latitude;
-				data.lon = pos.coords.longitude;
+			geolocation()
+				.then(function(location){
+					data.lat = location.lat;
+					data.lon = location.lon;
 
-				getData("GetStopsByLatLon", data)
-					.then(function(res){
-						deferred.resolve(res.stops);
-					}, function(){
-						deferred.reject([]);
-					});
+					getData("GetStopsByLatLon", data)
+						.then(function(res){
+							deferred.resolve(res.stops);
+						}, function(){
+							deferred.reject([]);
+						});
 			});
 
 			return deferred.promise;
