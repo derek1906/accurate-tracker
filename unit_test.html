@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Unit Tests</title>
+
+        <link href="./bower_components/angular-material/angular-material.css" rel="stylesheet" />
+
+        <script src="./bower_components/angular/angular.js" type="text/javascript" ></script>
+        <script src="./bower_components/angular-animate/angular-animate.js" type="text/javascript" ></script>
+        <script src="./bower_components/angular-aria/angular-aria.js" type="text/javascript" ></script>
+        <script src="./bower_components/angular-material/angular-material.js" type="text/javascript" ></script>
+        <script src="./bower_components/angular-route/angular-route.js" type="text/javascript" ></script>
+        <script src="./bower_components/angular-messages/angular-messages.js" type="text/javascript" ></script>
+        <script src="./bower_components/angular-google-maps/dist/angular-google-maps.min.js"></script>
+        <script src="./bower_components/angular-simple-logger/dist/angular-simple-logger.min.js"></script>
+        <script src="./bower_components/lodash/lodash.js"></script>
+
+        <script src="./services.js"></script>
+        <script>
+            // Create module "tracker"
+            var tester = angular.module("tester", [])
+
+            .service("assertFail", function(){
+                return function(a, b){
+                    throw new Error("Assertion Fail");
+                };
+            })
+            .service("assertEqual", function(assertFail){
+                return function(a, b){
+                    if(a !== b) assertFail();
+                };
+            })
+            .service("assertTrue", function(assertEqual){
+                return function(a){
+                    assertEqual(a, true);
+                };
+            })
+            .service("assertFalse", function(assertEqual){
+                return function(a){
+                    assertEqual(a, false);
+                };
+            })
+            .service("assertType", function(assertTrue){
+                return function(a, type){
+                    assertTrue(Object(a) instanceof type);
+                };
+            })
+            .service("Tester", function(){
+                return function(scope, testName, test, async){
+                    scope.testName = testName;
+                    scope.status = "Waiting";
+
+                    try{
+                        test(asyncTester);
+                        if(!async)  scope.status = "Success";
+                    } catch(err){
+                        scope.status = "Fail";
+
+                        console.error("[" + testName + "]", err.stack);
+                    }
+
+                    function asyncTester(asyncFunc){
+                        return function(){
+                            try{
+                                asyncFunc.apply(this, arguments);
+                                scope.status = "Success";
+                            } catch(err){
+                                scope.status = "Fail";
+
+                                console.error("[" + testName + "]", err.stack);
+                            }
+                        };
+                    }
+                };
+            })
+
+
+
+            // Storage test
+            .controller("StorageTest", function(Tester, $scope, storage, assertEqual){
+                Tester($scope, "Storage Test", function(){
+                    storage.set("__foo__", "bar");
+                    assertEqual(storage.get("__foo__"), "bar");
+
+                    storage.remove("__foo__");
+                    assertEqual(storage.exists("__foo__"), false);
+                });
+            })
+
+            // Geolocation
+            .controller("GeolocationTest", function(Tester, $scope, geolocation, assertType, assertFail){
+                Tester($scope, "Geolocation Test", function(asyncTester){
+                    geolocation().then(asyncTester(function(latlng){
+                        assertType(latlng, Object);
+                        assertType(latlng.latitude, Number);
+                        assertType(latlng.longitude, Number);
+                    }), asyncTester(function(){
+                        assertFail();
+                    }));
+                }, true);
+            })
+
+            services(tester);
+        </script>
+    </head>
+    <body ng-app="tester">
+        <div ng-controller="StorageTest">{{testName}} - {{status}}</div>
+        <div ng-controller="GeolocationTest">{{testName}} - {{status}}</div>
+    </body>
+</html>

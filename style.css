@@ -1,0 +1,124 @@
+@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+
+body{
+    width: 100%;
+    height: 100%;
+    font-family: Montserrat;
+}
+::-webkit-scrollbar{
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track{
+    background: transparent;
+}
+::-webkit-scrollbar-thumb{
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover{
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+/* Standard height for toolbar level */
+.headbar{
+    height: 64px;
+}
+.headbar .md-errors-spacer{
+    min-height: 0;
+}
+
+
+/* Map background */
+#map{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+#map .angular-google-map-container{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+
+#splash{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: white;
+}
+
+
+/* Page wrapper */
+#wrapper{
+    position: absolute;
+    width: 50%;
+    height: 100%;
+
+    /* background: rgba(0, 0, 0, 0.6); */
+}
+#wrapper *{
+    color: white;
+}
+#wrapper svg{
+    -webkit-filter: drop-shadow(0px 4px 3px rgba(0, 0, 0, 0.6));
+    filter: drop-shadow(0px 4px 3px rgba(0, 0, 0, 0.6));
+}
+
+
+/* Menu sidebar */
+#menu{
+    padding: 0 10px;
+}
+#menu #menu-toggle-button{
+    -webkit-transform: rotate(90deg);
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+}
+#menu-more{
+    margin-left: 0%;
+    -webkit-transition: margin-left 0.3s ease;
+    -moz-transition: margin-left 0.3s ease;
+    transition: margin-left 0.3s ease;
+}
+#menu.closed #menu-toggle-button{
+    -webkit-transform: rotate(0deg);
+}
+#menu.closed #menu-more{
+    margin-left: -100%;
+}
+
+
+/* Content panel */
+#content{
+}
+
+
+/* Universal styles */
+.main-content{
+    color: white;
+    text-shadow: 0px 4px 3px rgba(0, 0, 0, 0.6);
+    background: transparent;
+    overflow: visible;
+}
+.page-title{
+    font-size: 91px;
+    margin: 0;
+    padding: 0;
+}
+.page-subtitle{
+    font-size: 20px;
+    line-height: 28px;
+}
+.page-header{
+    margin-bottom: 39.4px;
+    white-space: nowrap;
+}
+.page-scrollable-content{
+    overflow: auto;
+}

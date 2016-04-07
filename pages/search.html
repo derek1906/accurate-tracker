@@ -1,0 +1,60 @@
+<style>
+    #search-input{
+        width: 500px;
+        height: 24px;
+        font-size: 24px;
+        border: 0;
+        border-bottom: 2px solid white;
+        background: transparent;
+        outline: none;
+        padding: 5px;
+        box-sizing: content-box;
+    }
+
+    .nearbyStops{
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .nearbyStop-info{
+        height: 34px;
+        margin-bottom: 23px;
+        font-size: 28px;
+    }
+    .nearbyStop-info a{
+        color: white !important;
+        text-decoration: none !important;
+    }
+    .favorite-button{
+        padding: 0;
+    }
+    .favorite-button md-icon{
+        color: white;
+    }
+
+    .nearbyStop-info > *{
+        vertical-align: center !important;
+        display: inline-block;
+    }
+
+</style>
+
+<div class="headbar" layout="row" layout-align="start center" flex="none">
+    <input id="search-input" placeholder="search" ng-model="searchTerm" ng-model-options="{debounce: 200}" ng-change="performSearch()">
+</div>
+<md-content flex class="main-content" layout="column">
+    <div class="page-header" flex="none" ng-if="!searchResults.length && searchTerm.length && !isSearching">
+        <h1 class="page-title">Well shit...</h1>
+        <span class="page-subtitle">Sorry, we couldn't find a single thing.</span>
+    </div>
+    <md-list class="page-scrollable-content">
+        <md-list-item class="nearbyStop-info" ng-repeat="stop in searchResults track by $index">
+            <md-button class="favorite-button md-icon-button" aria-label="Set favorite">
+                <md-tooltip md-direction="left" md-delay="1000">Set favorite</md-tooltip>
+                <md-icon md-svg-src="icons/heart-outline.svg"></md-icon>
+            </md-button>
+            <a href="#/stop/{{stop.stop_id}}">{{stop.stop_name}}</a>
+        </md-list-item>
+    </md-list>
+</md-content>
