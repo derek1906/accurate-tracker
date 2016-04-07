@@ -2,7 +2,7 @@
  * Angular Material Design
  * https://github.com/angular/material
  * @license MIT
- * v1.0.5
+ * v1.1.0-rc2
  */
 (function( window, angular, undefined ){
 "use strict";
@@ -21,6 +21,8 @@
 
 var SELECT_EDGE_MARGIN = 8;
 var selectNextId = 0;
+var CHECKBOX_SELECTION_INDICATOR =
+  angular.element('<div class="_md-container"><div class="_md-icon"></div></div>');
 
 angular.module('material.components.select', [
     'material.core',
@@ -45,10 +47,12 @@ angular.module('material.components.select', [
  * @param {expression=} md-on-close Expression to be evaluated when the select is closed.
  * @param {expression=} md-on-open Expression to be evaluated when opening the select.
  * Will hide the select options and show a spinner until the evaluated promise resolves.
+ * @param {expression=} md-selected-text Expression to be evaluated that will return a string
+ * to be displayed as a placeholder in the select input box when it is closed.
  * @param {string=} placeholder Placeholder hint text.
  * @param {string=} aria-label Optional label for accessibility. Only necessary if no placeholder or
  * explicit label is present.
- * @param {string=} md-container-class Class list to get applied to the `.md-select-menu-container`
+ * @param {string=} md-container-class Class list to get applied to the `._md-select-menu-container`
  * element (for custom styling).
  *
  * @usage
@@ -96,9 +100,9 @@ angular.module('material.components.select', [
  * </hljs>
  *
  * At first one might expect that the select should be populated with "Bob" as the selected user. However,
- * this is not true. To determine whether something is selected, 
+ * this is not true. To determine whether something is selected,
  * `ngModelController` is looking at whether `$scope.selectedUser == (any user in $scope.users);`;
- * 
+ *
  * Javascript's `==` operator does not check for deep equality (ie. that all properties
  * on the object are the same), but instead whether the objects are *the same object in memory*.
  * In this case, we have two instances of identical objects, but they exist in memory as unique
@@ -107,7 +111,7 @@ angular.module('material.components.select', [
  * To get around this, `ngModelController` provides a `track by` option that allows us to specify a different
  * expression which will be used for the equality operator. As such, we can update our `html` to
  * make use of this by specifying the `ng-model-options="{trackBy: '$value.id'}"` on the `md-select`
- * element. This converts our equality expression to be 
+ * element. This converts our equality expression to be
  * `$scope.selectedUser.id == (any id in $scope.users.map(function(u) { return u.id; }));`
  * which results in Bob being selected as desired.
  *
@@ -132,8 +136,8 @@ function SelectDirective($mdSelect, $mdUtil, $mdTheming, $mdAria, $compile, $par
   function compile(element, attr) {
     // add the select value that will hold our placeholder or selected option value
     var valueEl = angular.element('<md-select-value><span></span></md-select-value>');
-    valueEl.append('<span class="md-select-icon" aria-hidden="true"></span>');
-    valueEl.addClass('md-select-value');
+    valueEl.append('<span class="_md-select-icon" aria-hidden="true"></span>');
+    valueEl.addClass('_md-select-value');
     if (!valueEl[0].hasAttribute('id')) {
       valueEl.attr('id', 'select_value_label_' + $mdUtil.nextUid());
     }
@@ -153,7 +157,7 @@ function SelectDirective($mdSelect, $mdUtil, $mdTheming, $mdAria, $compile, $par
         .find('md-content')
         .prepend(angular.element(
           '<div>' +
-          ' <md-progress-circular md-mode="{{progressMode}}" ng-hide="$$loadingAsyncDone"></md-progress-circular>' +
+          ' <md-progress-circular md-mode="{{progressMode}}" ng-hide="$$loadingAsyncDone" md-diameter="25px"></md-progress-circular>' +
           '</div>'
         ));
 
@@ -164,7 +168,7 @@ function SelectDirective($mdSelect, $mdUtil, $mdTheming, $mdAria, $compile, $par
     }
 
     if (attr.name) {
-      var autofillClone = angular.element('<select class="md-visually-hidden">');
+      var autofillClone = angular.element('<select class="_md-visually-hidden">');
       autofillClone.attr({
         'name': '.' + attr.name,
         'ng-model': attr.ngModel,
@@ -182,18 +186,22 @@ function SelectDirective($mdSelect, $mdUtil, $mdTheming, $mdAria, $compile, $par
       element.parent().append(autofillClone);
     }
 
+    var isMultiple = $mdUtil.parseAttributeBoolean(attr.multiple);
+
     // Use everything that's left inside element.contents() as the contents of the menu
-    var multiple = angular.isDefined(attr.multiple) ? 'multiple' : '';
+    var multipleContent = isMultiple ? 'multiple' : '';
     var selectTemplate = '' +
-      '<div class="md-select-menu-container" aria-hidden="true">' +
+      '<div class="_md-select-menu-container" aria-hidden="true">' +
       '<md-select-menu {0}>{1}</md-select-menu>' +
       '</div>';
 
-    selectTemplate = $mdUtil.supplant(selectTemplate, [multiple, element.html()]);
+    selectTemplate = $mdUtil.supplant(selectTemplate, [multipleContent, element.html()]);
     element.empty().append(valueEl);
     element.append(selectTemplate);
 
-    attr.tabindex = attr.tabindex || '0';
+    if(!attr.tabindex){
+      attr.$set('tabindex', 0);
+    }
 
     return function postLink(scope, element, attr, ctrls) {
       var untouched = true;
@@ -262,23 +270,30 @@ function SelectDirective($mdSelect, $mdUtil, $mdTheming, $mdAria, $compile, $par
 
       mdSelectCtrl.setLabelText = function(text) {
         mdSelectCtrl.setIsPlaceholder(!text);
-        // Use placeholder attribute, otherwise fallback to the md-input-container label
-        var tmpPlaceholder = attr.placeholder || (containerCtrl && containerCtrl.label ? containerCtrl.label.text() : '');
-        text = text || tmpPlaceholder || '';
+
+        if (attr.mdSelectedText) {
+          text = $parse(attr.mdSelectedText)(scope);
+        } else {
+          // Use placeholder attribute, otherwise fallback to the md-input-container label
+          var tmpPlaceholder = attr.placeholder ||
+              (containerCtrl && containerCtrl.label ? containerCtrl.label.text() : '');
+          text = text || tmpPlaceholder || '';
+        }
+
         var target = valueEl.children().eq(0);
         target.html(text);
       };
 
       mdSelectCtrl.setIsPlaceholder = function(isPlaceholder) {
         if (isPlaceholder) {
-          valueEl.addClass('md-select-placeholder');
+          valueEl.addClass('_md-select-placeholder');
           if (containerCtrl && containerCtrl.label) {
-            containerCtrl.label.addClass('md-placeholder');
+            containerCtrl.label.addClass('_md-placeholder');
           }
         } else {
-          valueEl.removeClass('md-select-placeholder');
+          valueEl.removeClass('_md-select-placeholder');
           if (containerCtrl && containerCtrl.label) {
-            containerCtrl.label.removeClass('md-placeholder');
+            containerCtrl.label.removeClass('_md-placeholder');
           }
         }
       };
@@ -293,19 +308,19 @@ function SelectDirective($mdSelect, $mdUtil, $mdTheming, $mdAria, $compile, $par
             }
           });
 
-        // Wait until postDigest so that we attach after ngModel's 
-        // blur listener so we can set untouched.
-        $mdUtil.nextTick(function () {
-          element.on('blur', function() {
-            if (untouched) {
-              untouched = false;
-              ngModelCtrl.$setUntouched();
+        // Attach before ngModel's blur listener to stop propagation of blur event
+        // to prevent from setting $touched.
+        element.on('blur', function(event) {
+          if (untouched) {
+            untouched = false;
+            if (selectScope.isOpen) {
+              event.stopImmediatePropagation();
             }
+          }
 
-            if (selectScope.isOpen) return;
-            containerCtrl && containerCtrl.setFocused(false);
-            inputCheckValue();
-          });
+          if (selectScope.isOpen) return;
+          containerCtrl && containerCtrl.setFocused(false);
+          inputCheckValue();
         });
       }
 
@@ -381,27 +396,29 @@ function SelectDirective($mdSelect, $mdUtil, $mdTheming, $mdAria, $compile, $par
         }
         isDisabled = disabled;
         if (disabled) {
-          element.attr({'tabindex': -1, 'aria-disabled': 'true'});
-          element.off('click', openSelect);
-          element.off('keydown', handleKeypress);
+          element
+            .attr({'aria-disabled': 'true'})
+            .removeAttr('tabindex')
+            .off('click', openSelect)
+            .off('keydown', handleKeypress);
         } else {
-          element.attr({'tabindex': attr.tabindex, 'aria-disabled': 'false'});
-          element.on('click', openSelect);
-          element.on('keydown', handleKeypress);
+          element
+            .attr({'tabindex': attr.tabindex, 'aria-disabled': 'false'})
+            .on('click', openSelect)
+            .on('keydown', handleKeypress);
         }
       });
 
-      if (!attr.disabled && !attr.ngDisabled) {
-        element.attr({'tabindex': attr.tabindex, 'aria-disabled': 'false'});
+      if (!attr.hasOwnProperty('disabled') && !attr.hasOwnProperty('ngDisabled')) {
+        element.attr({'aria-disabled': 'false'});
         element.on('click', openSelect);
         element.on('keydown', handleKeypress);
       }
 
-
       var ariaAttrs = {
         role: 'listbox',
         'aria-expanded': 'false',
-        'aria-multiselectable': attr.multiple !== undefined && !attr.ngMultiple ? 'true' : 'false'
+        'aria-multiselectable': isMultiple && !attr.ngMultiple ? 'true' : 'false'
       };
 
       if (!element[0].hasAttribute('id')) {
@@ -436,7 +453,7 @@ function SelectDirective($mdSelect, $mdUtil, $mdTheming, $mdAria, $compile, $par
 
       function findSelectContainer() {
         selectContainer = angular.element(
-          element[0].querySelector('.md-select-menu-container')
+          element[0].querySelector('._md-select-menu-container')
         );
         selectScope = scope;
         if (attr.mdContainerClass) {
@@ -777,7 +794,7 @@ function OptionDirective($mdButtonInkRipple, $mdUtil) {
 
   function compile(element, attr) {
     // Manual transclusion to avoid the extra inner <span> that ng-transclude generates
-    element.append(angular.element('<div class="md-text">').append(element.contents()));
+    element.append(angular.element('<div class="_md-text">').append(element.contents()));
 
     element.attr('tabindex', attr.tabindex || '0');
     return postLink;
@@ -787,13 +804,18 @@ function OptionDirective($mdButtonInkRipple, $mdUtil) {
     var optionCtrl = ctrls[0];
     var selectCtrl = ctrls[1];
 
+    if (selectCtrl.isMultiple) {
+      element.attr('md-checkbox-enabled', '');
+      element.prepend(CHECKBOX_SELECTION_INDICATOR.clone());
+    }
+
     if (angular.isDefined(attr.ngValue)) {
       scope.$watch(attr.ngValue, setOptionValue);
     } else if (angular.isDefined(attr.value)) {
       setOptionValue(attr.value);
     } else {
       scope.$watch(function() {
-        return element.text();
+        return element.text().trim();
       }, setOptionValue);
     }
 
@@ -890,7 +912,7 @@ function OptgroupDirective() {
       labelElement = angular.element('<label>');
       el.prepend(labelElement);
     }
-    labelElement.addClass('md-container-ignore');
+    labelElement.addClass('_md-container-ignore');
     if (attrs.label) labelElement.text(attrs.label);
   }
 }
@@ -937,7 +959,7 @@ function SelectProvider($$interimElementProvider) {
        * skip the animations
        */
       function animateRemoval() {
-        return $animateCss(element, {addClass: 'md-leave'}).start();
+        return $animateCss(element, {addClass: '_md-leave'}).start();
       }
 
       /**
@@ -945,7 +967,7 @@ function SelectProvider($$interimElementProvider) {
        */
       function cleanElement() {
 
-        element.removeClass('md-active');
+        element.removeClass('_md-active');
         element.attr('aria-hidden', 'true');
         element[0].style.display = 'none';
 
@@ -993,7 +1015,7 @@ function SelectProvider($$interimElementProvider) {
 
           try {
 
-            $animateCss(element, {removeClass: 'md-leave', duration: 0})
+            $animateCss(element, {removeClass: '_md-leave', duration: 0})
               .start()
               .then(positionAndFocusMenu)
               .then(resolve);
@@ -1019,7 +1041,7 @@ function SelectProvider($$interimElementProvider) {
           info.dropDown.element.css(animator.toCss(info.dropDown.styles));
 
           $$rAF(function() {
-            element.addClass('md-active');
+            element.addClass('_md-active');
             info.dropDown.element.css(animator.toCss({transform: ''}));
 
             autoFocus(opts.focusedNode);
@@ -1045,7 +1067,7 @@ function SelectProvider($$interimElementProvider) {
 
         if (options.hasBackdrop) {
           // Override duration to immediately show invisible backdrop
-          options.backdrop = $mdUtil.createBackdrop(scope, "md-select-backdrop md-click-catcher");
+          options.backdrop = $mdUtil.createBackdrop(scope, "_md-select-backdrop _md-click-catcher");
           $animate.enter(options.backdrop, $document[0].body, null, {duration: 0});
         }
 
@@ -1150,7 +1172,7 @@ function SelectProvider($$interimElementProvider) {
         var dropDown = opts.selectEl;
         var selectCtrl = dropDown.controller('mdSelectMenu') || {};
 
-        element.addClass('md-clickable');
+        element.addClass('_md-clickable');
 
         // Close on backdrop click
         opts.backdrop && opts.backdrop.on('click', onBackdropClick);
@@ -1165,7 +1187,7 @@ function SelectProvider($$interimElementProvider) {
           dropDown.off('keydown', onMenuKeyDown);
           dropDown.off('click', checkCloseMenu);
 
-          element.removeClass('md-clickable');
+          element.removeClass('_md-clickable');
           opts.isRemoved = true;
         };
 
@@ -1235,7 +1257,7 @@ function SelectProvider($$interimElementProvider) {
             }
             newOption = optionsArray[index];
             if (newOption.hasAttribute('disabled')) newOption = undefined;
-          } while (!newOption && index < optionsArray.length - 1 && index > 0)
+          } while (!newOption && index < optionsArray.length - 1 && index > 0);
           newOption && newOption.focus();
           opts.focusedNode = newOption;
         }
@@ -1293,7 +1315,7 @@ function SelectProvider($$interimElementProvider) {
       var mdSelect = opts.selectCtrl;
       if (mdSelect) {
         var menuController = opts.selectEl.controller('mdSelectMenu');
-        mdSelect.setLabelText(menuController.selectedLabels());
+        mdSelect.setLabelText(menuController ? menuController.selectedLabels() : '');
         mdSelect.triggerClose();
       }
     }
@@ -1362,7 +1384,7 @@ function SelectProvider($$interimElementProvider) {
 
       // Remove padding before we compute the position of the menu
       if (isScrollable) {
-        selectNode.classList.add('md-overflow');
+        selectNode.classList.add('_md-overflow');
       }
 
       var focusedNode = centeredNode;
@@ -1485,6 +1507,5 @@ function SelectProvider($$interimElementProvider) {
   }
 }
 SelectProvider.$inject = ["$$interimElementProvider"];
-
 
 })(window, window.angular);

@@ -100,11 +100,24 @@
                 }, true);
             })
 
+            // Get data
+            .controller("GetDataTest", function(Tester, $scope, getData, assertType, assertFail){
+                Tester($scope, "GetData Test", function(asyncTester){
+                    getData("getStops").then(asyncTester(function(respond){
+                        assertType(respond, Object);
+                        assertType(respond.status, Object);
+                    }), asyncTester(function(){
+                        assertFail();
+                    }));
+                }, true);
+            })
+
             services(tester);
         </script>
     </head>
     <body ng-app="tester">
         <div ng-controller="StorageTest">{{testName}} - {{status}}</div>
         <div ng-controller="GeolocationTest">{{testName}} - {{status}}</div>
+        <div ng-controller="GetDataTest">{{testName}} - {{status}}</div>
     </body>
 </html>

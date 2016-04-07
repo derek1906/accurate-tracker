@@ -11,14 +11,7 @@
         box-sizing: content-box;
     }
 
-    .nearbyStops{
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
     .nearbyStop-info{
-        height: 34px;
         margin-bottom: 23px;
         font-size: 28px;
     }
@@ -41,21 +34,21 @@
 </style>
 
 <div class="headbar" layout="row" layout-align="start center" flex="none">
-    <input id="search-input" placeholder="search" ng-click="doSearch()">
+    <input id="search-input" placeholder="search" ng-click="doSearch()" ng-model="searchTerm" ng-change="doSearch()">
 </div>
 <md-content flex class="main-content" layout="column">
     <div class="page-header" flex="none">
         <h1 class="page-title">Near as fuck.</h1>
-        <span class="page-subtitle">These are the closest bus stops I could fucking find.</span>
+        <span class="page-subtitle">These are the closest bus stops I could find.</span>
     </div>
 
     <md-list class="page-scrollable-content">
-        <md-list-item class="nearbyStop-info" ng-repeat="stop in nearbyStops track by $index">
-            <md-button class="favorite-button md-icon-button" aria-label="Set favorite">
-                <md-tooltip md-direction="left" md-delay="1000">Set favorite</md-tooltip>
-                <md-icon md-svg-src="icons/heart-outline.svg"></md-icon>
+        <md-list-item class="nearbyStop-info" ng-repeat="stop in nearbyStops track by $index" ng-click="goToStop(stop.stop_id)">
+            <md-button class="md-icon-button" ng-click="toggleFavorite(stop.stop_id)" aria-label="Toggle favorite">
+                <md-tooltip md-direction="left" md-delay="1000">favorite</md-tooltip>
+                <md-icon class="md-primary" md-svg-src="icons/heart-outline.svg"></md-icon>
             </md-button>
-            <a href="#/stop/{{stop.stop_id}}">{{stop.stop_name}}</a>
+            <span>{{stop.stop_name}}</span>
         </md-list-item>
     </md-list>
 </md-content>

@@ -1,6 +1,6 @@
 function controllers(tracker){
 	tracker
-	.controller("Overall", function($scope, $mdSidenav, uiGmapIsReady, map, getStopDetails){
+	.controller("Overall", function($scope, $mdSidenav, $mdToast, uiGmapIsReady, map, getStopDetails){
 		$scope.atLanding = true;
 	    $scope.menuClosed = true;
 	    $scope.toggleMenu = function(){
@@ -53,11 +53,11 @@ function controllers(tracker){
 
 	    // interacts with map
 	    $scope.$on("map", function(e, obj){
-			console.log("[Map]", obj.action);
+			//console.log("[Map]", obj.action);
 			var data = obj.data;
 
 			if(!$scope.mapMeta.loaded){
-				console.log("[Map]", "Map not loaded. Request stored in queue.");
+				console.log("[Map] Map not loaded. Request \"%s\" stored in queue.", obj.action);
 				$scope.mapMeta.actionQueue.push({
 					action: obj.action,
 					data: data
@@ -102,8 +102,14 @@ function controllers(tracker){
 
 			$scope.mapMeta.control.refresh();
 	    });
+
+	    // Global functions
+		$scope.toggleFavorite = function(id){
+			var toast = $mdToast.simple().textContent("Not implemented").position("top right");
+			$mdToast.show(toast);
+		}
 	})
-	.controller("Landing", function($scope, getNearbyStops, loadStopsDetails, geolocation, map, $location){
+	.controller("Landing", function($scope, getNearbyStops, loadStopsDetails, geolocation, map, $location, $mdToast){
 		$scope.nearbyStops = [];
 
 		loadStopsDetails();
@@ -125,14 +131,20 @@ function controllers(tracker){
 		$scope.doSearch = function(){
 			$location.path("/search");
 		}
+		$scope.goToStop = function(id){
+			$location.path("/stop/" + id);
+		}
 	})
-	.controller("Search", function($scope,loadStopsDetails, getAutocomplete, map){
+	.controller("Search", function($scope, $location, geolocation, loadStopsDetails, getAutocomplete, map){
 		// focus input
 		setTimeout(function(){
 			document.getElementById("search-input").focus();
 		});
 
 		map("reset");
+		geolocation().then(function(latlng){
+			map("moveTo", latlng);
+		})
 
 		loadStopsDetails()
 			.then(function(){
@@ -160,6 +172,12 @@ function controllers(tracker){
 					});
 				};
 			});
+
+			// go to stop
+			$scope.goToStop = function(id){
+				$location.path("/stop/" + id);
+				$location.replace();
+			}
 	})
 	.controller("StopDetails", function($scope, $routeParams, loadStopsDetails, getStopDetails, getUpcomingBuses, map){
 		var stop_id = $routeParams.id;
@@ -176,8 +194,11 @@ function controllers(tracker){
 				});
 			}, function(){/*error*/});
 
+
+		$scope.isSearching = true;
 		getUpcomingBuses(stop_id)
 			.then(function(departures){
+				$scope.isSearching = false;
 				$scope.departures = departures;
 			}, function(){/*error*/});
 

@@ -122,6 +122,7 @@ function services(tracker){
 				params: data
 			})
 				.then(function(res){
+					console.log("[getData] Server responded to %s with status %d", method, res.data.status.code);
 					if(res.data.status.code != 200){
 						console.error("[" + method + "]", res.data.status.msg);
 						deferred.reject([]);
