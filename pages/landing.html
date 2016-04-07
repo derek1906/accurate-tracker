@@ -18,8 +18,6 @@
     }
 
     .nearbyStop-info{
-        /*width: 585px;*/
-        /*display: block;*/
         height: 34px;
         margin-bottom: 23px;
         font-size: 28px;
@@ -43,7 +41,7 @@
 </style>
 
 <div class="headbar" layout="row" layout-align="start center" flex="none">
-    <input id="search-input" placeholder="search">
+    <input id="search-input" placeholder="search" ng-click="doSearch()">
 </div>
 <md-content flex class="main-content" layout="column">
     <div class="page-header" flex="none">
@@ -53,7 +51,10 @@
 
     <md-list class="page-scrollable-content">
         <md-list-item class="nearbyStop-info" ng-repeat="stop in nearbyStops track by $index">
-            <md-button class="favorite-button md-icon-button"><md-icon md-svg-src="icons/heart-outline.svg"></md-icon></md-button>
+            <md-button class="favorite-button md-icon-button" aria-label="Set favorite">
+                <md-tooltip md-direction="left" md-delay="1000">Set favorite</md-tooltip>
+                <md-icon md-svg-src="icons/heart-outline.svg"></md-icon>
+            </md-button>
             <a href="#/stop/{{stop.stop_id}}">{{stop.stop_name}}</a>
         </md-list-item>
     </md-list>

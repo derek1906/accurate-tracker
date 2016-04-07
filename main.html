@@ -24,11 +24,16 @@
             var tracker = angular.module("tracker", ["ngMaterial", "ngRoute", "uiGmapgoogle-maps"]);
             tracker
                 .value("stop_details", {stops:{}, loaded: false})
+                .value("DATA_STORAGE_KEY", "stop_data")
                 .config(function($routeProvider, $mdThemingProvider){
                     $routeProvider
                         .when("/", {
                             templateUrl: "pages/landing.html",
                             controller: "Landing"
+                        })
+                        .when("/search", {
+                            templateUrl: "pages/search.html",
+                            controller: "Search"
                         })
                         .when("/stop/:id", {
                             templateUrl: "pages/stop_details.html",
@@ -51,37 +56,45 @@
     <body ng-app="tracker" ng-controller="Overall">
         <div id="map">
             <div style="position: relative; height: 100%;">
-                <ui-gmap-google-map center='map.center' zoom='map.zoom' options="gmapsOptions">
-                    <ui-gmap-marker idKey='1' coords='{ latitude: 45, longitude: -73 }'></ui-gmap-marker>
+                <ui-gmap-google-map center='mapMeta.center' zoom='mapMeta.zoom' options="mapMeta.options" control="mapMeta.control">
+                    <div ng-if="mapMeta.loaded">
+                        <ui-gmap-marker idKey='0' ng-if="mapMeta.selfLocation" coords="mapMeta.selfLocation"></ui-gmap-marker>
+                        <ui-gmap-rectangle bounds='mapMeta.background.bounds' fill='mapMeta.background.fill' clickable="false"></ui-gmap-rectangle>
+                        <ui-gmap-markers ng-if="mapMeta.points.length" models="mapMeta.points" coords="'coords'" options="{opacity: 0.3}"></ui-gmap-markers>
+                    </div>
                 </ui-gmap-google-map>
             </div>
         </div>
         <div id="wrapper" layout="row">
             <div id="menu" layout="column" ng-class="{'closed': menuClosed}">
                 <div layout="column" layout-align="center" class="headbar">
-                    <md-button id="menu-toggle-button" class="md-icon-button" ng-click="toggleMenu()" ng-class="{'hide': !atLanding}">
+                    <md-button id="menu-toggle-button" class="md-icon-button" ng-click="toggleMenu()" ng-class="{'hide': !atLanding}" aria-label="Toggle Menu">
                         <md-icon md-svg-src="icons/menu.svg"></md-icon>
                     </md-button>
-                    <md-button id="menu-toggle-button" class="md-icon-button" ng-click="navBack()" ng-class="{'hide': atLanding}">
+                    <md-button class="md-icon-button" ng-click="navBack()" ng-class="{'hide': atLanding}" aria-label="Back">
                         <md-icon md-svg-src="icons/arrow-left.svg"></md-icon>
                     </md-button>
                 </div>
                 <div layout="column" id="menu-more">
-                    <md-button class="md-icon-button">
+                    <md-button class="md-icon-button" aria-label="Favorites">
                         <md-tooltip md-direction="right">Favorites</md-tooltip>
                         <md-icon md-svg-src="icons/heart.svg"></md-icon>
                     </md-button>
-                    <md-button class="md-icon-button">
+                    <md-button class="md-icon-button" aria-label="Toggle Profanity">
                         <md-tooltip md-direction="right">Passive Aggressive</md-tooltip>
                         <md-icon md-svg-src="icons/profanity.svg"></md-icon>
                     </md-button>
-                    <md-button class="md-icon-button">
+                    <md-button class="md-icon-button" aria-label="About">
                         <md-tooltip md-direction="right">About</md-tooltip>
                         <md-icon md-svg-src="icons/info.svg"></md-icon>
                     </md-button>
                 </div>
             </div>
             <div id="content" ng-view layout="column" flex></div>
+        </div>
+        <div id="splash" layout="column" layout-align="center center" ng-if="!mapMeta.loaded">
+            <md-progress-circular md-mode="indeterminate" md-diameter="100"></md-progress-circular>
+            <div>Be patient...</div>
         </div>
     </body>
 </html>

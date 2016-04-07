@@ -40,11 +40,15 @@
     </h2>
 </div>
 <md-content flex class="main-content" layout="column">
-    <div class="page-header" flex="none">
-        <h1 class="page-title">Well...........?</h1>
-        <span class="page-subtitle">You gonna pick a bus or what?</span>
+    <div class="page-header" flex="none" ng-if="departures.length">
+        <h1 class="page-title">Don't miss it.</h1>
+        <span class="page-subtitle">Use the damn timer so you won’t miss yo bus!</span>
     </div>
-    
+    <div class="page-header" flex="none" ng-if="!departures.length">
+        <h1 class="page-title">You are doomed.</h1>
+        <span class="page-subtitle">Nothing is coming.</span>
+    </div>
+
     <div class="page-scrollable-content">
         <ul class="departures" flex>
             <li class="departure-info" ng-repeat="departure in departures">
