@@ -118,7 +118,7 @@ function services(tracker){
 			if(data === undefined)	data = {};
 			data.key = key;
 			data.callback = "JSON_CALLBACK";
-			$http.jsonp("http://developer.cumtd.com/api/v2.2/json/" + method, {
+			$http.jsonp("https://developer.cumtd.com/api/v2.2/json/" + method, {
 				params: data
 			})
 				.then(function(res){
@@ -144,7 +144,7 @@ function services(tracker){
 			if(!input){
 				deferred.resolve([]);
 			}else{
-				$http.jsonp("http://www.cumtd.com/autocomplete/Stops/v1.0/json/search", {
+				$http.jsonp("https://www.cumtd.com/autocomplete/Stops/v1.0/json/search", {
 					params: {
 						query: input,
 						callback: "JSON_CALLBACK"
