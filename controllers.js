@@ -1,6 +1,6 @@
 function controllers(tracker){
 	tracker
-	.controller("Overall", function($scope, $mdSidenav, $mdToast, uiGmapIsReady, map, getStopDetails, icons){
+	.controller("Overall", function($scope, $mdSidenav, $mdToast, $location, uiGmapIsReady, map, getStopDetails, icons){
 		// Navigation button
 		$scope.atLanding = true;
 		// Menu
@@ -23,7 +23,8 @@ function controllers(tracker){
 				mapTypeControl: false, streetViewControl: false, 
 				scaleControl: false, zoomControl: false, scrollwheel: false, disableDoubleClickZoom: false,
 				minZoom: 17, maxZoom: 17,
-				disableDefaultUI: true
+				disableDefaultUI: true,
+				backgroundColor: "#000"
 			},
 			center: { latitude: 40.1069778, longitude: -88.2272211 }, // main quad
 			zoom: 17,
@@ -31,7 +32,10 @@ function controllers(tracker){
 			background: {},
 
 			selfLocation: undefined,
-			selfLocationOptions: {},
+			selfLocationOptions: {
+				clickable: false,
+				opacity: 0.6
+			},
 			targetLocation: undefined,
 			targetLocationOptions: {
 				opacity: 1
@@ -122,7 +126,12 @@ function controllers(tracker){
 								latitude: stop.mid_lat,
 								longitude: stop.mid_lon
 							},
-							id: i
+							id: i,
+							events: {
+								click: function(){
+									$location.path("/stop/" + stop_id);
+								}
+							}
 						};
 					});
 					break;
@@ -224,39 +233,60 @@ function controllers(tracker){
 			});
 
 			// go to stop
-			$scope.goToStop = function(id){
-				$location.path("/stop/" + id);
+			$scope.goToStop = function(stop){
+				$location.path("/stop/" + stop.stop_id);
 				$location.replace();
 			};
+			// change target stop
 			$scope.changeTargetStop = function(stop){
 				map("setTargetLocation", {
 					latitude: stop.mid_lat,
 					longitude: stop.mid_lon
 				});
 			};
+			// go to first stop in search results
+			$scope.goToFirstOption = function(e){
+				if(e.keyCode != 13)	return true;
+				if($scope.searchResults.length){
+					$scope.goToStop($scope.searchResults[0]);
+				}
+			};
 	})
-	.controller("StopDetails", function($scope, $routeParams, loadStopsDetails, getStopDetails, getUpcomingBuses, map){
-		var stop_id = $routeParams.id;
+	.controller("StopDetails", function($scope, $routeParams, $interval, $mdToast,
+										loadStopsDetails, getStopDetails, getUpcomingBuses, map, DEPARTURE_UPDATE_INTERVAL){
+		var stop_id = $scope.stop_id = $routeParams.id;
 
-		map("reset");
+		//map("reset");
 
 		loadStopsDetails()
 			.then(function(){
 				var stop = $scope.stop = getStopDetails(stop_id);
+
+				if(!stop){
+					$scope.stopNotExists = true;
+					return;
+				}
 				
 				map("setTargetLocation", {
 					latitude: stop.mid_lat,
 					longitude: stop.mid_lon
 				});
+
+				$scope.update();
+				$interval($scope.update, DEPARTURE_UPDATE_INTERVAL);
 			}, function(){/*error*/});
 
+		$scope.update = function(){
+			$scope.isSearching = true;
+			getUpcomingBuses(stop_id)
+				.then(function(departures){
+					$scope.isSearching = false;
+					$scope.departures = departures;
 
-		$scope.isSearching = true;
-		getUpcomingBuses(stop_id)
-			.then(function(departures){
-				$scope.isSearching = false;
-				$scope.departures = departures;
-			}, function(){/*error*/});
-
+				}, function(msg){
+					var toast = $mdToast.simple().textContent("Error: " + msg).position("top right");
+					$mdToast.show(toast);
+				});
+		};
 	});
 }

@@ -25,6 +25,7 @@
             tracker
                 .value("stop_details", {stops:{}, loaded: false})
                 .value("DATA_STORAGE_KEY", "stop_data")
+                .value("DEPARTURE_UPDATE_INTERVAL", 60*1000)    // 60 seconds
                 .config(function($routeProvider, $mdThemingProvider){
                     $routeProvider
                         .when("/", {

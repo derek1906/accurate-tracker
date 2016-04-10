@@ -30,7 +30,9 @@
 </style>
 
 <div class="headbar" layout="row" layout-align="start center" flex="none">
-    <input id="search-input" placeholder="search" ng-model="searchTerm" ng-model-options="{debounce: 200}" ng-change="performSearch()">
+    <input id="search-input" placeholder="search" ng-model="searchTerm" ng-model-options="{debounce: 200}"
+        ng-change="performSearch()"
+        ng-keypress="goToFirstOption($event)">
 </div>
 <md-content flex class="main-content" layout="column">
     <div class="page-header" flex="none" ng-if="!searchResults.length && searchTerm.length && !isSearching">
@@ -38,7 +40,7 @@
         <span class="page-subtitle">Sorry, we couldn't find a single thing.</span>
     </div>
     <md-list class="page-scrollable-content">
-        <md-list-item class="nearbyStop-info" ng-repeat="stop in searchResults track by $index" ng-click="goToStop(stop.stop_id)" ng-mouseover="changeTargetStop(stop)">
+        <md-list-item class="nearbyStop-info" ng-repeat="stop in searchResults track by $index" ng-click="goToStop(stop)" ng-mouseover="changeTargetStop(stop)">
             <md-button class="md-icon-button" ng-click="toggleFavorite(stop.stop_id)" aria-label="Toggle favorite">
                 <md-tooltip md-direction="left" md-delay="1000">favorite</md-tooltip>
                 <md-icon class="md-primary" md-svg-src="icons/emptyheart.svg"></md-icon>

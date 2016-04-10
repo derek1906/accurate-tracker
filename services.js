@@ -145,11 +145,11 @@ function services(tracker){
 					console.log("[getData] Server responded to %s with status %d", method, res.data.status.code);
 					if(res.data.status.code != 200){
 						console.error("[" + method + "]", res.data.status.msg);
-						deferred.reject([]);
+						deferred.reject(res.data.status.msg);
 					}
 					deferred.resolve(res.data);
-				}, function(){
-					deferred.reject([]);
+				}, function(res){
+					deferred.reject(res.message);
 				});
 
 			return deferred.promise;
@@ -220,8 +220,8 @@ function services(tracker){
 			})
 				.then(function(res){
 					deferred.resolve(res.departures);
-				}, function(){
-					deferred.reject();
+				}, function(error_message){
+					deferred.reject(error_message);
 				});
 
 			return deferred.promise;

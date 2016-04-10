@@ -32,6 +32,12 @@
     .departures .destination, .departures .min_label{
         font-size: 14px;
     }
+
+    .istop-icon{
+        color: white;
+        margin-left: 8px;
+        cursor: help;
+    }
 </style>
 
 <div class="headbar" layout="row" layout-align="start center" flex="none">
@@ -40,13 +46,17 @@
     </h2>
 </div>
 <md-content flex class="main-content" layout="column">
-    <div class="page-header" flex="none" ng-if="departures.length">
+    <div class="page-header" flex="none" ng-show="departures.length">
         <h1 class="page-title">Don't miss it.</h1>
         <span class="page-subtitle">Use the damn timer so you won’t miss yo bus!</span>
     </div>
-    <div class="page-header" flex="none" ng-if="!departures.length && !isSearching">
+    <div class="page-header" flex="none" ng-show="!departures.length && !isSearching && !stopNotExists">
         <h1 class="page-title">You are doomed.</h1>
-        <span class="page-subtitle">Nothing is coming.</span>
+        <span class="page-subtitle">Nothing is coming to {{stop.stop_name}}.</span>
+    </div>
+    <div class="page-header" flex="none" ng-show="stopNotExists">
+        <h1 class="page-title">Dafuq?</h1>
+        <span class="page-subtitle">Stop "{{stop_id}}" does not exist. How did you get here?</span>
     </div>
 
     <div class="page-scrollable-content">
@@ -54,7 +64,12 @@
             <li class="departure-info" ng-repeat="departure in departures">
                 <div>
                     <div class="departure-info-container-left">
-                        <span class="headsign">{{departure.headsign}}</span>
+                        <span class="headsign" layout="row" layout-align="start center">
+                            {{departure.headsign}}
+                            <md-icon class="istop-icon" md-svg-src="icons/istop.svg" ng-show="departure.is_istop">
+                                <md-tooltip md-direction="right" md-delay="300">Boarding is free</md-tooltip>
+                            </md-icon>
+                        </span>
                         <span class="destination">To {{departure.destination.stop_id | stopID}}</span>
                     </div>
                     <div class="departure-info-container-right">
