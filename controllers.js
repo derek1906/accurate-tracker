@@ -153,12 +153,7 @@ function controllers(tracker){
 							id: $scope.mapMeta.universalId++,
 							events: {
 								click: function(){
-									$location.path("/stop/" + stop_id);
-
-									// replace previous entry to maintain history consistency
-									if(!$scope.atLanding){
-										$location.replace();
-									}
+									$scope.goToStop(stop);
 								},
 								mouseover: function(){
 									map("highlightPoint", stop);
@@ -211,6 +206,20 @@ function controllers(tracker){
 			$scope.setOverlay("about");
 			$scope.toggleMenu();
 		};
+		$scope.goToStop = function(stop){
+			$location.path("/stop/" + stop.stop_id);
+
+			// replace previous entry to maintain history consistency
+			if(!$scope.atLanding){
+				$location.replace();
+			}
+		};
+		$scope.highlightStop = function(stop){
+			map("highlightPoint", stop);
+		};
+		$scope.dehighlightStop = function(stop){
+			map("dehighlightPoint", stop);
+		};
 	})
 	.controller("Landing", function($scope, getNearbyStops, loadStopsDetails, geolocation, map, $location, $mdToast){
 		$scope.nearbyStops = [];
@@ -235,15 +244,6 @@ function controllers(tracker){
 		// events
 		$scope.doSearch = function(){
 			$location.path("/search");
-		};
-		$scope.goToStop = function(id){
-			$location.path("/stop/" + id);
-		};
-		$scope.highlightStop = function(stop){
-			map("highlightPoint", stop);
-		};
-		$scope.dehighlightStop = function(stop){
-			map("dehighlightPoint", stop);
 		};
 	})
 	.controller("Search", function($scope, $location, geolocation, loadStopsDetails, getAutocomplete, map){
@@ -279,24 +279,13 @@ function controllers(tracker){
 				};
 			});
 
-			// go to stop
-			$scope.goToStop = function(stop){
-				$location.path("/stop/" + stop.stop_id);
-				$location.replace();
-			};
-			$scope.highlightStop = function(stop){
-				map("highlightPoint", stop);
-			};
-			$scope.dehighlightStop = function(stop){
-				map("dehighlightPoint", stop);
-			};
-			// go to first stop in search results
-			$scope.goToFirstOption = function(e){
-				if(e.keyCode != 13)	return true;
-				if($scope.searchResults.length){
-					$scope.goToStop($scope.searchResults[0]);
-				}
-			};
+		// go to first stop in search results
+		$scope.goToFirstOption = function(e){
+			if(e.keyCode != 13)	return true;
+			if($scope.searchResults.length){
+				$scope.goToStop($scope.searchResults[0]);
+			}
+		};
 	})
 	.controller("StopDetails", function($scope, $routeParams, $interval, $mdToast,
 										loadStopsDetails, getStopDetails, getUpcomingBuses, map, DEPARTURE_UPDATE_INTERVAL){

@@ -137,6 +137,8 @@ body{
 }
 #menu #menu-toggle-button{
     -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    transform: rotate(90deg);
     -webkit-transition: all 0.3s ease;
     -moz-transition: all 0.3s ease;
     transition: all 0.3s ease;
@@ -149,6 +151,8 @@ body{
 }
 #menu.closed #menu-toggle-button{
     -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    transform: rotate(0deg);
 }
 #menu.closed #menu-more{
     margin-left: -150%;
