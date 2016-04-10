@@ -40,7 +40,8 @@
         <span class="page-subtitle">Sorry, we couldn't find a single thing.</span>
     </div>
     <md-list class="page-scrollable-content">
-        <md-list-item class="nearbyStop-info" ng-repeat="stop in searchResults track by $index" ng-click="goToStop(stop)" ng-mouseover="changeTargetStop(stop)">
+        <md-list-item class="nearbyStop-info" ng-repeat="stop in searchResults track by $index"
+                ng-click="goToStop(stop)" ng-mouseover="highlightStop(stop)" ng-mouseout="dehighlightStop(stop)">
             <md-button class="md-icon-button" ng-click="toggleFavorite(stop.stop_id)" aria-label="Toggle favorite">
                 <md-tooltip md-direction="left" md-delay="1000">favorite</md-tooltip>
                 <md-icon class="md-primary" md-svg-src="icons/emptyheart.svg"></md-icon>

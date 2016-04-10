@@ -42,8 +42,10 @@ function controllers(tracker){
 			},
 			points: [],
 			pointsOptions: {
-				opacity: 0.3
 			},
+			_points: {},
+
+			universalId: 0,
 
 			loaded: false,
 			actionQueue: []
@@ -56,7 +58,6 @@ function controllers(tracker){
 
 			$scope.mapMeta.selfLocationOptions.icon = icons("home");
 			$scope.mapMeta.targetLocationOptions.icon = icons("stop");
-			$scope.mapMeta.pointsOptions.icon = icons("stop");
 
 			$scope.$emit("mapLoaded");
 		});
@@ -94,6 +95,7 @@ function controllers(tracker){
 					$scope.mapMeta.selfLocation = undefined;
 					$scope.mapMeta.targetLocation = undefined;
 					$scope.mapMeta.points = [];
+					$scope.mapMeta._points = {};
 					break;
 
 				case "setSelfLocation":
@@ -104,10 +106,9 @@ function controllers(tracker){
 				case "setTargetLocation":
 					$scope.mapMeta.targetLocation = data;
 
-					var bounds = $scope.mapMeta.control.getGMap().getBounds();
-					var targetLatLng = new google.maps.LatLng(data.latitude, data.longitude);
-					if(data && (data.pan || !bounds.contains(targetLatLng))){
-						map("moveTo", data);
+					if(data){
+						if(data.pan)	map("moveTo", data);
+						else        	map("moveIntoBound", data);
 					}
 					break;
 
@@ -123,22 +124,61 @@ function controllers(tracker){
 					});
 					break;
 
+				case "moveIntoBound":
+					// get bound of screen left half
+					var bounds = $scope.mapMeta.control.getGMap().getBounds(),
+						sw = bounds.getSouthWest(),
+						ne = bounds.getNorthEast();
+					var halfBounds = new google.maps.LatLngBounds({
+						lat: sw.lat(),
+						lng: sw.lng() + bounds.toSpan().lng() * 0.5
+					}, ne);
+					var targetLatLng = new google.maps.LatLng(data.latitude, data.longitude);
+					if(!halfBounds.contains(targetLatLng)){
+						map("moveTo", data);
+					}
+
+					break;
+
 				case "displayPoints":
+					$scope.mapMeta._points = {};
 					$scope.mapMeta.points = data.map(function(stop_id, i){
-						var stop = getStopDetails(stop_id);
-						return {
-							coords: {
+						var stop = getStopDetails(stop_id),
+							coords = {
 								latitude: stop.mid_lat,
 								longitude: stop.mid_lon
-							},
-							id: i,
+							};
+						var point = {
+							coords: coords,
+							id: $scope.mapMeta.universalId++,
 							events: {
 								click: function(){
 									$location.path("/stop/" + stop_id);
+								},
+								mouseover: function(){
+									map("highlightPoint", stop);
+								},
+								mouseout: function(){
+									map("dehighlightPoint", stop);
 								}
+							},
+							options: {
+								opacity: 0.3,
+								icon: icons("stop")
 							}
 						};
+						$scope.mapMeta._points[stop_id] = point;
+						return point;
 					});
+					break;
+
+				case "highlightPoint":
+					$scope.mapMeta._points[data.stop_id].options.opacity = 1;
+					map("moveIntoBound", {latitude: data.mid_lat, longitude: data.mid_lon});
+					break;
+
+				case "dehighlightPoint":
+					$scope.mapMeta._points[data.stop_id].options.opacity = 0.3;
 					break;
 			}
 
@@ -172,6 +212,8 @@ function controllers(tracker){
 
 		loadStopsDetails();
 
+		map("setTargetLocation", undefined);
+
 		// Get nearby stops by user's geolocation
 		getNearbyStops(10).then(function(stops){
 			$scope.nearbyStops = stops;
@@ -192,11 +234,11 @@ function controllers(tracker){
 		$scope.goToStop = function(id){
 			$location.path("/stop/" + id);
 		};
-		$scope.changeTargetStop = function(stop){
-			map("setTargetLocation", {
-				latitude: stop.mid_lat,
-				longitude: stop.mid_lon
-			});
+		$scope.highlightStop = function(stop){
+			map("highlightPoint", stop);
+		};
+		$scope.dehighlightStop = function(stop){
+			map("dehighlightPoint", stop);
 		};
 	})
 	.controller("Search", function($scope, $location, geolocation, loadStopsDetails, getAutocomplete, map){
@@ -220,17 +262,12 @@ function controllers(tracker){
 					getAutocomplete($scope.searchTerm).then(function(list){
 						$scope.isSearching = false;
 						$scope.searchResults = list;
-						if(list.length){
-							map("setTargetLocation", {
-								latitude: list[0].mid_lat,
-								longitude: list[0].mid_lon
-							});
-						}else{
-							map("setTargetLocation", undefined);
-						}
 						map("displayPoints", list.map(function(stop){
 							return stop.stop_id;
 						}));
+						if(list.length){
+							map("highlightPoint", list[0]);
+						}
 					}, function(){
 						$scope.isSearching = false;
 					});
@@ -242,12 +279,11 @@ function controllers(tracker){
 				$location.path("/stop/" + stop.stop_id);
 				$location.replace();
 			};
-			// change target stop
-			$scope.changeTargetStop = function(stop){
-				map("setTargetLocation", {
-					latitude: stop.mid_lat,
-					longitude: stop.mid_lon
-				});
+			$scope.highlightStop = function(stop){
+				map("highlightPoint", stop);
+			};
+			$scope.dehighlightStop = function(stop){
+				map("dehighlightPoint", stop);
 			};
 			// go to first stop in search results
 			$scope.goToFirstOption = function(e){
