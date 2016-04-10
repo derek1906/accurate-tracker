@@ -41,7 +41,7 @@
         <md-list-item class="nearbyStop-info" ng-repeat="stop in searchResults track by $index" ng-click="goToStop(stop.stop_id)">
             <md-button class="md-icon-button" ng-click="toggleFavorite(stop.stop_id)" aria-label="Toggle favorite">
                 <md-tooltip md-direction="left" md-delay="1000">favorite</md-tooltip>
-                <md-icon class="md-primary" md-svg-src="icons/heart-outline.svg"></md-icon>
+                <md-icon class="md-primary" md-svg-src="icons/emptyheart.svg"></md-icon>
             </md-button>
             <span>{{stop.stop_name}}</span>
         </md-list-item>

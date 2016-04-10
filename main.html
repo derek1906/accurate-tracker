@@ -54,18 +54,19 @@
         </script>
     </head>
     <body ng-app="tracker" ng-controller="Overall">
-        <div id="map">
+        <div id="map" class="overlayControlled" ng-class="overlayPage">
             <div style="position: relative; height: 100%;">
                 <ui-gmap-google-map center='mapMeta.center' zoom='mapMeta.zoom' options="mapMeta.options" control="mapMeta.control">
                     <div ng-if="mapMeta.loaded">
-                        <ui-gmap-marker idKey='0' ng-if="mapMeta.selfLocation" coords="mapMeta.selfLocation"></ui-gmap-marker>
+                        <ui-gmap-marker idKey="-1" ng-if="mapMeta.selfLocation" options="mapMeta.selfLocationOptions" coords="mapMeta.selfLocation"></ui-gmap-marker>
+                        <ui-gmap-marker idKey="0" ng-if="mapMeta.targetLocation" options="mapMeta.targetLocationOptions" coords="mapMeta.targetLocation"></ui-gmap-marker>
                         <ui-gmap-rectangle bounds='mapMeta.background.bounds' fill='mapMeta.background.fill' clickable="false"></ui-gmap-rectangle>
-                        <ui-gmap-markers ng-if="mapMeta.points.length" models="mapMeta.points" coords="'coords'" options="{opacity: 0.3}"></ui-gmap-markers>
+                        <ui-gmap-markers ng-if="mapMeta.points.length" models="mapMeta.points" options="mapMeta.pointsOptions" coords="'coords'"></ui-gmap-markers>
                     </div>
                 </ui-gmap-google-map>
             </div>
         </div>
-        <div id="wrapper" layout="row">
+        <div id="wrapper" layout="row" class="overlayControlled" ng-class="overlayPage">
             <div id="menu" layout="column" ng-class="{'closed': menuClosed}">
                 <div layout="column" layout-align="center" class="headbar">
                     <md-button id="menu-toggle-button" class="md-icon-button" ng-click="toggleMenu()" ng-class="{'hide': !atLanding}" aria-label="Toggle Menu">
@@ -84,7 +85,7 @@
                         <md-tooltip md-direction="right">Passive Aggressive</md-tooltip>
                         <md-icon md-svg-src="icons/profanity.svg"></md-icon>
                     </md-button>
-                    <md-button class="md-icon-button" aria-label="About">
+                    <md-button class="md-icon-button" aria-label="About" ng-click="openAbout()">
                         <md-tooltip md-direction="right">About</md-tooltip>
                         <md-icon md-svg-src="icons/info.svg"></md-icon>
                     </md-button>
@@ -92,9 +93,43 @@
             </div>
             <div id="content" ng-view layout="column" flex></div>
         </div>
-        <div id="splash" layout="column" layout-align="center center" ng-if="!mapMeta.loaded">
-            <md-progress-circular md-mode="indeterminate" md-diameter="70"></md-progress-circular>
-            <div>Wait a sec...</div>
+        <div id="overlay" ng-switch="overlayPage" ng-if="overlayPage">
+            <div id="about" ng-switch-when="about" layout="column">
+                <div layout="row" layout-align="center center">
+                    <md-button class="md-icon-button" aria-label="Close" ng-click="clearOverlay()">
+                        <md-icon md-svg-src="icons/close.svg"></md-icon>
+                    </md-button>
+                    <h2 flex>Just another UIUC transit app made by...</h2>
+                </div>
+                <div layout="row" flex>
+                    <div layout="column" layout-align="center center" flex>
+                        <h3 class="about-part">Designer</h3>
+                        <div class="about-avatar"></div>
+                        <h3 class="about-name">Foo bar</h3>
+                        <p>
+                            University of Illinois at Urbana-Champaign<br>
+                            Lorem ipsum dolor sit amet<br>
+                            Consectetur adipiscing elit<br>
+                            Duis placerat sodales sapien.
+                        </p>
+                    </div>
+                    <div layout="column" layout-align="center center" flex>
+                        <h3 class="about-part">Programmer</h3>
+                        <div class="about-avatar"></div>
+                        <h3 class="about-name">Foo Bar</h3>
+                        <p>
+                            University of Illinois at Urbana-Champaign<br>
+                            Lorem ipsum dolor sit amet<br>
+                            Consectetur adipiscing elit<br>
+                            Duis placerat sodales sapien.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div id="splash" ng-switch-when="splash" layout="column" layout-align="center center" ng-if="!mapMeta.loaded">
+                <md-progress-circular md-mode="indeterminate" md-diameter="70"></md-progress-circular>
+                <div>Wait a sec...</div>
+            </div>
         </div>
     </body>
 </html>

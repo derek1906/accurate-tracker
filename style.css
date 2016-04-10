@@ -1,6 +1,9 @@
 @import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
 
 body{
+    background: rgba(0, 0, 0, 0.6);
+}
+body{
     width: 100%;
     height: 100%;
     font-family: Montserrat;
@@ -48,27 +51,74 @@ body{
     height: 100%;
 }
 
-
-#splash{
+/* Overlay container */
+#overlay{
     position: absolute;
     width: 100%;
     height: 100%;
-    background: white;
+}
+#overlay > *{
+    position: absolute;
+    width: 100%;
+    height: 100%;
 }
 
+/* Background style with overlay */
+.overlayControlled{
+    -webkit-filter: blur(0px);
+    -moz-filter: blur(0px);
+    filter: blur(0px);
+    -webkit-transition: -webkit-filter 0.3s ease;
+    -moz-transition: -moz-filter 0.3s ease;
+    transition: filter 0.3s ease;
+}
+.overlayControlled.about{
+    -webkit-filter: blur(10px);
+    -moz-filter: blur(10px);
+    filter: blur(10px);
+}
+
+/* Overlays */
+#splash{
+    background: white;
+    color: black !important;
+}
+#about{
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.6);
+}
+#about *{
+    text-align: center;
+}
+#about h2{
+    margin: 0;
+}
+#about .about-part{
+    font-size: 36px;
+}
+#about .about-name{
+    font-size: 24px;
+}
+#about .about-avatar{
+    display: inline-block;
+    width: 200px;
+    height: 200px;
+    border: 5px solid white;
+    border-radius: 50% 50%;
+    box-shadow: 0px 4px 3px rgba(0, 0, 0, 0.6);
+    background: gray;
+}
 
 /* Page wrapper */
 #wrapper{
     position: absolute;
     width: 50%;
     height: 100%;
-
-    /* background: rgba(0, 0, 0, 0.6); */
 }
-#wrapper *{
+#wrapper *, #overlay *{
     color: white;
 }
-#wrapper *:not(input){
+#wrapper *:not(input), #about *{
     text-shadow: 0px 4px 3px rgba(0, 0, 0, 0.6) !important;
 }
 #wrapper svg{

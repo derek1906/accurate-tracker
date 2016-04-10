@@ -58,6 +58,27 @@ function services(tracker){
 		};
 	})
 
+	// icons generator
+	.service("icons", function(){
+		var icons = {
+			home: {
+				url: "icons/home.png",
+				size: {width: 35, height: 56}
+			},
+			stop: {
+				url: "icons/stop.png",
+				size: {width: 25, height: 39}
+			}
+		}
+		return function(name){
+			var icon = icons[name];
+			if(!icon.anchor){
+				icon.anchor = new google.maps.Point(icon.size.width/2, icon.size.height);
+			}
+			return icon;
+		}
+	})
+
 	// Load stops database - Fetch from web if data is outdated or missing
 	.service("loadStopsDetails", function(DATA_STORAGE_KEY, $q, stop_details, storage, getData){
 		return function(){
@@ -117,7 +138,6 @@ function services(tracker){
 
 			if(data === undefined)	data = {};
 			data.key = key;
-			//data.callback = "JSON_CALLBACK";
 			$http.get("https://developer.cumtd.com/api/v2.2/json/" + method, {
 				params: data
 			})
@@ -147,7 +167,6 @@ function services(tracker){
 				$http.get("https://www.cumtd.com/autocomplete/Stops/v1.0/json/search", {
 					params: {
 						query: input
-						//callback: "JSON_CALLBACK"
 					}
 				})
 					.then(function(res){

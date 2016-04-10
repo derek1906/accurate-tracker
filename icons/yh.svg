@@ -1,12 +1,64 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg width="35px" height="56px" viewBox="0 0 35 56" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
-    <title>yh</title>
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="icons" transform="translate(-235.000000, -252.000000)" fill="#000000">
-            <path d="M252.5,307.5 C252.5,307.5 269.889706,279.179894 269.889706,269.6875 C269.889706,260.195106 262.104069,252.5 252.5,252.5 C242.895931,252.5 235.110294,260.195106 235.110294,269.6875 C235.110294,279.179894 252.5,307.5 252.5,307.5 Z M252.5,269 C255.537566,269 258,266.537566 258,263.5 C258,260.462434 255.537566,258 252.5,258 C249.462434,258 247,260.462434 247,263.5 C247,266.537566 249.462434,269 252.5,269 Z M245,275.001099 C245,272.239068 247.245652,270 249.994783,270 L255.005217,270 C257.76376,270 260,272.239273 260,275.001099 L260,281 L245,281 L245,275.001099 Z" id="yh"></path>
-        </g>
-    </g>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="35px"
+   height="56px"
+   viewBox="0 0 35 56"
+   version="1.1"
+   id="svg2"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="yh.svg"
+   inkscape:export-filename="C:\Users\Derek\Documents\GitHub\accurate-tracker\icons\home.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <metadata
+     id="metadata15">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>yh</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1366"
+     inkscape:window-height="705"
+     id="namedview13"
+     showgrid="false"
+     inkscape:zoom="4.2142857"
+     inkscape:cx="17.5"
+     inkscape:cy="28"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+  <title
+     id="title4">yh</title>
+  <desc
+     id="desc6">Created with Sketch.</desc>
+  <defs
+     id="defs8" />
+  <path
+     style="fill:#ff5e71;fill-rule:evenodd;stroke:none;stroke-width:1;fill-opacity:1"
+     d="m 17.5,55.5 c 0,0 17.38971,-28.32011 17.38971,-37.8125 C 34.88971,8.19511 27.10407,0.5 17.5,0.5 7.89593,0.5 0.11029,8.19511 0.11029,17.6875 0.11029,27.17989 17.5,55.5 17.5,55.5 Z M 17.5,17 C 20.53757,17 23,14.53757 23,11.5 23,8.46243 20.53757,6 17.5,6 14.46243,6 12,8.46243 12,11.5 12,14.53757 14.46243,17 17.5,17 Z M 10,23.0011 C 10,20.23907 12.24565,18 14.99478,18 l 5.01044,0 C 22.76376,18 25,20.23927 25,23.0011 L 25,29 10,29 10,23.0011 Z"
+     id="yh"
+     inkscape:connector-curvature="0" />
 </svg>

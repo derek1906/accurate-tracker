@@ -1,15 +1,14 @@
 function controllers(tracker){
 	tracker
-	.controller("Overall", function($scope, $mdSidenav, $mdToast, uiGmapIsReady, map, getStopDetails){
+	.controller("Overall", function($scope, $mdSidenav, $mdToast, uiGmapIsReady, map, getStopDetails, icons){
+		// Navigation button
 		$scope.atLanding = true;
+		// Menu
 	    $scope.menuClosed = true;
-	    $scope.toggleMenu = function(){
-			$scope.menuClosed = !$scope.menuClosed;
-	    };
-	    $scope.navBack = function(){
-			history.back();
-	    };
+	    // Overlay
+	    $scope.overlayPage = "splash";
 
+		// Routing
 	    $scope.$on("$routeChangeSuccess", function(e, current, previous){
 			if(current.$$route.controller == "Landing"){
 				$scope.atLanding = true;
@@ -18,6 +17,7 @@ function controllers(tracker){
 			}
 	    });
 
+	    // Map information
 	    $scope.mapMeta = {
 			options: {
 				mapTypeControl: false, streetViewControl: false, 
@@ -25,13 +25,21 @@ function controllers(tracker){
 				minZoom: 17, maxZoom: 17,
 				disableDefaultUI: true
 			},
-			center: { latitude: 45, longitude: -73 }, 
+			center: { latitude: 40.1069778, longitude: -88.2272211 }, // main quad
 			zoom: 17,
 			control: {},
 			background: {},
 
 			selfLocation: undefined,
+			selfLocationOptions: {},
+			targetLocation: undefined,
+			targetLocationOptions: {
+				opacity: 1
+			},
 			points: [],
+			pointsOptions: {
+				opacity: 0.3
+			},
 
 			loaded: false,
 			actionQueue: []
@@ -42,6 +50,15 @@ function controllers(tracker){
 				fill: {color: "#000000", opacity: 0.6}
 			};
 
+			$scope.mapMeta.selfLocationOptions.icon = icons("home");
+			$scope.mapMeta.targetLocationOptions.icon = icons("stop");
+			$scope.mapMeta.pointsOptions.icon = icons("stop");
+
+			$scope.$emit("mapLoaded");
+		});
+
+		$scope.$on("mapLoaded", function(e){
+			console.log("Map loaded.");
 			$scope.mapMeta.loaded = true;
 			
 			var queue = $scope.mapMeta.actionQueue;
@@ -49,9 +66,11 @@ function controllers(tracker){
 				var entry = $scope.mapMeta.actionQueue[i];
 				map(entry.action, entry.data);
 			}
+
+			$scope.clearOverlay();
 		});
 
-	    // interacts with map
+	    // Map events
 	    $scope.$on("map", function(e, obj){
 			//console.log("[Map]", obj.action);
 			var data = obj.data;
@@ -69,6 +88,7 @@ function controllers(tracker){
 			switch(obj.action){
 				case "reset":
 					$scope.mapMeta.selfLocation = undefined;
+					$scope.mapMeta.targetLocation = undefined;
 					$scope.mapMeta.points = [];
 					break;
 
@@ -77,13 +97,21 @@ function controllers(tracker){
 					if(data)	map("moveTo", data);
 					break;
 
+				case "setTargetLocation":
+					$scope.mapMeta.targetLocation = data;
+					if(data)	map("moveTo", data);
+					break;
+
 				case "moveTo":
 					var gmap = $scope.mapMeta.control.getGMap();
 					var span = gmap.getBounds().toSpan();
-					gmap.panTo({
-						lat: data.latitude,
-						lng: data.longitude - span.lng() * 0.25
-					})
+					// Added to the end of execution queue
+					setTimeout(function(){
+						gmap.panTo({
+							lat: data.latitude,
+							lng: data.longitude - span.lng() * 0.25
+						})
+					});
 					break;
 
 				case "displayPoints":
@@ -104,10 +132,23 @@ function controllers(tracker){
 	    });
 
 	    // Global functions
+	    $scope.toggleMenu = function(){
+			$scope.menuClosed = !$scope.menuClosed;
+	    };
+	    $scope.navBack = function(){
+			history.back();
+	    };
 		$scope.toggleFavorite = function(id){
 			var toast = $mdToast.simple().textContent("Not implemented").position("top right");
 			$mdToast.show(toast);
-		}
+		};
+		$scope.clearOverlay = function(){
+			$scope.overlayPage = undefined;
+		};
+		$scope.openAbout = function(){
+			$scope.overlayPage = "about";
+			$scope.toggleMenu();
+		};
 	})
 	.controller("Landing", function($scope, getNearbyStops, loadStopsDetails, geolocation, map, $location, $mdToast){
 		$scope.nearbyStops = [];
@@ -157,12 +198,12 @@ function controllers(tracker){
 						$scope.isSearching = false;
 						$scope.searchResults = list;
 						if(list.length){
-							map("setSelfLocation", {
+							map("setTargetLocation", {
 								latitude: list[0].mid_lat,
 								longitude: list[0].mid_lon
 							});
 						}else{
-							map("setSelfLocation", undefined);
+							map("setTargetLocation", undefined);
 						}
 						map("displayPoints", list.map(function(stop){
 							return stop.stop_id;
@@ -188,7 +229,7 @@ function controllers(tracker){
 			.then(function(){
 				var stop = $scope.stop = getStopDetails(stop_id);
 				
-				map("setSelfLocation", {
+				map("setTargetLocation", {
 					latitude: stop.mid_lat,
 					longitude: stop.mid_lon
 				});
