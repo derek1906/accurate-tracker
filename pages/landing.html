@@ -46,7 +46,7 @@
         Waiting for location service...
     </div>
     <md-list class="page-scrollable-content">
-        <md-list-item class="nearbyStop-info" ng-repeat="stop in nearbyStops track by $index" ng-click="goToStop(stop.stop_id)">
+        <md-list-item class="nearbyStop-info" ng-repeat="stop in nearbyStops track by $index" ng-click="goToStop(stop.stop_id)" ng-mouseover="changeTargetStop(stop)">
             <md-button class="md-icon-button" ng-click="toggleFavorite(stop.stop_id)" aria-label="Toggle favorite">
                 <md-tooltip md-direction="left" md-delay="1000">favorite</md-tooltip>
                 <md-icon class="md-primary" md-svg-src="icons/emptyheart.svg"></md-icon>

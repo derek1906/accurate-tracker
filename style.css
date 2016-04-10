@@ -68,9 +68,9 @@ body{
     -webkit-filter: blur(0px);
     -moz-filter: blur(0px);
     filter: blur(0px);
+    transition: filter 0.3s ease;
     -webkit-transition: -webkit-filter 0.3s ease;
     -moz-transition: -moz-filter 0.3s ease;
-    transition: filter 0.3s ease;
 }
 .overlayControlled.about{
     -webkit-filter: blur(10px);
@@ -78,10 +78,31 @@ body{
     filter: blur(10px);
 }
 
+
+/* Page wrapper */
+#wrapper{
+    position: absolute;
+    width: 50%;
+    height: 100%;
+}
+#wrapper *, #overlay *{
+    color: white;
+}
+#wrapper *:not(input), #about *{
+    text-shadow: 0px 4px 3px rgba(0, 0, 0, 0.6) !important;
+}
+#wrapper svg{
+    -webkit-filter: drop-shadow(0px 4px 3px rgba(0, 0, 0, 0.6));
+    filter: drop-shadow(0px 4px 3px rgba(0, 0, 0, 0.6));
+}
+
+
 /* Overlays */
 #splash{
     background: white;
-    color: black !important;
+}
+#splash *{
+    color: black;
 }
 #about{
     padding: 10px;
@@ -107,23 +128,6 @@ body{
     border-radius: 50% 50%;
     box-shadow: 0px 4px 3px rgba(0, 0, 0, 0.6);
     background: gray;
-}
-
-/* Page wrapper */
-#wrapper{
-    position: absolute;
-    width: 50%;
-    height: 100%;
-}
-#wrapper *, #overlay *{
-    color: white;
-}
-#wrapper *:not(input), #about *{
-    text-shadow: 0px 4px 3px rgba(0, 0, 0, 0.6) !important;
-}
-#wrapper svg{
-    -webkit-filter: drop-shadow(0px 4px 3px rgba(0, 0, 0, 0.6));
-    filter: drop-shadow(0px 4px 3px rgba(0, 0, 0, 0.6));
 }
 
 

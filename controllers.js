@@ -142,11 +142,14 @@ function controllers(tracker){
 			var toast = $mdToast.simple().textContent("Not implemented").position("top right");
 			$mdToast.show(toast);
 		};
+		$scope.setOverlay = function(name){
+			$scope.overlayPage = name;
+		};
 		$scope.clearOverlay = function(){
-			$scope.overlayPage = undefined;
+			$scope.setOverlay(undefined);
 		};
 		$scope.openAbout = function(){
-			$scope.overlayPage = "about";
+			$scope.setOverlay("about");
 			$scope.toggleMenu();
 		};
 	})
@@ -171,10 +174,16 @@ function controllers(tracker){
 		// events
 		$scope.doSearch = function(){
 			$location.path("/search");
-		}
+		};
 		$scope.goToStop = function(id){
 			$location.path("/stop/" + id);
-		}
+		};
+		$scope.changeTargetStop = function(stop){
+			map("setTargetLocation", {
+				latitude: stop.mid_lat,
+				longitude: stop.mid_lon
+			});
+		};
 	})
 	.controller("Search", function($scope, $location, geolocation, loadStopsDetails, getAutocomplete, map){
 		// focus input
@@ -218,7 +227,13 @@ function controllers(tracker){
 			$scope.goToStop = function(id){
 				$location.path("/stop/" + id);
 				$location.replace();
-			}
+			};
+			$scope.changeTargetStop = function(stop){
+				map("setTargetLocation", {
+					latitude: stop.mid_lat,
+					longitude: stop.mid_lon
+				});
+			};
 	})
 	.controller("StopDetails", function($scope, $routeParams, loadStopsDetails, getStopDetails, getUpcomingBuses, map){
 		var stop_id = $routeParams.id;

@@ -184,7 +184,7 @@ function services(tracker){
 	})
 
 	// Get nearby stops
-	.service("getNearbyStops", function($q, getData, geolocation){
+	.service("getNearbyStops", function($q, getData, geolocation, getStopDetails){
 		return function(count){
 			var deferred = $q.defer();
 			var data = {};
@@ -198,7 +198,9 @@ function services(tracker){
 
 					getData("GetStopsByLatLon", data)
 						.then(function(res){
-							deferred.resolve(res.stops);
+							deferred.resolve(res.stops.map(function(stop){
+								return getStopDetails(stop.stop_id);
+							}));
 						}, function(){
 							deferred.reject([]);
 						});
