@@ -103,7 +103,12 @@ function controllers(tracker){
 
 				case "setTargetLocation":
 					$scope.mapMeta.targetLocation = data;
-					if(data)	map("moveTo", data);
+
+					var bounds = $scope.mapMeta.control.getGMap().getBounds();
+					var targetLatLng = new google.maps.LatLng(data.latitude, data.longitude);
+					if(data && (data.pan || !bounds.contains(targetLatLng))){
+						map("moveTo", data);
+					}
 					break;
 
 				case "moveTo":
@@ -269,7 +274,8 @@ function controllers(tracker){
 				
 				map("setTargetLocation", {
 					latitude: stop.mid_lat,
-					longitude: stop.mid_lon
+					longitude: stop.mid_lon,
+					pan: true
 				});
 
 				$scope.update();
