@@ -154,6 +154,11 @@ function controllers(tracker){
 							events: {
 								click: function(){
 									$location.path("/stop/" + stop_id);
+
+									// replace previous entry to maintain history consistency
+									if(!$scope.atLanding){
+										$location.replace();
+									}
 								},
 								mouseover: function(){
 									map("highlightPoint", stop);

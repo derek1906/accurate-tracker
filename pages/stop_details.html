@@ -46,13 +46,20 @@
     </h2>
 </div>
 <md-content flex class="main-content" layout="column">
+    <div class="page-header" flex="none" ng-show="isSearching">
+        <h1 class="page-title">Loading...</h1>
+        <span class="page-subtitle"></span>
+    </div>
     <div class="page-header" flex="none" ng-show="departures.length">
         <h1 class="page-title">Don't miss it.</h1>
         <span class="page-subtitle">Use the damn timer so you won’t miss yo bus!</span>
     </div>
     <div class="page-header" flex="none" ng-show="!departures.length && !isSearching && !stopNotExists">
         <h1 class="page-title">You are doomed.</h1>
-        <span class="page-subtitle">Nothing is coming to {{stop.stop_name}}.</span>
+        <span class="page-subtitle">
+            Nothing is coming to {{stop.stop_name}}.<br>
+            Or the bus is going to say NIS. Either one.
+        </span>
     </div>
     <div class="page-header" flex="none" ng-show="stopNotExists">
         <h1 class="page-title">Dafuq?</h1>
