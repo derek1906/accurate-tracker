@@ -45,10 +45,17 @@ function controllers(tracker){
 			},
 			_points: {},
 
-			universalId: 0,
-
 			loaded: false,
-			actionQueue: []
+			actionQueue: [],
+
+			// universal id generator
+			universalId: (function(){
+				var id = 1;
+
+				return function(){
+					return id++;
+				}
+			})()
 		};
 	    uiGmapIsReady.promise().then(function(){
 			$scope.mapMeta.background = {
@@ -150,7 +157,7 @@ function controllers(tracker){
 							};
 						var point = {
 							coords: coords,
-							id: $scope.mapMeta.universalId++,
+							id: $scope.mapMeta.universalId(),
 							events: {
 								click: function(){
 									$scope.goToStop(stop);
