@@ -1,6 +1,6 @@
 function controllers(tracker){
 	tracker
-	.controller("Overall", function($scope, $mdSidenav, $mdToast, $location, uiGmapIsReady, map, getStopDetails, icons){
+	.controller("Overall", function($scope, $mdSidenav, $mdToast, $location, uiGmapIsReady, map, btn, getStopDetails, icons, TripManager){
 		// Navigation button
 		$scope.atLanding = true;
 		// Menu
@@ -15,6 +15,9 @@ function controllers(tracker){
 			}else{
 				$scope.atLanding = false;
 			}
+
+			// Reset buttons
+			btn("reset");
 	    });
 
 	    // Map information
@@ -44,6 +47,8 @@ function controllers(tracker){
 			pointsOptions: {
 			},
 			_points: {},
+
+			path: [],
 
 			loaded: false,
 			actionQueue: [],
@@ -103,11 +108,14 @@ function controllers(tracker){
 					$scope.mapMeta.targetLocation = undefined;
 					$scope.mapMeta.points = [];
 					$scope.mapMeta._points = {};
+					$scope.mapMeta.path = [];
 					break;
 
 				case "setSelfLocation":
 					$scope.mapMeta.selfLocation = data;
-					if(data)	map("moveTo", data);
+					if(data){
+						if(data.pan)	map("moveTo", data);
+					}
 					break;
 
 				case "setTargetLocation":
@@ -187,6 +195,12 @@ function controllers(tracker){
 				case "dehighlightPoint":
 					$scope.mapMeta._points[data.stop_id].options.opacity = 0.3;
 					break;
+
+				case "setPath":
+					$scope.mapMeta.path = data;
+					break;
+				case "clearPath":
+					$scope.mapMeta.path = [];
 			}
 
 			$scope.mapMeta.control.refresh();
@@ -221,6 +235,9 @@ function controllers(tracker){
 				$location.replace();
 			}
 		};
+		$scope.goToTrip = function(vehicle_id){
+			$location.path("/trip/" + vehicle_id);
+		};
 		$scope.highlightStop = function(stop){
 			map("highlightPoint", stop);
 		};
@@ -228,6 +245,25 @@ function controllers(tracker){
 			map("dehighlightPoint", stop);
 		};
 	})
+
+	.controller("overmapButtons", function($scope){
+		$scope.buttons = [];
+
+		$scope.$on("overmapButtons", function(e, obj){
+			var data = obj.data;
+
+			switch(obj.action){
+				case "reset":
+					$scope.buttons = [];
+					break;
+
+				case "set":
+					$scope.buttons = data;
+					break;
+			}
+		});
+	})
+
 	.controller("Landing", function($scope, getNearbyStops, loadStopsDetails, geolocation, map, $location, $mdToast){
 		$scope.nearbyStops = [];
 
@@ -297,6 +333,7 @@ function controllers(tracker){
 	.controller("StopDetails", function($scope, $routeParams, $interval, $mdToast,
 										loadStopsDetails, getStopDetails, getUpcomingBuses, map, DEPARTURE_UPDATE_INTERVAL){
 		var stop_id = $scope.stop_id = $routeParams.id;
+		var refreshInterval = undefined;
 
 		//map("reset");
 
@@ -316,8 +353,12 @@ function controllers(tracker){
 				});
 
 				$scope.update();
-				$interval($scope.update, DEPARTURE_UPDATE_INTERVAL);
+				refreshInterval = $interval($scope.update, DEPARTURE_UPDATE_INTERVAL);
 			}, function(){/*error*/});
+
+		$scope.$on("$destroy", function(){
+			if(refreshInterval)	$interval.cancel(refreshInterval);
+		});
 
 		$scope.update = function(){
 			$scope.isSearching = true;
@@ -331,5 +372,70 @@ function controllers(tracker){
 					$mdToast.show(toast);
 				});
 		};
+	})
+	.controller("TripDetails", function($scope, $routeParams, $q, loadStopsDetails, geolocation, TripManager, getData, getShapeAndStops, map, btn){
+		var vehicle_id = $routeParams.id;
+		var arrival_times = [];
+
+		var nextStop = undefined;
+		$scope.nextStopIndex = 0;
+
+		map("reset");
+		btn("set", [{
+			text: "Show Route",
+			onDisplay: false,
+			click: function(){
+				if(this.onDisplay){
+					map("clearPath");
+				}else{
+					getShapeAndStops($scope.vehicle.trip.shape_id).then(function(data){
+						map("setPath", data.path.map(function(point){
+							return {
+								latitude: point.shape_pt_lat,
+								longitude: point.shape_pt_lon
+							};
+						}));
+					});
+				}
+				this.onDisplay = !this.onDisplay;
+				this.text = ["Show Route", "Hide Route"][+this.onDisplay];
+			}
+		}]);
+
+		geolocation().then(function(latlon){
+			latlon.pan = false;
+			map("setSelfLocation", latlon);
+		});
+
+		getData("GetVehicle", {vehicle_id: vehicle_id}).then(function(res){
+			$scope.vehicle = res.vehicles[0];
+			nextStop = res.vehicles[0].next_stop_id;
+
+			return loadStopsDetails();
+		})
+		.then(function(){
+
+			map("setTargetLocation", {
+				latitude: $scope.vehicle.location.lat,
+				longitude: $scope.vehicle.location.lon
+			});
+
+			var trip = $scope.vehicle.trip;
+			if(trip){
+				// display arrival times
+				getData("GetStopTimesByTrip", {trip_id: $scope.vehicle.trip.trip_id}).then(function(res){
+					$scope.arrival_times = res.stop_times;
+
+					res.stop_times.forEach(function(stop, i){
+						if(stop.stop_point.stop_id == nextStop){
+							$scope.nextStopIndex = i;
+						}
+					});
+					console.log("Next stop index: %d", $scope.nextStopIndex);
+				});
+			}
+
+		});
+		
 	});
 }

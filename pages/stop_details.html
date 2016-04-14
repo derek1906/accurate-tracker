@@ -1,36 +1,14 @@
 <style>
-    .departures{
-        list-style: none;
-        padding: 0;
-        margin-top: 0;
-    }
     .departure-info{
-        width: 585px;
-        display: block;
-        height: 52px;
-        margin-bottom: 23px;
-    }
-    .departure-info-container-left{
-        display: inline-block;
-        float: left;
-    }
-    .departure-info-container-left > *{
-        float: left;
-        clear: both;
-    }
-    .departure-info-container-right{
-        display: inline-block;
-        float: right;
-    }
-    .departure-info-container-right > *{
-        float: right;
-        clear: both;
+        padding-top: 12px;
+        padding-bottom: 12px;
     }
     .departures .headsign, .departures .expected_mins{
         font-size: 28px;
     }
     .departures .destination, .departures .min_label{
         font-size: 14px;
+        line-height: normal;
     }
 
     .istop-icon{
@@ -63,28 +41,27 @@
     </div>
     <div class="page-header" flex="none" ng-show="stopNotExists">
         <h1 class="page-title">Dafuq?</h1>
-        <span class="page-subtitle">Stop "{{stop_id}}" does not exist. How did you get here?</span>
+        <span class="page-subtitle">
+            Stop id "{{stop_id}}" does not exist (in the internal database).<br>
+            How did you get here?
+        </span>
     </div>
 
-    <div class="page-scrollable-content">
-        <ul class="departures" flex>
-            <li class="departure-info" ng-repeat="departure in departures">
-                <div>
-                    <div class="departure-info-container-left">
-                        <span class="headsign" layout="row" layout-align="start center">
-                            {{departure.headsign}}
-                            <md-icon class="istop-icon" md-svg-src="icons/istop.svg" ng-show="departure.is_istop">
-                                <md-tooltip md-direction="right" md-delay="300">Boarding is free</md-tooltip>
-                            </md-icon>
-                        </span>
-                        <span class="destination">To {{departure.destination.stop_id | stopID}}</span>
-                    </div>
-                    <div class="departure-info-container-right">
-                        <span class="expected_mins">{{departure.expected_mins}}</span>
-                        <span class="min_label">min</span>
-                    </div>
-                </div>
-            </li>
-        </ul>
-    </div>
+    <md-list class="page-scrollable-content departures">
+        <md-list-item ng-repeat="departure in departures" ng-click="goToTrip(departure.vehicle_id)">
+            <div class="departure-info" layout="column" layout-align="center start">
+                <span class="headsign" layout="row" layout-align="start center">
+                    {{departure.headsign}}
+                    <md-icon class="istop-icon" md-svg-src="icons/istop.svg" ng-show="departure.is_istop">
+                        <md-tooltip md-direction="right" md-delay="300">Boarding is free</md-tooltip>
+                    </md-icon>
+                </span>
+                <span class="destination">To {{departure.destination.stop_id | stopID}}</span>
+            </div>
+            <div class="md-secondary" layout="column" layout-align="center center">
+                <span class="expected_mins">{{departure.expected_mins}}</span>
+                <span class="min_label">min</span>
+            </div>
+        </md-list-item>
+    </md-list>
 </md-content>

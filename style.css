@@ -51,6 +51,15 @@ body{
     height: 100%;
 }
 
+/* Overmap buttons */
+#overmap-buttons{
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+    padding: 16px 32px;
+    color: white;
+}
+
 /* Overlay container */
 #overlay{
     position: absolute;

@@ -58,6 +58,12 @@ function services(tracker){
 		};
 	})
 
+	.service("btn", function($rootScope){
+		return function(action, data){
+			$rootScope.$broadcast("overmapButtons", {action: action, data: data});
+		}
+	})
+
 	// icons generator
 	.service("icons", function(){
 		var icons = {
@@ -231,7 +237,87 @@ function services(tracker){
 	// Get stop details from database
 	.service("getStopDetails", function(stop_details){
 		return function(stop_id){
-			return stop_details.stops[stop_id];
+			var parts = stop_id.split(":");
+			if(parts.length == 2){
+				return stop_details.stops[parts[0]].stop_points.filter(function(stop){
+					return stop.stop_id == stop_id;
+				})[0];
+			}else{
+				return stop_details.stops[stop_id];
+			}
 		};
 	})
+
+
+	// Trip manager
+	.factory("TripManager", function($q, getData){
+		var trips = {};
+
+		return {
+			setTrip: function(trip_id, trip){
+				trips[trip_id] = trip;
+			},
+			getTrip: function(trip_id){
+				var deferred = $q.defer();
+
+				if(trip_id in trips){
+					deferred.resolve(trips[trip_id]);
+				}else{
+					getData("GetTrip", {
+						trip_id: trip_id
+					}).then(function(res){
+						if(!res.trips.length){
+							deferred.reject();
+						}else{
+							trips[trip_id] = res.trips[0];
+							deferred.resolve(res.trips[0]);
+						}
+					}, function(){
+						deferred.reject();
+					})
+				}
+
+				return deferred.promise;
+			}
+		};
+	})
+
+	.service("getShapeAndStops", function($q, getData, getStopDetails){
+		// cache
+		var shapes = {};
+
+		return function(shape_id){
+			var deferred = $q.defer();
+
+			if(shape_id in shapes){
+				deferred.resolve(shapes[shape_id]);
+			}else{
+				getData("GetShape", {
+					shape_id: shape_id
+				}).then(function(res){
+					var result = {
+						stops: [],
+						path: res.shapes
+					};
+
+					result.stops = res.shapes.reduce(function(prev, cur){
+						if("stop_id" in cur){
+							prev.push(getStopDetails(cur.stop_id));
+							return prev;
+						}else{
+							return prev;
+						}
+					}, []);
+
+					shapes[shape_id] = result;
+
+					deferred.resolve(result);
+				}, function(){
+					deferred.reject();
+				})
+			}
+
+			return deferred.promise;
+		};
+	});
 }

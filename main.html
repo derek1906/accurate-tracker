@@ -40,6 +40,10 @@
                             templateUrl: "pages/stop_details.html",
                             controller: "StopDetails"
                         })
+                        .when("/trip/:id", {
+                            templateUrl: "pages/trip_details.html",
+                            controller: "TripDetails"
+                        })
                         .otherwise({
                             redirectTo: "/"
                         });
@@ -63,6 +67,7 @@
                         <ui-gmap-marker idKey="0" ng-if="mapMeta.targetLocation" options="mapMeta.targetLocationOptions" coords="mapMeta.targetLocation"></ui-gmap-marker>
                         <ui-gmap-rectangle bounds='mapMeta.background.bounds' fill='mapMeta.background.fill' clickable="false"></ui-gmap-rectangle>
                         <ui-gmap-markers ng-if="mapMeta.points.length" models="mapMeta.points" options="'options'" coords="'coords'"></ui-gmap-markers>
+                        <ui-gmap-polyline ng-if="mapMeta.path.length" path="mapMeta.path" clickable="false" geodesic="true" static="true"></ui-gmap-polyline>
                     </div>
                 </ui-gmap-google-map>
             </div>
@@ -93,6 +98,9 @@
                 </div>
             </div>
             <div id="content" ng-view layout="column" flex></div>
+        </div>
+        <div id="overmap-buttons" ng-controller="overmapButtons">
+            <md-button ng-click="button.click()" ng-repeat="button in buttons">{{button.text}}</md-button>
         </div>
         <div id="overlay" ng-switch="overlayPage" ng-if="overlayPage">
             <div id="about" ng-switch-when="about" layout="column">
