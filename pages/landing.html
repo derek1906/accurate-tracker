@@ -38,15 +38,15 @@
 </div>
 <md-content flex class="main-content" layout="column">
     <div class="page-header" flex="none">
-        <h1 class="page-title">Near as fuck.</h1>
-        <span class="page-subtitle">These are the closest bus stops I could find.</span>
+        <h1 class="page-title">{{"default-title" | msg:"landing"}}</h1>
+        <span class="page-subtitle">{{"default-subtitle" | msg:"landing"}}</span>
     </div>
 
     <div ng-show="!nearbyStops.length">
         Waiting for location service...
     </div>
     <md-list class="page-scrollable-content">
-        <md-list-item class="nearbyStop-info" ng-repeat="stop in nearbyStops track by $index"
+        <md-list-item class="nearbyStop-info" ng-repeat="stop in nearbyStops track by stop.stop_id"
                 ng-click="goToStop(stop)" ng-mouseover="highlightStop(stop)" ng-mouseout="dehighlightStop(stop)">
             <md-button class="md-icon-button" ng-click="toggleFavorite(stop.stop_id)" aria-label="Toggle favorite">
                 <md-tooltip md-direction="left" md-delay="1000">favorite</md-tooltip>

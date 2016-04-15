@@ -2,7 +2,7 @@ function services(tracker){
 	tracker
 
 	// Storage service
-	.service("storage", function(){
+	.factory("storage", function(){
 		var methods = {
 			exists: function(key){
 				return localStorage[key] !== undefined;
@@ -15,6 +15,9 @@ function services(tracker){
 			},
 			remove: function(key){
 				localStorage.removeItem(key);
+			},
+			toggle: function(key){
+				this.set(key, !this.get(key));
 			}
 		};
 

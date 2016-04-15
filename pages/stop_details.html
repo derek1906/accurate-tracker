@@ -29,8 +29,8 @@
         <span class="page-subtitle"></span>
     </div>
     <div class="page-header" flex="none" ng-show="departures.length">
-        <h1 class="page-title">Don't miss it.</h1>
-        <span class="page-subtitle">Use the damn timer so you won’t miss yo bus!</span>
+        <h1 class="page-title">{{ "default-title" | msg:"stop-details" }}</h1>
+        <span class="page-subtitle">{{ "default-subtitle" | msg:"stop-details" }}</span>
     </div>
     <div class="page-header" flex="none" ng-show="!departures.length && !isSearching && !stopNotExists">
         <h1 class="page-title">You are doomed.</h1>
@@ -48,19 +48,24 @@
     </div>
 
     <md-list class="page-scrollable-content departures">
-        <md-list-item ng-repeat="departure in departures" ng-click="goToTrip(departure.vehicle_id)">
+        <md-list-item ng-repeat="departure in departures track by departure.trip.trip_id" ng-click="goToTrip(departure.vehicle_id)">
             <div class="departure-info" layout="column" layout-align="center start">
                 <span class="headsign" layout="row" layout-align="start center">
                     {{departure.headsign}}
                     <md-icon class="istop-icon" md-svg-src="icons/istop.svg" ng-show="departure.is_istop">
-                        <md-tooltip md-direction="right" md-delay="300">Boarding is free</md-tooltip>
+                        <md-tooltip md-direction="right" md-delay="300">
+                            Boarding is free<br>
+                            (no iCard is needed)
+                        </md-tooltip>
                     </md-icon>
                 </span>
                 <span class="destination">To {{departure.destination.stop_id | stopID}}</span>
             </div>
-            <div class="md-secondary" layout="column" layout-align="center center">
+            <div class="md-secondary" layout="column" layout-align="center center" ng-show="departure.expected_mins">
                 <span class="expected_mins">{{departure.expected_mins}}</span>
                 <span class="min_label">min</span>
+            <div class="md-secondary" layout="column" layout-align="center center" ng-show="!departure.expected_mins">
+                <span class="min_label">Arriving</span>
             </div>
         </md-list-item>
     </md-list>

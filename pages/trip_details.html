@@ -1,0 +1,68 @@
+<style>
+    #arrivals{
+        position: relative;
+    }
+    .arrival-info{
+        font-size: 18px;
+    }
+    .arrival-info::before{
+        position: absolute;
+        top: 0;
+        left: 5px;
+        height: 100%;
+        width: 20px;
+        background-image: url('icons/route_pieces.png');
+        background-repeat: no-repeat;
+        content: '';
+    }
+    .arrival-info:first-of-type::before{
+        background-position: -40px 0px;
+    }
+    .arrival-info:last-of-type::before{
+        background-position: -60px 0px;
+    }
+
+    .passedStop *{
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+    .arrival-info.passedStop::before{
+        background-position: -20px 0px;
+    }
+    .arrival-info.passedStop:first-of-type::before{
+        background-position: -80px 0px;
+    }
+    .arrival-info.passedStop:last-of-type::before{
+        background-position: -100px 0px;
+    }
+
+    .arrival-stop-name{
+        margin-left: 30px;
+    }
+</style>
+
+<div class="headbar" layout="row" layout-align="start center" flex="none">
+    <h2>
+        <span>#{{vehicle.vehicle_id}}: {{vehicle.trip.trip_headsign}}</span>
+    </h2>
+</div>
+<md-content flex class="main-content" layout="column">
+    <div class="page-header" flex="none" ng-show="arrival_times.length">
+        <h1 class="page-title">So Accurate!</h1>
+        <span class="page-subtitle">
+            We got them bus times and locations down to a science.
+        </span>
+    </div>
+    <div class="page-header" flex="none" ng-show="!arrival_times.length">
+        <h1 class="page-title">Not In Service.</h1>
+        <span class="page-subtitle">
+            Even buses need to rest. Bus {{vehicle.vehicle_id}} is not in service right now.
+        </span>
+    </div>
+
+    <md-list class="page-scrollable-content" id="arrivals">
+        <md-list-item class="arrival-info" ng-class="{passedStop: $index < nextStopIndex}" ng-repeat="arrival in arrival_times">
+            <div class="arrival-stop-name">{{arrival.stop_point.stop_id | stopID}}</div>
+            <div class="md-secondary">{{arrival.departure_time | toDate | date:"shortTime" | lowercase}}</div>
+        </md-list-item>
+    </md-list>
+</md-content>

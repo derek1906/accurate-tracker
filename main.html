@@ -19,9 +19,16 @@
         <script src="./services.js"></script>
         <script src="./controllers.js"></script>
         <script src="./filters.js"></script>
+        <script src="./messages.js"></script>
         <script>
             // Create module "tracker"
             var tracker = angular.module("tracker", ["ngMaterial", "ngRoute", "uiGmapgoogle-maps"]);
+
+            services(tracker);
+            controllers(tracker);
+            filters(tracker);
+            messages(tracker);
+
             tracker
                 .value("stop_details", {stops:{}, loaded: false})
                 .value("DATA_STORAGE_KEY", "stop_data")
@@ -51,11 +58,12 @@
                     $mdThemingProvider.theme('docs-dark', 'default')
                         .primaryPalette("grey")
                         .dark();
+                })
+                .run(function(storage){
+                    if(!storage.exists("standard_messages")){
+                        storage.set("standard_messages", false);
+                    }
                 });
-
-            services(tracker);
-            controllers(tracker);
-            filters(tracker);
         </script>
     </head>
     <body ng-app="tracker" ng-controller="Overall">
@@ -87,7 +95,7 @@
                         <md-tooltip md-direction="right">Favorites</md-tooltip>
                         <md-icon md-svg-src="icons/heart.svg"></md-icon>
                     </md-button>
-                    <md-button class="md-icon-button" aria-label="Toggle Profanity">
+                    <md-button class="md-icon-button" aria-label="Toggle Profanity" ng-click="toggleProfanity()">
                         <md-tooltip md-direction="right">Passive Aggressive</md-tooltip>
                         <md-icon md-svg-src="icons/profanity.svg"></md-icon>
                     </md-button>

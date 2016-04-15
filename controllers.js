@@ -1,6 +1,7 @@
 function controllers(tracker){
 	tracker
-	.controller("Overall", function($scope, $mdSidenav, $mdToast, $location, uiGmapIsReady, map, btn, getStopDetails, icons, TripManager){
+	.controller("Overall", function($scope, $mdSidenav, $mdToast, $location, uiGmapIsReady, 
+									map, btn, getStopDetails, icons, TripManager, storage){
 		// Navigation button
 		$scope.atLanding = true;
 		// Menu
@@ -217,16 +218,26 @@ function controllers(tracker){
 			var toast = $mdToast.simple().textContent("Not implemented").position("top right");
 			$mdToast.show(toast);
 		};
+
+		// overlay control
 		$scope.setOverlay = function(name){
 			$scope.overlayPage = name;
 		};
 		$scope.clearOverlay = function(){
 			$scope.setOverlay(undefined);
 		};
+
+		// menu bar
 		$scope.openAbout = function(){
 			$scope.setOverlay("about");
 			$scope.toggleMenu();
 		};
+		$scope.toggleProfanity = function(){
+			storage.toggle("standard_messages");
+			location.reload();
+		};
+
+		// general
 		$scope.goToStop = function(stop){
 			$location.path("/stop/" + stop.stop_id);
 
@@ -264,7 +275,7 @@ function controllers(tracker){
 		});
 	})
 
-	.controller("Landing", function($scope, getNearbyStops, loadStopsDetails, geolocation, map, $location, $mdToast){
+	.controller("Landing", function($scope, $location, $mdToast, getNearbyStops, loadStopsDetails, geolocation, map){
 		$scope.nearbyStops = [];
 
 		loadStopsDetails();
@@ -281,6 +292,7 @@ function controllers(tracker){
 		});
 
 		geolocation().then(function(latlon){
+			latlon.pan = true;
 			map("setSelfLocation", latlon);
 		});
 
@@ -373,7 +385,8 @@ function controllers(tracker){
 				});
 		};
 	})
-	.controller("TripDetails", function($scope, $routeParams, $q, loadStopsDetails, geolocation, TripManager, getData, getShapeAndStops, map, btn){
+	.controller("TripDetails", function($scope, $routeParams, $q, 
+										loadStopsDetails, geolocation, TripManager, getData, getShapeAndStops, map, btn){
 		var vehicle_id = $routeParams.id;
 		var arrival_times = [];
 
@@ -431,10 +444,24 @@ function controllers(tracker){
 							$scope.nextStopIndex = i;
 						}
 					});
+
+					// scroll to correct position
+					setTimeout(function(){
+						var container = document.querySelector("#arrivals");
+						var nextStop = document.querySelectorAll("#arrivals md-list-item")[$scope.nextStopIndex];
+
+						container.scrollTop = nextStop.offsetTop - container.clientHeight /2;
+					});
 					console.log("Next stop index: %d", $scope.nextStopIndex);
 				});
 			}
 
+		});
+
+
+		$scope.$on("$destroy", function(){
+			console.log("clearPath");
+			map("clearPath");
 		});
 		
 	});
