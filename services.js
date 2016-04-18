@@ -72,13 +72,17 @@ function services(tracker){
 		var icons = {
 			home: {
 				url: "icons/home.png",
-				size: {width: 35, height: 56}
+				size: {width: 74, height: 88}
 			},
 			stop: {
 				url: "icons/stop.png",
-				size: {width: 25, height: 39}
+				size: {width: 62, height: 73}
+			},
+			bus: {
+				url: "icons/bus.png",
+				size: {width: 70, height: 83}
 			}
-		}
+		};
 		return function(name){
 			var icon = icons[name];
 			if(!icon.anchor){
@@ -86,6 +90,22 @@ function services(tracker){
 			}
 			return icon;
 		}
+	})
+
+	// random value provider
+	.service("random", function($rootScope){
+		var randomValue;
+
+		generateRandomValue();
+		$rootScope.$on("$routeChangeSuccess", generateRandomValue);
+
+		function generateRandomValue(){
+			randomValue = Math.random();
+		}
+
+		return function(){
+			return randomValue;
+		};
 	})
 
 	// Load stops database - Fetch from web if data is outdated or missing
