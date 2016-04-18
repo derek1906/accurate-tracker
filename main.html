@@ -15,6 +15,7 @@
         <script src="./bower_components/angular-google-maps/dist/angular-google-maps.min.js"></script>
         <script src="./bower_components/angular-simple-logger/dist/angular-simple-logger.min.js"></script>
         <script src="./bower_components/lodash/lodash.js"></script>
+        <script src="./bower_components/jquery/dist/jquery.min.js"></script>
 
         <script src="./services.js"></script>
         <script src="./controllers.js"></script>
@@ -71,7 +72,7 @@
             <div style="position: relative; height: 100%;">
                 <ui-gmap-google-map center='mapMeta.center' zoom='mapMeta.zoom' options="mapMeta.options" control="mapMeta.control">
                     <div ng-if="mapMeta.loaded">
-                        <ui-gmap-marker idKey="-1" ng-if="mapMeta.selfLocation" options="mapMeta.selfLocationOptions" coords="mapMeta.selfLocation"></ui-gmap-marker>
+                        <ui-gmap-marker idKey="-1" ng-if="mapMeta.selfLocation" options="mapMeta.selfLocationOptions" coords="mapMeta.selfLocation" events="mapMeta.selfLocationEvents"></ui-gmap-marker>
                         <ui-gmap-marker idKey="0" ng-if="mapMeta.targetLocation" options="mapMeta.targetLocationOptions" coords="mapMeta.targetLocation"></ui-gmap-marker>
                         <ui-gmap-rectangle bounds='mapMeta.background.bounds' fill='mapMeta.background.fill' clickable="false"></ui-gmap-rectangle>
                         <ui-gmap-markers ng-if="mapMeta.points.length" models="mapMeta.points" options="'options'" coords="'coords'"></ui-gmap-markers>
