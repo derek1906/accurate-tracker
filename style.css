@@ -30,6 +30,13 @@ body{
     background-clip: padding-box;
 }
 
+
+/* Overrides */
+.md-button:not([disabled]):hover {
+    background-color: rgba(158, 158, 158, 0.3);
+}
+
+
 /* Standard height for toolbar level */
 .headbar{
     height: 64px;
