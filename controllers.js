@@ -37,9 +37,9 @@ function controllers(tracker){
 
 			selfLocation: undefined,
 			selfLocationOptions: {
-				clickable: false,
 				opacity: 0.6
 			},
+			selfLocationEvents: {},
 			targetLocation: undefined,
 			targetLocationOptions: {
 				opacity: 1
@@ -117,6 +117,11 @@ function controllers(tracker){
 					if(data){
 						if(data.pan)	map("moveTo", data);
 					}
+					$scope.mapMeta.selfLocationEvents = {
+						click: function(){
+							map("moveTo", data);
+						}
+					};
 					break;
 
 				case "setTargetLocation":
@@ -161,8 +166,8 @@ function controllers(tracker){
 					$scope.mapMeta.points = data.map(function(stop_id, i){
 						var stop = getStopDetails(stop_id),
 							coords = {
-								latitude: stop.mid_lat,
-								longitude: stop.mid_lon
+								latitude: stop.mid_lat || stop.stop_lat,
+								longitude: stop.mid_lon || stop.stop_lon
 							};
 						var point = {
 							coords: coords,
@@ -275,7 +280,7 @@ function controllers(tracker){
 		});
 	})
 
-	.controller("Landing", function($scope, $location, $mdToast, getNearbyStops, loadStopsDetails, geolocation, map){
+	.controller("Landing", function($scope, $location, $mdToast, getNearbyStops, loadStopsDetails, geolocation, map, btn){
 		$scope.nearbyStops = [];
 
 		loadStopsDetails();
@@ -283,7 +288,7 @@ function controllers(tracker){
 		map("setTargetLocation", undefined);
 
 		// Get nearby stops by user's geolocation
-		getNearbyStops(10).then(function(stops){
+		getNearbyStops(20).then(function(stops){
 			$scope.nearbyStops = stops;
 
 			map("displayPoints", stops.map(function(stop){
@@ -294,7 +299,16 @@ function controllers(tracker){
 		geolocation().then(function(latlon){
 			latlon.pan = true;
 			map("setSelfLocation", latlon);
+
+			btn("set", [{
+				text: "Center yourself",
+				onDisplay: false,
+				click: function(){
+					map("setSelfLocation", latlon);
+				}
+			}]);
 		});
+
 
 		// events
 		$scope.doSearch = function(){
@@ -394,6 +408,8 @@ function controllers(tracker){
 		$scope.nextStopIndex = 0;
 
 		map("reset");
+
+		// Buttons
 		btn("set", [{
 			text: "Show Route",
 			onDisplay: false,
@@ -415,11 +431,13 @@ function controllers(tracker){
 			}
 		}]);
 
+		// Geolocation
 		geolocation().then(function(latlon){
 			latlon.pan = false;
 			map("setSelfLocation", latlon);
 		});
 
+		// main
 		getData("GetVehicle", {vehicle_id: vehicle_id}).then(function(res){
 			$scope.vehicle = res.vehicles[0];
 			nextStop = res.vehicles[0].next_stop_id;
@@ -445,13 +463,19 @@ function controllers(tracker){
 						}
 					});
 
+					map("displayPoints", res.stop_times.map(function(stop){
+						return stop.stop_point.stop_id;
+					}));
+
 					// scroll to correct position
 					setTimeout(function(){
 						var container = document.querySelector("#arrivals");
 						var nextStop = document.querySelectorAll("#arrivals md-list-item")[$scope.nextStopIndex];
 
-						container.scrollTop = nextStop.offsetTop - container.clientHeight /2;
-					});
+						$("#arrivals").animate({
+							scrollTop: nextStop.offsetTop - container.clientHeight /3
+						});
+					}, 500);
 					console.log("Next stop index: %d", $scope.nextStopIndex);
 				});
 			}
