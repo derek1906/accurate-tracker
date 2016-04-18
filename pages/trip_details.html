@@ -47,10 +47,8 @@
 </div>
 <md-content flex class="main-content" layout="column">
     <div class="page-header" flex="none" ng-show="arrival_times.length">
-        <h1 class="page-title">So Accurate!</h1>
-        <span class="page-subtitle">
-            We got them bus times and locations down to a science.
-        </span>
+        <h1 class="page-title">{{ "default-title" | msg:"trip-details" }}</h1>
+        <span class="page-subtitle">{{ "default-subtitle" | msg:"trip-details" }}</span>
     </div>
     <div class="page-header" flex="none" ng-show="!arrival_times.length">
         <h1 class="page-title">Not In Service.</h1>
