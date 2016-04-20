@@ -6,7 +6,7 @@ function messages(tracker){
 				standard: "Welcome."
 			},
 			"default-subtitle": {
-				funny: ["These are the closest bus stops I could find.", "Do you know how long it took me to find these damn stops for you?", "Found some damn close bus stops. They on yo ass."],
+				funny: ["These are the closest bus stops I could fucking find.", "Do you know how long it took me to find these damn stops for you?", "Found some damn close bus stops. They on yo ass."],
 				standard: "Nearby bus stops will be listed below from closest to furthest."
 			}
 		},
