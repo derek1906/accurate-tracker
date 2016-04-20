@@ -24,8 +24,8 @@ button._md-no-style {
   background-color: inherit;
   text-align: left;
   border: none;
-  padding: 0px;
-  margin: 0px; }
+  padding: 0;
+  margin: 0; }
 
 select,
 button,
@@ -2472,7 +2472,7 @@ md-list-item {
       -webkit-justify-content: flex-start;
           -ms-flex-pack: start;
               justify-content: flex-start;
-      padding: 0px;
+      padding: 0 16px;
       margin: 0;
       background-color: initial;
       font-weight: 400;
@@ -2551,7 +2551,6 @@ md-list-item {
         -ms-flex-align: center;
             align-items: center;
     min-height: 48px;
-    margin-left: -5px;
     height: auto; }
     md-list-item > div.md-primary > md-icon:not(.md-avatar-icon),
     md-list-item > div.md-secondary > md-icon:not(.md-avatar-icon),
