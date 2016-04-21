@@ -36,8 +36,8 @@
 </div>
 <md-content flex class="main-content" layout="column">
     <div class="page-header" flex="none" ng-if="!searchResults.length && searchTerm.length && !isSearching">
-        <h1 class="page-title">Well shit...</h1>
-        <span class="page-subtitle">Sorry, we couldn't find a single thing.</span>
+        <h1 class="page-title" msg="search-fail-title" msg-page-id="error"></h1>
+        <span class="page-subtitle" msg="search-fail-subtitle" msg-page-id="error"</span>
     </div>
     <md-list class="page-scrollable-content">
         <md-list-item class="nearbyStop-info" ng-repeat="stop in searchResults track by $index"

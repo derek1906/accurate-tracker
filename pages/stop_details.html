@@ -33,11 +33,8 @@
         <span class="page-subtitle" msg="default-subtitle"</span>
     </div>
     <div class="page-header" flex="none" ng-show="!departures.length && !isSearching && !stopNotExists">
-        <h1 class="page-title">You are doomed.</h1>
-        <span class="page-subtitle">
-            Nothing is coming to {{stop.stop_name}}.<br>
-            Or the bus is going to say NIS. Either one.
-        </span>
+        <h1 class="page-title" msg="empty-bus-arrival-title"></h1>
+        <span class="page-subtitle" msg="empty-bus-arrival-subtitle"></span>
     </div>
     <div class="page-header" flex="none" ng-show="stopNotExists">
         <h1 class="page-title">Dafuq?</h1>
