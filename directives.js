@@ -43,24 +43,33 @@ function directives(tracker){
 
 	// Favorite button directive
 	.directive("favButton", function(storage){
-		// cache list to avoid repeated parsing
+		// cache list to avoid repeated parsing and maintain consistency
 		var favoritesListCache = storage.get("favorites");
 
 		return {
 			restrict: "E",
 			scope: true,
-			template: '<md-button class="md-icon-button" ng-click="toggleFavorite()" aria-label="Toggle favorite">\
-							<md-tooltip md-direction="left" md-delay="1000">{{tooltipMessage}}</md-tooltip>\
-							<md-icon ng-show="favorited" md-svg-src="icons/heart.svg"></md-icon>\
-							<md-icon ng-show="!favorited" md-svg-src="icons/emptyheart.svg"></md-icon>\
-						</md-button>',
+			template:	'<md-button class="md-icon-button" ng-click="toggleFavorite()" aria-label="Toggle favorite">\
+			         		<md-tooltip md-direction="left" md-delay="1000">{{tooltipMessage}}</md-tooltip>\
+			         		<md-icon ng-show="favorited" md-svg-src="icons/heart.svg"></md-icon>\
+			         		<md-icon ng-show="!favorited" md-svg-src="icons/emptyheart.svg"></md-icon>\
+			         	</md-button>',
 			link: function(scope, element, attr){
-				var stopId = attr.stopId;
 
-				scope.favorited = favoritesListCache.indexOf(stopId) > -1;
-				setTooltipMessage();
+				// watch for changes
+				attr.$observe("stopId", function(){
+					var stopId = scope.$eval(attr.stopId);
 
-				scope.toggleFavorite = function(){
+					scope.favorited = favoritesListCache.indexOf(stopId) > -1;
+					setTooltipMessage();
+
+					scope.toggleFavorite = function(){
+						toggleFavorite(stopId);
+					};
+				});
+
+				// toggle favorite
+				function toggleFavorite(stopId){
 					if(scope.favorited){
 						// remove from favorite
 						favoritesListCache.splice(favoritesListCache.indexOf(stopId), 1);
@@ -71,17 +80,17 @@ function directives(tracker){
 
 					// update storage
 					storage.set("favorites", favoritesListCache);
-					console.log(favoritesListCache)
 
 					// update state
 					scope.favorited = !scope.favorited;
 					setTooltipMessage();
-				};
+				}
 
+				// update tooltip message
 				function setTooltipMessage(){
 					scope.tooltipMessage = scope.favorited ? "cancel favorite" : "set favorite";
-				};
+				}
 			}
-		}
+		};
 	})
 }

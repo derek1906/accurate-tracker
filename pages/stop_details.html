@@ -19,6 +19,7 @@
 </style>
 
 <div class="headbar" layout="row" layout-align="start center" flex="none">
+    <fav-button stop-id="stop.stop_id"></fav-button>
     <h2>
         <span>{{stop.stop_name}}</span>
     </h2>
@@ -45,7 +46,7 @@
     </div>
 
     <md-list class="page-scrollable-content departures">
-        <md-list-item ng-repeat="departure in departures track by departure.trip.trip_id" ng-click="goToTrip(departure.vehicle_id)">
+        <md-list-item ng-repeat="departure in departures" ng-click="goToTrip(departure.vehicle_id)">
             <div class="departure-info" layout="column" layout-align="center start">
                 <span class="headsign" layout="row" layout-align="start center">
                     {{departure.headsign}}

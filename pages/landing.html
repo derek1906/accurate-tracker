@@ -32,7 +32,7 @@
     <md-list class="page-scrollable-content">
         <md-list-item class="nearbyStop-info" ng-repeat="stop in nearbyStops track by stop.stop_id"
                 ng-click="goToStop(stop)" ng-mouseover="highlightStop(stop)" ng-mouseout="dehighlightStop(stop)">
-            <fav-button stop-id="{{stop.stop_id}}" class="md-primary"></fav-button>
+            <fav-button stop-id="stop.stop_id" class="md-primary"></fav-button>
             <span>{{stop.stop_name}}</span>
         </md-list-item>
     </md-list>
