@@ -1,6 +1,6 @@
 function messages(tracker){
 	var messages = {
-		"landing": {
+		"Landing": {
 			"default-title": {
 				funny: ["Near as fuck.", "Damn.", "They be close."],
 				standard: "Welcome."
@@ -10,7 +10,7 @@ function messages(tracker){
 				standard: "Nearby bus stops will be listed below from closest to furthest."
 			}
 		},
-		"stop-details": {
+		"StopDetails": {
 			"default-title": {
 				funny: ["Don't miss it.", "Which one?", "I’m. Starving."],
 				standard: "Choose a bus."
@@ -20,7 +20,7 @@ function messages(tracker){
 				standard: "Buses of this bus stop will be listed below."
 			}
 		},
-		"trip-details": {
+		"TripDetails": {
 			"default-title": {
 				funny: ["So Accurate!", "Hey ladies~", "Check it out!"],
 				standard: "Arrival times."
@@ -31,22 +31,30 @@ function messages(tracker){
 			}
 		}
 	};
+	
 
-	tracker
-	.filter("msg", function(storage, random){
+	tracker.directive("msg", function(storage, random){
 		var useStandard = storage.get("standard_messages");
 
-		return function(message_id, page_id){
-
+		function lookup(page_id, message_id){
+			console.log(page_id, message_id)
 			var page = messages[page_id];
 			if(!page)	return "[Message Error]";
 
 			var message = page[message_id];
 			if(!message)	return "[Message Error]";
 
-			console.log(random())
-
 			return useStandard ? message.standard : message.funny[random()*message.funny.length |0];
+		}
+
+		return {
+			restrict: "A",
+			link: function(scope, element, attr){
+				var message_id = attr.msg;
+				var page_id = element.controller().constructor.name;
+
+				element.text(lookup(page_id, message_id));
+			}
 		};
-	})
+	});
 }

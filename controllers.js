@@ -1,6 +1,6 @@
 function controllers(tracker){
 	tracker
-	.controller("Overall", function($scope, $mdSidenav, $mdToast, $location, uiGmapIsReady, 
+	.controller("Overall", function Overall($scope, $mdSidenav, $mdToast, $location, uiGmapIsReady, 
 									map, btn, getStopDetails, icons, TripManager, storage){
 		// Navigation button
 		$scope.atLanding = true;
@@ -262,7 +262,7 @@ function controllers(tracker){
 		};
 	})
 
-	.controller("overmapButtons", function($scope){
+	.controller("overmapButtons", function OvermapButtons($scope){
 		$scope.buttons = [];
 
 		$scope.$on("overmapButtons", function(e, obj){
@@ -280,7 +280,7 @@ function controllers(tracker){
 		});
 	})
 
-	.controller("Landing", function($scope, $location, $mdToast, getNearbyStops, loadStopsDetails, geolocation, map, btn){
+	.controller("Landing", function Landing($scope, $location, $mdToast, getNearbyStops, loadStopsDetails, geolocation, map, btn){
 		$scope.nearbyStops = [];
 
 		loadStopsDetails();
@@ -315,7 +315,7 @@ function controllers(tracker){
 			$location.path("/search");
 		};
 	})
-	.controller("Search", function($scope, $location, geolocation, loadStopsDetails, getAutocomplete, map){
+	.controller("Search", function Search($scope, $location, geolocation, loadStopsDetails, getAutocomplete, map){
 		// focus input
 		setTimeout(function(){
 			document.getElementById("search-input").focus();
@@ -356,7 +356,7 @@ function controllers(tracker){
 			}
 		};
 	})
-	.controller("StopDetails", function($scope, $routeParams, $interval, $mdToast,
+	.controller("StopDetails", function StopDetails($scope, $routeParams, $interval, $mdToast,
 										loadStopsDetails, getStopDetails, getUpcomingBuses, map, DEPARTURE_UPDATE_INTERVAL){
 		var stop_id = $scope.stop_id = $routeParams.id;
 		var refreshInterval = undefined;
@@ -399,7 +399,7 @@ function controllers(tracker){
 				});
 		};
 	})
-	.controller("TripDetails", function($scope, $routeParams, $q, 
+	.controller("TripDetails", function TripDetails($scope, $routeParams, $q, 
 										loadStopsDetails, geolocation, TripManager, getData, getShapeAndStops, map, btn){
 		var vehicle_id = $routeParams.id;
 		var arrival_times = [];
