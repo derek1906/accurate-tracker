@@ -16,7 +16,7 @@
 		},
 		"default-subtitle": {
 			"funny": ["You gon miss it if you don’t use the damn timer.", "Bruh... we don’t have all fucking day here.", "Need. Food. Insert. Pizza."],
-			"standard": "Buses of this bus stop will be listed below."
+			"standard": "Buses of this bus stop is listed below."
 		},
 		"empty-bus-arrival-title": {
 			"funny": ["It's too late...", "You're screwed.", "Here's a poem:"],
@@ -64,8 +64,24 @@
 		"search-fail-subtitle": {
 			"funny": ["Sorry, we couldn’t find a damn thing.", "Ain’t nothing showing up on our radar.", "I don’t think what you’re typing there is a bus stop."],
 			"standard": "There are no results for your search."
+		},
+		"page-missing-title": {
+			"funny": ["Dafuq?", "Nope.", "Cats."],
+			"standard": "Page missing."
+		},
+		"page-missing-subtitle": {
+			"funny": ["This shit doesn’t fucking exist.", "Nopenopenopenopenopenopenopenopenope.", "Seems like you’ve found our cat gif but not a page."],
+			"standard": "Page not found."
 		}
-
-		
+	},
+	"special": {
+		"loading-title": {
+			"funny": ["Wooweeee."],
+			"standard": "Loading..."
+		},
+		"loading-subtitle": {
+			"funny": ["The content is, loading, so please be fucking patient."],
+			"standard": "Content will show up shortly."
+		}
 	}
 }

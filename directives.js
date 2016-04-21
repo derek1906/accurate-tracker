@@ -61,7 +61,7 @@ function directives(tracker){
 					var stopId = scope.$eval(attr.stopId);
 
 					scope.favorited = favoritesListCache.indexOf(stopId) > -1;
-					setTooltipMessage();
+					setState();
 
 					scope.toggleFavorite = function(){
 						toggleFavorite(stopId);
@@ -83,11 +83,12 @@ function directives(tracker){
 
 					// update state
 					scope.favorited = !scope.favorited;
-					setTooltipMessage();
+					setState();
 				}
 
 				// update tooltip message
-				function setTooltipMessage(){
+				function setState(){
+					element[["addClass", "removeClass"][+scope.favorited]]("not-fav");
 					scope.tooltipMessage = scope.favorited ? "cancel favorite" : "set favorite";
 				}
 			}
