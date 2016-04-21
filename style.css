@@ -193,6 +193,7 @@ body{
 .page-subtitle{
     font-size: 20px;
     line-height: 28px;
+    white-space: normal;
 }
 .page-header{
     margin-bottom: 30px;
