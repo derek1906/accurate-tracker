@@ -87,7 +87,7 @@ function controllers(tracker){
 		});
 
 		$scope.$on("mapLoaded", function(e){
-			console.log("Map loaded.");
+			console.log("[Map]", "Map loaded.");
 			$scope.mapMeta.loaded = true;
 			
 			var queue = $scope.mapMeta.actionQueue;
@@ -291,30 +291,31 @@ function controllers(tracker){
 	.controller("Landing", function Landing($scope, $location, $mdToast, getNearbyStops, loadStopsDetails, geolocation, map, btn){
 		$scope.nearbyStops = [];
 
-		loadStopsDetails();
+		loadStopsDetails().then(function(){
 
-		map("setTargetLocation", undefined);
+			map("setTargetLocation", undefined);
 
-		// Get nearby stops by user's geolocation
-		getNearbyStops(20).then(function(stops){
-			$scope.nearbyStops = stops;
+			// Get nearby stops by user's geolocation
+			getNearbyStops(20).then(function(stops){
+				$scope.nearbyStops = stops;
 
-			map("displayPoints", stops.map(function(stop){
-				return stop.stop_id;
-			}));
-		});
+				map("displayPoints", stops.map(function(stop){
+					return stop.stop_id;
+				}));
+			});
 
-		geolocation().then(function(latlon){
-			latlon.pan = true;
-			map("setSelfLocation", latlon);
+			geolocation().then(function(latlon){
+				latlon.pan = true;
+				map("setSelfLocation", latlon);
 
-			btn("set", [{
-				text: "Center yourself",
-				onDisplay: false,
-				click: function(){
-					map("setSelfLocation", latlon);
-				}
-			}]);
+				btn("set", [{
+					text: "Center yourself",
+					onDisplay: false,
+					click: function(){
+						map("setSelfLocation", latlon);
+					}
+				}]);
+			});
 		});
 
 

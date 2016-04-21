@@ -110,20 +110,37 @@ function services(tracker){
 
 	// Load stops database - Fetch from web if data is outdated or missing
 	.service("loadStopsDetails", function(DATA_STORAGE_KEY, $q, stop_details, storage, getData){
-		return function(){
-			var deferred = $q.defer();
+		var deferred;
 
-			if(storage.exists(DATA_STORAGE_KEY)){
-				if(!stop_details.loaded){
-					stop_details.stops = storage.get(DATA_STORAGE_KEY).stops;
-					stop_details.loaded = true;
-				}
-				deferred.resolve();
+		return function(){
+			// if it is already in progress
+			if(deferred){
+				return deferred.promise;
 			}
-			if(!storage.exists(DATA_STORAGE_KEY) || storage.get(DATA_STORAGE_KEY).last_updated - Date.now() > 7*24*60*60*1000){
-				console.log("[loadStopsDetails]", "Updating database.");
-				getData("GetStops").then(
-					function(res){
+
+			deferred = $q.defer();
+
+			// Database already loaded
+			if(stop_details.loaded){
+				deferred.resolve();
+			}else{
+			
+				// Database not loaded
+				console.log("[loadStopsDetails]", "Checking for changes in database...");
+				getData("GetStops", storage.exists(DATA_STORAGE_KEY) ? {
+					changeset_id: storage.get(DATA_STORAGE_KEY).changeset_id
+				}: undefined).then(function(res){
+
+					if(!res.new_changeset){
+						// no change
+						stop_details.stops = storage.get(DATA_STORAGE_KEY).stops;
+						stop_details.loaded = true;
+						deferred.resolve();
+
+						console.log("[loadStopsDetails]", "Database not changed.");
+					}else{
+						// update
+
 						var stops = {};
 						res.stops.forEach(function(stop){
 							stops[stop.stop_id] = stop;
@@ -140,17 +157,20 @@ function services(tracker){
 						});
 						storage.set(DATA_STORAGE_KEY, {
 							stops: stops,
-							last_updated: Date.now()
+							changeset_id: res.changeset_id
 						});
 
 						stop_details.stops = stops;
 						stop_details.loaded = true;
 
 						deferred.resolve("updated");
-					}, function(){
-						console.error("Cannot update");
-						deferred.reject();
-					});
+						console.log("[loadStopsDetails]", "Database updated.");
+					}
+
+				}, function(){
+					console.error("[loadStopsDetails]", "Cannot update");
+					deferred.reject();
+				});
 			}
 
 			return deferred.promise;
