@@ -17,6 +17,13 @@
 		"default-subtitle": {
 			"funny": ["You gon miss it if you don’t use the damn timer.", "Bruh... we don’t have all fucking day here.", "Need. Food. Insert. Pizza."],
 			"standard": "Buses of this bus stop will be listed below."
+		},
+		"empty-bus-arrival-title": {
+			"funny": ["It's too late...", "You're screwed.", "Here's a poem:"],
+			"standard": "Sorry."
+		},
+		"empty-bus-arrival-subtitle": {
+			"funny": ["To catch a bus~ It’s tooo laaaate~ Call SafeRides instead: 217-265-7433", "Bettah find a damn bench... or call SafeRides instead: 217-265-7433", "Roses are red. Violets are blue. Call SafeRides at 217-265-7433. Cuz no buses are due."]
 		}
 	},
 	"TripDetails": {
@@ -28,5 +35,36 @@
 			"funny": ["We got dem bus times & locations down to a science.", "Your bus isn’t the only thing that’s about to arrive ;)", "Bottom right to check out the fucking bus routes"],
 			"standard": "And the bus route if you click the button on the bottom right."
 		}
+	},
+	"Favorites": {
+		"default-title": {
+			"funny": ["Aw yeee!", "I swear!", "It burns!"],
+			"standard": "Fill'm up."
+		},
+		"default-subtitle": {
+			"funny": ["These bus stops look really nice."]
+		}
+	},
+	"Timer": {
+		"title": {
+			"funny": ["Setting a fucking timer,"],
+			"standard":	"Set a timer,"
+		},
+		"subtitle": {
+			"funny": ["so you won't miss dat bus."],
+			"standard": "so you don't miss your bus."
+		}
+	},
+	"error": {
+		"search-fail-title": {
+			"funny": ["Well shit...", "Sorry fam.", "Yo..."],
+			"standard": "Apologies."
+		},
+		"search-fail-subtitle": {
+			"funny": ["Sorry, we couldn’t find a damn thing.", "Ain’t nothing showing up on our radar.", "I don’t think what you’re typing there is a bus stop."],
+			"standard": "There are no results for your search."
+		}
+
+		
 	}
 }
