@@ -8,6 +8,7 @@ function messages(tracker){
 		var messagePromise = $http.get("i18n/en.json");
 
 		function lookup(messages, page_id, message_id){
+			console.log(page_id, message_id)
 			var page = messages[page_id];
 			if(!page)	return MESSAGE_ERROR_TEXT;
 
@@ -24,6 +25,10 @@ function messages(tracker){
 			link: function(scope, element, attr){
 				var message_id = attr.msg;
 				var page_id = element.controller().constructor.name;
+
+				if(attr.msgPageId){
+					page_id = attr.msgPageId;
+				}
 
 				messagePromise.then(function(messages){
 					scope.message = lookup(messages.data, page_id, message_id);
