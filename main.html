@@ -20,7 +20,8 @@
         <script src="./services.js"></script>
         <script src="./controllers.js"></script>
         <script src="./filters.js"></script>
-        <script src="./messages.js"></script>
+        <script src="./directives.js"></script>
+        <script src="./initStorage.js"></script>
         <script>
             // Create module "tracker"
             var tracker = angular.module("tracker", ["ngMaterial", "ngRoute", "uiGmapgoogle-maps"]);
@@ -28,7 +29,11 @@
             services(tracker);
             controllers(tracker);
             filters(tracker);
-            messages(tracker);
+            directives(tracker);
+            initStorage(tracker, [
+                ["standard_messages", true],
+                ["favorites", []]
+            ]);
 
             tracker
                 .value("stop_details", {stops:{}, loaded: false})
@@ -52,6 +57,10 @@
                             templateUrl: "pages/trip_details.html",
                             controller: "TripDetails"
                         })
+                        .when("/favorites", {
+                            templateUrl: "pages/favorites.html",
+                            controller: "Favorites"
+                        })
                         .otherwise({
                             redirectTo: "/"
                         });
@@ -59,11 +68,6 @@
                     $mdThemingProvider.theme('docs-dark', 'default')
                         .primaryPalette("grey")
                         .dark();
-                })
-                .run(function(storage){
-                    if(!storage.exists("standard_messages")){
-                        storage.set("standard_messages", false);
-                    }
                 });
         </script>
     </head>
@@ -92,7 +96,7 @@
                     </md-button>
                 </div>
                 <div layout="column" id="menu-more">
-                    <md-button class="md-icon-button" aria-label="Favorites">
+                    <md-button class="md-icon-button" aria-label="Favorites" ng-click="goToFavorites()">
                         <md-tooltip md-direction="right">Favorites</md-tooltip>
                         <md-icon md-svg-src="icons/heart.svg"></md-icon>
                     </md-button>

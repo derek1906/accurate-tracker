@@ -19,6 +19,9 @@ function controllers(tracker){
 
 			// Reset buttons
 			btn("reset");
+
+			// Reset menu
+			$scope.menuClosed = true;
 	    });
 
 	    // Map information
@@ -39,7 +42,15 @@ function controllers(tracker){
 			selfLocationOptions: {
 				opacity: 0.6
 			},
-			selfLocationEvents: {},
+			selfLocationEvents: {
+				// temp hack
+				mouseover: function(){
+					$scope.mapMeta.selfLocationOptions.opacity = 1;
+				},
+				mouseout: function(){
+					$scope.mapMeta.selfLocationOptions.opacity = 0.6;
+				}
+			},
 			targetLocation: undefined,
 			targetLocationOptions: {
 				opacity: 1
@@ -117,10 +128,8 @@ function controllers(tracker){
 					if(data){
 						if(data.pan)	map("moveTo", data);
 					}
-					$scope.mapMeta.selfLocationEvents = {
-						click: function(){
-							map("moveTo", data);
-						}
+					$scope.mapMeta.selfLocationEvents.click = function(){
+						map("moveTo", data);
 					};
 					break;
 
@@ -219,10 +228,6 @@ function controllers(tracker){
 	    $scope.navBack = function(){
 			history.back();
 	    };
-		$scope.toggleFavorite = function(id){
-			var toast = $mdToast.simple().textContent("Not implemented").position("top right");
-			$mdToast.show(toast);
-		};
 
 		// overlay control
 		$scope.setOverlay = function(name){
@@ -243,6 +248,9 @@ function controllers(tracker){
 		};
 
 		// general
+		$scope.goToFavorites = function(){
+			$location.path("/favorites");
+		};
 		$scope.goToStop = function(stop){
 			$location.path("/stop/" + stop.stop_id);
 
@@ -356,6 +364,18 @@ function controllers(tracker){
 			}
 		};
 	})
+
+	.controller("Favorites", function Favorites($scope, loadStopsDetails, storage, getStopDetails, map){
+		loadStopsDetails().then(function(){
+
+			$scope.stops = storage.get("favorites").map(function(stop_id){
+				return getStopDetails(stop_id);
+			});
+
+			map("reset");
+		});
+	})
+
 	.controller("StopDetails", function StopDetails($scope, $routeParams, $interval, $mdToast,
 										loadStopsDetails, getStopDetails, getUpcomingBuses, map, DEPARTURE_UPDATE_INTERVAL){
 		var stop_id = $scope.stop_id = $routeParams.id;

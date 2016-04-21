@@ -15,22 +15,6 @@
         margin-bottom: 23px;
         font-size: 28px;
     }
-    .nearbyStop-info a{
-        color: white !important;
-        text-decoration: none !important;
-    }
-    .favorite-button{
-        padding: 0;
-    }
-    .favorite-button md-icon{
-        color: white;
-    }
-
-    .nearbyStop-info > *{
-        vertical-align: center !important;
-        display: inline-block;
-    }
-
 </style>
 
 <div class="headbar" layout="row" layout-align="start center" flex="none">
@@ -48,10 +32,7 @@
     <md-list class="page-scrollable-content">
         <md-list-item class="nearbyStop-info" ng-repeat="stop in nearbyStops track by stop.stop_id"
                 ng-click="goToStop(stop)" ng-mouseover="highlightStop(stop)" ng-mouseout="dehighlightStop(stop)">
-            <md-button class="md-icon-button" ng-click="toggleFavorite(stop.stop_id)" aria-label="Toggle favorite">
-                <md-tooltip md-direction="left" md-delay="1000">favorite</md-tooltip>
-                <md-icon class="md-primary" md-svg-src="icons/emptyheart.svg"></md-icon>
-            </md-button>
+            <fav-button stop-id="{{stop.stop_id}}" class="md-primary"></fav-button>
             <span>{{stop.stop_name}}</span>
         </md-list-item>
     </md-list>
