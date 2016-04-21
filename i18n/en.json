@@ -42,7 +42,8 @@
 			"standard": "Fill'm up."
 		},
 		"default-subtitle": {
-			"funny": ["These bus stops look really nice."]
+			"funny": ["These are some sweet ass stops you’ve saved up", "If you fill this page up, you be getting a free burrito (no promises)", "Why? Cuz these saves are fire!"],
+			"standard": "These bus stops look really nice."
 		}
 	},
 	"Timer": {
