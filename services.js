@@ -183,7 +183,7 @@ function services(tracker){
 
 		return function(method, data){
 			var deferred = $q.defer();
-			console.log("[getData]", method, data);
+			console.log("[getData]", method, angular.copy(data));
 
 			if(data === undefined)	data = {};
 			data.key = key;
