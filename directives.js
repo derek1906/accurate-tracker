@@ -2,7 +2,7 @@ function directives(tracker){
 	tracker
 
 	// Message directive
-	.directive("msg", function(storage, random, $http){
+	.directive("msg", function(storage, random, $http, $compile){
 		var useStandard = storage.get("standard_messages");
 		var MESSAGE_ERROR_TEXT = "[Message Error]";
 
@@ -21,8 +21,6 @@ function directives(tracker){
 
 		return {
 			restrict: "A",
-			template: "{{message}}",
-			scope: true,
 			link: function(scope, element, attr){
 				var message_id = attr.msg;
 				var page_id = element.controller().constructor.name;
@@ -32,9 +30,12 @@ function directives(tracker){
 				}
 
 				messagePromise.then(function(messages){
-					scope.message = lookup(messages.data, page_id, message_id);
+					element.html(lookup(messages.data, page_id, message_id));
+
+					// compile html string
+					$compile(element.contents())(scope);
 				}, function(){
-					scope.message = MESSAGE_ERROR_TEXT;
+					element.html(MESSAGE_ERROR_TEXT);
 				});
 			}
 		};
@@ -50,22 +51,30 @@ function directives(tracker){
 			restrict: "E",
 			scope: true,
 			template:	'<md-button class="md-icon-button" ng-click="toggleFavorite()" aria-label="Toggle favorite">\
-			         		<md-tooltip md-direction="left" md-delay="1000">{{tooltipMessage}}</md-tooltip>\
 			         		<md-icon ng-show="favorited" md-svg-src="icons/heart.svg"></md-icon>\
 			         		<md-icon ng-show="!favorited" md-svg-src="icons/emptyheart.svg"></md-icon>\
 			         	</md-button>',
 			link: function(scope, element, attr){
 
-				// watch for changes
+				var currentListener = function(){};
+
+				// watch for changes on attribute
 				attr.$observe("stopId", function(){
-					var stopId = scope.$eval(attr.stopId);
+					if(attr.stopId){
+						// cancel watch
+						currentListener();
+						// watch for changes on expression
+						currentListener = scope.$watch(attr.stopId, function(){
+							var stopId = scope.$eval(attr.stopId);
 
-					scope.favorited = favoritesListCache.indexOf(stopId) > -1;
-					setState();
+							scope.favorited = favoritesListCache.indexOf(stopId) > -1;
+							setState();
 
-					scope.toggleFavorite = function(){
-						toggleFavorite(stopId);
-					};
+							scope.toggleFavorite = function(){
+								toggleFavorite(stopId);
+							};
+						});
+					}
 				});
 
 				// toggle favorite
