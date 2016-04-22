@@ -1,6 +1,6 @@
 function controllers(tracker){
 	tracker
-	.controller("Overall", function Overall($scope, $mdSidenav, $mdToast, $location, uiGmapIsReady, 
+	.controller("Overall", function Overall($scope, $mdToast, $location, uiGmapIsReady, 
 									map, btn, getStopDetails, icons, TripManager, storage){
 		// Navigation button
 		$scope.atLanding = true;
