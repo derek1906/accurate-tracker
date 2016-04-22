@@ -35,6 +35,9 @@ body{
 .md-button:not([disabled]):hover {
     background-color: rgba(158, 158, 158, 0.3);
 }
+md-list.no-margin md-list-item > .md-button{
+    padding: 0 !important;
+}
 
 
 /* Standard height for toolbar level */
@@ -115,10 +118,10 @@ body{
 
 /* Overlays */
 #splash{
-    background: white;
+    background: rgba(0, 0, 0, 0.6);
 }
 #splash *{
-    color: black;
+    color: white;
 }
 #about{
     padding: 10px;
