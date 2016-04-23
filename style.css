@@ -29,6 +29,11 @@ body{
     border: 2px solid transparent;
     background-clip: padding-box;
 }
+::selection {
+    color: white; 
+    background: rgba(0, 0, 0, 0.5);
+    text-shadow: none;
+}
 
 
 /* Overrides */
