@@ -177,18 +177,50 @@ md-list.no-margin md-list-item > .md-button{
     -moz-transform-origin: 50% 50%;
     transform-origin: 50% 50%;
 }
-#menu-more{
-    margin-left: 0%;
-    -webkit-transition: margin-left 0.3s ease;
-    -moz-transition: margin-left 0.3s ease;
-    transition: margin-left 0.3s ease;
-}
 #menu.closed #menu-toggle-button svg path{
     -webkit-transform: rotate(0deg);
     -moz-transform: rotate(0deg);
     transform: rotate(0deg);
 }
-#menu.closed #menu-more{
+
+/* Menu animation */
+#menu-more > .md-button{
+    margin-left: 0%;
+    -webkit-transition: margin-left 0.3s ease;
+    -moz-transition: margin-left 0.3s ease;
+    transition: margin-left 0.3s ease;
+}
+#menu-more > .md-button:nth-child(1){
+    -webkit-transition-delay: 0s;
+    -moz-transition-delay: 0s;
+    transition-delay: 0s;
+}
+#menu-more > .md-button:nth-child(2){
+    -webkit-transition-delay: 0.05s;
+    -moz-transition-delay: 0.05s;
+    transition-delay: 0.05s;
+}
+#menu-more > .md-button:nth-child(3){
+    -webkit-transition-delay: 0.1s;
+    -moz-transition-delay: 0.1s;
+    transition-delay: 0.1s;
+}
+#menu.closed #menu-more > .md-button:nth-child(1){
+    -webkit-transition-delay: 0.1s;
+    -moz-transition-delay: 0.1s;
+    transition-delay: 0.1s;
+}
+#menu.closed #menu-more > .md-button:nth-child(2){
+    -webkit-transition-delay: 0.05s;
+    -moz-transition-delay: 0.05s;
+    transition-delay: 0.05s;
+}
+#menu.closed #menu-more > .md-button:nth-child(3){
+    -webkit-transition-delay: 0s;
+    -moz-transition-delay: 0s;
+    transition-delay: 0s;
+}
+#menu.closed #menu-more > .md-button{
     margin-left: -150%;
 }
 
