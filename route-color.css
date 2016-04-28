@@ -26,16 +26,16 @@
 .blue .md-ink-ripple:hover{
     background: rgba(48, 90, 172, 0.2);
 }
-.green{
+.green, .greenhopper{
     border-left-color: #008061;
 }
-.green .md-ink-ripple:hover{
+.green .md-ink-ripple:hover, .greenhopper .md-ink-ripple:hover{
     background: rgba(0, 128, 97, 0.2);
 }
-.orange{
+.orange, .orangehopper{
     border-left-color: #faa003;
 }
-.orange .md-ink-ripple:hover{
+.orange .md-ink-ripple:hover, .orangehopper .md-ink-ripple:hover{
     background: rgba(250, 160, 3, 0.2);
 }
 .grey{
@@ -56,10 +56,10 @@
 .brown .md-ink-ripple:hover{
     background: rgba(104, 48, 29, 0.2);
 }
-.gold{
+.gold, .goldhopper{
     border-left-color: #c9a23b;
 }
-.gold .md-ink-ripple:hover{
+.gold .md-ink-ripple:hover, .goldhopper .md-ink-ripple:hover{
     background: rgba(201, 161, 59, 0.2);
 }
 .ruby{
