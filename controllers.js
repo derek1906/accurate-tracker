@@ -417,6 +417,7 @@ function controllers(tracker){
 					$scope.isSearching = false;
 					$scope.departures = departures;
 
+					console.log(departures);
 				}, function(msg){
 					var toast = $mdToast.simple().textContent("Error: " + msg).position("top right");
 					$mdToast.show(toast);

@@ -41,7 +41,7 @@ body{
     background-color: rgba(158, 158, 158, 0.3);
 }
 md-list.no-margin md-list-item > .md-button{
-    padding: 0 !important;
+    padding-left: 0 !important;
 }
 
 

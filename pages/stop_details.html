@@ -17,7 +17,7 @@
         cursor: help;
     }
 </style>
-
+<link href="route-color.css" rel="stylesheet" />
 <div class="headbar" layout="row" layout-align="start center" flex="none">
     <fav-button stop-id="stop.stop_id"></fav-button>
     <h2>
@@ -46,8 +46,9 @@
     </div>
 
     <md-list class="page-scrollable-content departures no-margin">
-        <md-list-item ng-repeat="departure in departures" ng-click="goToTrip(departure.vehicle_id)">
-            <md-button class="md-icon-button md-primary">
+        <md-list-item class="departure-list-item"
+                ng-repeat="departure in departures" ng-click="goToTrip(departure.vehicle_id)" ng-class="departure.route.route_id | lowercase">
+            <md-button class="md-icon-button md-primary" aria-label="Set timer">
                 <md-icon md-svg-src="icons/timer.svg"></md-icon>
             </md-button>
             <div class="departure-info" layout="column" layout-align="center start">
