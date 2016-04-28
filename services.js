@@ -2,7 +2,7 @@ function services(tracker){
 	tracker
 
 	// Storage service
-	.factory("storage", function(){
+	.factory("storage", function storage(){
 		var methods = {
 			exists: function(key){
 				return localStorage[key] !== undefined;
@@ -25,7 +25,7 @@ function services(tracker){
 	})
 
 	// Geolocation - returns a deferred promise
-	.service("geolocation", function($q){
+	.service("geolocation", function geolocation($q){
 		var ongoingRequest = false;	// This is to deal with bullshit Firefox behavior
 		                           	//  where .getCurrentPosition only fires once
 		                           	//  even when called multiple times
@@ -55,20 +55,20 @@ function services(tracker){
 	})
 
 	// shortcut for broadcasting map events
-	.service("map", function($rootScope){
+	.service("map", function map($rootScope){
 		return function(action, data){
 			$rootScope.$broadcast("map", {action: action, data: data});
 		};
 	})
 
-	.service("btn", function($rootScope){
+	.service("btn", function btn($rootScope){
 		return function(action, data){
 			$rootScope.$broadcast("overmapButtons", {action: action, data: data});
 		}
 	})
 
 	// icons generator
-	.service("icons", function(){
+	.service("icons", function icons(){
 		var icons = {
 			home: {
 				url: "icons/home.png",
@@ -93,7 +93,7 @@ function services(tracker){
 	})
 
 	// random value provider
-	.service("random", function($rootScope){
+	.service("random", function random($rootScope){
 		var randomValue;
 
 		generateRandomValue();
@@ -109,7 +109,7 @@ function services(tracker){
 	})
 
 	// Load stops database - Fetch from web if data is outdated or missing
-	.service("loadStopsDetails", function(DATA_STORAGE_KEY, $q, stop_details, storage, getData){
+	.service("loadStopsDetails", function loadStopsDetails(DATA_STORAGE_KEY, $q, stop_details, storage, getData){
 		var deferred;
 
 		return function(){
@@ -178,7 +178,7 @@ function services(tracker){
 	})
 
 	// Handle communications to the API server
-	.service("getData", function($q, $http){
+	.service("getData", function getData($q, $http){
 		var key = "77b92e5ceef640868adfc924c1735ac3";
 
 		return function(method, data){
@@ -206,7 +206,7 @@ function services(tracker){
 	})
 
 	// Handle communications to the autocomplete API server
-	.service("getAutocomplete", function($q, $http, getStopDetails){
+	.service("getAutocomplete", function getAutocomplete($q, $http, getStopDetails){
 		return function(input){
 			var deferred = $q.defer();
 
@@ -233,7 +233,7 @@ function services(tracker){
 	})
 
 	// Get nearby stops
-	.service("getNearbyStops", function($q, getData, geolocation, getStopDetails){
+	.service("getNearbyStops", function getNearbyStops($q, getData, geolocation, getStopDetails){
 		return function(count){
 			var deferred = $q.defer();
 			var data = {};
@@ -260,7 +260,7 @@ function services(tracker){
 	})
 
 	// Get upcoming buses
-	.service("getUpcomingBuses", function($q, getData){
+	.service("getUpcomingBuses", function getUpcomingBuses($q, getData){
 		return function(id){
 			var deferred = $q.defer();
 
@@ -278,7 +278,7 @@ function services(tracker){
 	})
 
 	// Get stop details from database
-	.service("getStopDetails", function(stop_details){
+	.service("getStopDetails", function getStopDetails(stop_details){
 		return function(stop_id){
 			var parts = stop_id.split(":");
 			if(parts.length == 2){
@@ -293,7 +293,7 @@ function services(tracker){
 
 
 	// Trip manager
-	.factory("TripManager", function($q, getData){
+	.factory("TripManager", function TripManager($q, getData){
 		var trips = {};
 
 		return {
@@ -325,7 +325,7 @@ function services(tracker){
 		};
 	})
 
-	.service("getShapeAndStops", function($q, getData, getStopDetails){
+	.service("getShapeAndStops", function getShapeAndStops($q, getData, getStopDetails){
 		// cache
 		var shapes = {};
 

@@ -1,7 +1,8 @@
 function controllers(tracker){
 	tracker
 	.controller("Overall", function Overall($scope, $mdToast, $location, uiGmapIsReady, 
-									map, btn, getStopDetails, icons, TripManager, storage){
+									map, btn, getStopDetails, icons, TripManager, storage)
+	{
 		// Navigation button
 		$scope.atLanding = true;
 		// Menu
@@ -324,6 +325,7 @@ function controllers(tracker){
 			$location.path("/search");
 		};
 	})
+
 	.controller("Search", function Search($scope, $location, geolocation, loadStopsDetails, getAutocomplete, map){
 		// focus input
 		setTimeout(function(){
@@ -378,7 +380,8 @@ function controllers(tracker){
 	})
 
 	.controller("StopDetails", function StopDetails($scope, $routeParams, $interval, $mdToast,
-										loadStopsDetails, getStopDetails, getUpcomingBuses, map, DEPARTURE_UPDATE_INTERVAL){
+										loadStopsDetails, getStopDetails, getUpcomingBuses, map, DEPARTURE_UPDATE_INTERVAL)
+	{
 		var stop_id = $scope.stop_id = $routeParams.id;
 		var refreshInterval = undefined;
 
@@ -421,7 +424,8 @@ function controllers(tracker){
 		};
 	})
 	.controller("TripDetails", function TripDetails($scope, $routeParams, $q, 
-										loadStopsDetails, geolocation, TripManager, getData, getShapeAndStops, map, btn){
+										loadStopsDetails, geolocation, TripManager, getData, getShapeAndStops, map, btn)
+	{
 		var vehicle_id = $routeParams.id;
 		var arrival_times = [];
 
@@ -508,6 +512,5 @@ function controllers(tracker){
 			console.log("clearPath");
 			map("clearPath");
 		});
-		
 	});
 }

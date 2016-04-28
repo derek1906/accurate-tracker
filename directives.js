@@ -2,7 +2,7 @@ function directives(tracker){
 	tracker
 
 	// Message directive
-	.directive("msg", function(storage, random, $http, $compile){
+	.directive("msg", function msg(storage, random, $http, $compile){
 		var useStandard = storage.get("standard_messages");
 		var MESSAGE_ERROR_TEXT = "[Message Error]";
 
@@ -43,7 +43,7 @@ function directives(tracker){
 
 
 	// Favorite button directive
-	.directive("favButton", function(storage){
+	.directive("favButton", function favButton(storage){
 		// cache list to avoid repeated parsing and maintain consistency
 		var favoritesListCache = storage.get("favorites");
 
