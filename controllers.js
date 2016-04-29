@@ -271,22 +271,25 @@ function controllers(tracker){
 		};
 	})
 
-	.controller("overmapTimers", function OvermapTimers($scope, $mdDialog, $interval, $mdToast, storage, getStopDetails){
+	.controller("overmapTimers", function OvermapTimers($scope, $mdDialog, $interval, $mdToast, storage, uuid, getStopDetails){
 		$scope.timers = storage.get("timers");
 
 		var refreshInterval = $interval(update, 1000);
 
 		function update(){
 			var itemsModified = false;
+			var currentTime = Date.now();
 
 			$scope.timers.forEach(function(timer, i){
-				timer.remainingTime = timer.expectedTime - Date.now();
-				timer.remainingTimeForNotification = timer.targetTime - Date.now();
+				timer.remainingTime = timer.expectedTime - currentTime;
+				timer.remainingTimeForNotification = timer.targetTime - currentTime;
 
+				// remove timer when it is done
 				if(timer.remainingTime <= 0){
 					$scope.timers[i] = undefined;
 					itemsModified = true;
 				}
+
 				// only notifies once
 				if(timer.remainingTimeForNotification <= 0 && !timer.notified){
 					timer.notified = true;
@@ -350,10 +353,12 @@ function controllers(tracker){
 					}).then(function(timerInterval){
 						$scope.timers.push({
 							headsign: data.headsign,
+							vehicle_id: data.vehicle_id,
 							stop: getStopDetails(data.stop_id),
 							expectedTime: expectedTime,
 							targetTime: expectedTime - timerInterval * 60 * 1000,
-							minsBeforeExpected: timerInterval
+							minsBeforeExpected: timerInterval,
+							timer_id: uuid()
 						});
 						storage.set("timers", $scope.timers);
 

@@ -114,12 +114,12 @@
             <div id="content" ng-view layout="column" flex></div>
         </div>
         <div id="overmap-timers" ng-controller="overmapTimers">
-            <div class="overmap-timer" ng-repeat="timer in timers track by $index" layout="column">
+            <div class="overmap-timer" ng-repeat="timer in timers track by timer.timer_id" layout="column" layout-align="center end">
                 <md-tooltip class="multilineTooltip" md-direction="left">
                     Original estimated arrival: {{timer.expectedTime | date:"shortTime"}}<br>
                     Notify {{timer.minsBeforeExpected}} minutes before est. arrival
                 </md-tooltip>
-                <span>{{timer.headsign}}</span>
+                <span>#{{timer.vehicle_id}} {{timer.headsign}}</span>
                 <span>At {{timer.stop.stop_name}}</span>
                 <div class="overmap-timer-interval" layout="row" layout-align="end center">
                     <md-button class="md-icon-button" ng-click="removeTimer($index)" aria-label="Remove timer">
