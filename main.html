@@ -117,7 +117,7 @@
             <div class="overmap-timer" ng-repeat="timer in timers track by $index" layout="column">
                 <md-tooltip class="multilineTooltip" md-direction="left">
                     Original estimated arrival: {{timer.expectedTime | date:"shortTime"}}<br>
-                    Notify {{timer.minsBeforeExpected}} minutes before arrival
+                    Notify {{timer.minsBeforeExpected}} minutes before est. arrival
                 </md-tooltip>
                 <span>{{timer.headsign}}</span>
                 <span>At {{timer.stop.stop_name}}</span>
