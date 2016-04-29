@@ -43,6 +43,9 @@ body{
 md-list.no-margin md-list-item > .md-button{
     padding-left: 0 !important;
 }
+.multilineTooltip ._md-content{
+    height: auto;
+}
 
 
 /* Standard height for toolbar level */
