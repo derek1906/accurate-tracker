@@ -122,7 +122,7 @@
                 <span>{{timer.headsign}}</span>
                 <span>At {{timer.stop.stop_name}}</span>
                 <div class="overmap-timer-interval" layout="row" layout-align="end center">
-                    <md-button class="md-icon-button" ng-click="removeTimer($index)">
+                    <md-button class="md-icon-button" ng-click="removeTimer($index)" aria-label="Remove timer">
                         <md-icon md-svg-src="icons/close.svg"></md-icon>
                     </md-button>
                     <div>{{timer.remainingTime | date:"m:ss"}} <span class="overmap-timer-interval-text">min</span></div>

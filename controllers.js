@@ -312,8 +312,6 @@ function controllers(tracker){
 
 			switch(obj.action){
 				case "prompt":
-					console.log(data)
-
 					var expectedTime = +new Date(data.expected);
 
 					$mdDialog.show({

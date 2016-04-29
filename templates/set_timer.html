@@ -48,11 +48,11 @@
 	    <h3 msg="subtitle" msg-page-id="Timer"></h3>
 	    <div class="timer-interval-selector-container" layout="column" layout-align="center center">
 		    <div class="timer-interval-selector" layout="row" layout-align="center center">
-				<md-button class="timer-interval-inc-dec md-icon-button" ng-click="decrease()" aria-label="Decrease" flex="none">
+				<md-button class="timer-interval-inc-dec md-icon-button" ng-click="decrease()" aria-label="Decrease">
 					<md-icon md-svg-src="icons/minus.svg"></md-icon>
 				</md-button>
 				<ng-pluralize id="timer-interval-text" count="timerInterval" when="{'1': '{} min', 'other': '{} mins'}" flex="60"></ng-pluralize>
-				<md-button class="timer-interval-inc-dec md-icon-button" ng-click="increase()" aria-label="Increase" flex="none">
+				<md-button class="timer-interval-inc-dec md-icon-button" ng-click="increase()" aria-label="Increase">
 					<md-icon md-svg-src="icons/add.svg"></md-icon>
 				</md-button>
 		    </div>
