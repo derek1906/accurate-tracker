@@ -273,6 +273,7 @@ function controllers(tracker){
 
 	.controller("overmapTimers", function OvermapTimers($scope, $mdDialog, $interval, $mdToast, storage, uuid, getStopDetails){
 		$scope.timers = storage.get("timers");
+		$scope.rightClicked = false;
 
 		var lastUpdated = 0;
 		var refreshInterval = $interval(update, 1000);
@@ -318,10 +319,15 @@ function controllers(tracker){
 			if(itemsModified)	storage.set("timers", $scope.timers);
 		}
 
+		$scope.displayRemove = function($event){
+			$scope.rightClicked = !$scope.rightClicked;
+		};
+
 		$scope.removeTimer = function(i){
 			$scope.timers.splice(i, 1);
 			storage.set("timers", $scope.timers);
-		}
+			$scope.rightClicked = false;
+		};
 
 		$scope.$on("overmapTimers", function(e, obj){
 			var data = obj.data;
