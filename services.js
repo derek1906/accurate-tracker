@@ -61,6 +61,12 @@ function services(tracker){
 		};
 	})
 
+	.service("timer", function timer($rootScope){
+		return function(action, data){
+			$rootScope.$broadcast("overmapTimers", {action: action, data: data});
+		}
+	})
+
 	.service("btn", function btn($rootScope){
 		return function(action, data){
 			$rootScope.$broadcast("overmapButtons", {action: action, data: data});

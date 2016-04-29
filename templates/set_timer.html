@@ -1,0 +1,67 @@
+<style>
+	#timer-prompt{
+	    width: 535px;
+	}
+	#timer-prompt md-dialog-content{
+	    padding: 13px;
+	}
+	#timer-prompt h2{
+	    font-size: 36px;
+	    margin: 0;
+	}
+	#timer-prompt h3{
+	    font-size: 20px;
+	    margin: 0;
+	}
+	#timer-interval-text{
+		font-size: 64px;
+		text-align: center;
+	}
+
+	.timer-interval-selector-container{
+		margin: 16px 0;
+	}
+	.timer-interval-selector{
+		width: 100%;
+	}
+
+	.timer-interval-inc-dec.md-icon-button{
+		width: 71px;
+		height: 71px;
+	}
+	.timer-interval-inc-dec.md-icon-button > md-icon{
+		color: #4a4a4a;
+		width: 55px;
+		height: 55px;
+	}
+
+	.timer-interval-set-button{
+		font-size: 36px;
+		height: 45px;
+	}
+
+</style>
+
+<md-dialog aria-label="Setting a fucking timer" id="timer-prompt">
+    <md-dialog-content>
+	    <h2 msg="title" msg-page-id="Timer"></h2>
+	    <h3 msg="subtitle" msg-page-id="Timer"></h3>
+	    <div class="timer-interval-selector-container" layout="column" layout-align="center center">
+		    <div class="timer-interval-selector" layout="row" layout-align="center center">
+				<md-button class="timer-interval-inc-dec md-icon-button" ng-click="decrease()" aria-label="Decrease" flex="none">
+					<md-icon md-svg-src="icons/minus.svg"></md-icon>
+				</md-button>
+				<ng-pluralize id="timer-interval-text" count="timerInterval" when="{'1': '{} min', 'other': '{} mins'}" flex="60"></ng-pluralize>
+				<md-button class="timer-interval-inc-dec md-icon-button" ng-click="increase()" aria-label="Increase" flex="none">
+					<md-icon md-svg-src="icons/add.svg"></md-icon>
+				</md-button>
+		    </div>
+		    <div>before the bus comes</div>
+		</div>
+	    <div layout="row" layout-align="center center">
+	        <md-button class="md-primary timer-interval-set-button" ng-click="setTimer()" aria-label="Set">
+	            Set
+	        </md-button>
+	    </div>
+    </md-dialog-content>
+</md-dialog>

@@ -271,6 +271,104 @@ function controllers(tracker){
 		};
 	})
 
+	.controller("overmapTimers", function OvermapTimers($scope, $mdDialog, $interval, $mdToast, storage, getStopDetails){
+		$scope.timers = storage.get("timers");
+
+		var refreshInterval = $interval(update, 1000);
+
+		function update(){
+			var itemsModified = false;
+
+			$scope.timers.forEach(function(timer, i){
+				timer.remainingTime = timer.expectedTime - Date.now();
+				timer.remainingTimeForNotification = timer.targetTime - Date.now();
+
+				if(timer.remainingTime <= 0){
+					$scope.timers[i] = undefined;
+					itemsModified = true;
+				}
+				// only notifies once
+				if(timer.remainingTimeForNotification <= 0 && !timer.notified){
+					timer.notified = true;
+					itemsModified = true;
+					new Notification(timer.minsBeforeExpected + " mins left", {body: timer.headsign + " @ " + timer.stop.stop_name});
+				}
+
+			});
+
+			$scope.timers = $scope.timers.filter(function(timer){ return !!timer; });
+
+			// Stringify only when items removed
+			if(itemsModified)	storage.set("timers", $scope.timers);
+		}
+
+		$scope.removeTimer = function(i){
+			$scope.timers.splice(i, 1);
+			storage.set("timers", $scope.timers);
+		}
+
+		$scope.$on("overmapTimers", function(e, obj){
+			var data = obj.data;
+
+			switch(obj.action){
+				case "prompt":
+					console.log(data)
+
+					var expectedTime = +new Date(data.expected);
+
+					$mdDialog.show({
+						templateUrl: "templates/set_timer.html",
+						clickOutsideToClose: true,
+						controller: function($scope){
+							$scope.timerInterval = 1;
+
+							$scope.increase = function(){
+								$scope.timerInterval = Math.min($scope.timerInterval + 1, Math.floor((expectedTime - Date.now()) / 1000 / 60));
+							};
+							$scope.decrease = function(){ 
+								$scope.timerInterval = Math.max($scope.timerInterval - 1, 1);
+							};
+							$scope.setTimer = function(){
+								var toast = $mdToast.simple().position("top right")
+								if(!window.Notification){
+									toast.textContent("Your browser does not support notifications.");
+									$mdToast.show(toast);
+								}else if(Notification.permission == "denied"){
+									toast.textContent("You must allow notifications.");
+									$mdToast.show(toast);
+								}else if(Notification.permission == "granted"){
+									$mdDialog.hide($scope.timerInterval);
+								}else{
+									Notification.requestPermission(function(permission){
+										if(permission == "granted"){
+											$mdDialog.hide($scope.timerInterval);
+										}else{
+											toast.textContent("You must allow notifications.");
+										}
+									});
+								}
+							};
+						}
+					}).then(function(timerInterval){
+						$scope.timers.push({
+							headsign: data.headsign,
+							stop: getStopDetails(data.stop_id),
+							expectedTime: expectedTime,
+							targetTime: expectedTime - timerInterval * 60 * 1000,
+							minsBeforeExpected: timerInterval
+						});
+						storage.set("timers", $scope.timers);
+
+						update();
+					});
+			}
+		});
+
+		$scope.$on("$destroy", function(){
+			if(refreshInterval)	$interval.cancel(refreshInterval);
+		});
+	})
+
 	.controller("overmapButtons", function OvermapButtons($scope){
 		$scope.buttons = [];
 
@@ -380,7 +478,7 @@ function controllers(tracker){
 	})
 
 	.controller("StopDetails", function StopDetails($scope, $routeParams, $interval, $mdToast,
-										loadStopsDetails, getStopDetails, getUpcomingBuses, map, DEPARTURE_UPDATE_INTERVAL)
+										loadStopsDetails, getStopDetails, getUpcomingBuses, map, timer, DEPARTURE_UPDATE_INTERVAL)
 	{
 		var stop_id = $scope.stop_id = $routeParams.id;
 		var refreshInterval = undefined;
@@ -416,12 +514,14 @@ function controllers(tracker){
 				.then(function(departures){
 					$scope.isSearching = false;
 					$scope.departures = departures;
-
-					console.log(departures);
 				}, function(msg){
 					var toast = $mdToast.simple().textContent("Error: " + msg).position("top right");
 					$mdToast.show(toast);
 				});
+		};
+
+		$scope.addTimer = function(departure){
+			timer("prompt", departure);
 		};
 	})
 	.controller("TripDetails", function TripDetails($scope, $routeParams, $q, 

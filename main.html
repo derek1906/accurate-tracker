@@ -32,7 +32,8 @@
             directives(tracker);
             initStorage(tracker, [
                 ["standard_messages", true],
-                ["favorites", []]
+                ["favorites", []],
+                ["timers", []]
             ]);
 
             tracker
@@ -111,6 +112,19 @@
                 </div>
             </div>
             <div id="content" ng-view layout="column" flex></div>
+        </div>
+        <div id="overmap-timers" ng-controller="overmapTimers">
+            <div class="overmap-timer" ng-repeat="timer in timers track by $index" layout="column">
+                <span>{{timer.headsign}}</span>
+                <span>At {{timer.stop.stop_name}}</span>
+                <span>Original est. arrival: {{timer.expectedTime | date:"shortTime"}}</span>
+                <div class="overmap-timer-interval" layout="row" layout-align="end center">
+                    <md-button class="md-icon-button" ng-click="removeTimer($index)">
+                        <md-icon md-svg-src="icons/close.svg"></md-icon>
+                    </md-button>
+                    <div>{{timer.remainingTime | date:"m:ss"}} <span class="overmap-timer-interval-text">min</span></div>
+                </div>
+            </div>
         </div>
         <div id="overmap-buttons" ng-controller="overmapButtons">
             <md-button ng-click="button.click()" ng-repeat="button in buttons">{{button.text}}</md-button>
