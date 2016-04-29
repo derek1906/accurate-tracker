@@ -49,12 +49,12 @@
 	},
 	"Timer": {
 		"title": {
-			"funny": ["Setting a fucking timer,"],
+			"funny": ["Setting a fucking timer"],
 			"standard":	"Set a timer,"
 		},
 		"subtitle": {
-			"funny": ["so you won't miss dat bus."],
-			"standard": "so you don't miss your bus."
+			"funny": ["so you can pack up and leave for the bus stop in..."],
+			"standard": "so you can pack up and leave for the bus stop in..."
 		}
 	},
 	"error": {

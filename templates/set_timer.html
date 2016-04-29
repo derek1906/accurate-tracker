@@ -1,6 +1,10 @@
 <style>
+	#timer-prompt *{
+	}
 	#timer-prompt{
 	    width: 535px;
+	    font-weight: bold;
+	    font-family: Roboto;
 	}
 	#timer-prompt md-dialog-content{
 	    padding: 13px;
@@ -16,6 +20,8 @@
 	#timer-interval-text{
 		font-size: 64px;
 		text-align: center;
+		font-family: Montserrat;
+		font-weight: normal;
 	}
 
 	.timer-interval-selector-container{
@@ -30,7 +36,7 @@
 		height: 71px;
 	}
 	.timer-interval-inc-dec.md-icon-button > md-icon{
-		color: #4a4a4a;
+		color: #000000;
 		width: 55px;
 		height: 55px;
 	}
@@ -38,6 +44,12 @@
 	.timer-interval-set-button{
 		font-size: 36px;
 		height: 45px;
+		border: 1px solid black;
+		border-radius: 45px;
+		color: black !important;
+		text-transform: none;
+		font-family: Roboto;
+		font-weight: bold;
 	}
 
 </style>
@@ -56,10 +68,10 @@
 					<md-icon md-svg-src="icons/add.svg"></md-icon>
 				</md-button>
 		    </div>
-		    <div>before the bus comes</div>
+		    <div>...before the bus comes</div>
 		</div>
 	    <div layout="row" layout-align="center center">
-	        <md-button class="md-primary timer-interval-set-button" ng-click="setTimer()" aria-label="Set">
+	        <md-button class="md-primary timer-interval-set-button" ng-click="setTimer()" md-no-ink="true" aria-label="Set" flex="40">
 	            Set
 	        </md-button>
 	    </div>

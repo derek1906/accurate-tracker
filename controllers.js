@@ -274,11 +274,24 @@ function controllers(tracker){
 	.controller("overmapTimers", function OvermapTimers($scope, $mdDialog, $interval, $mdToast, storage, uuid, getStopDetails){
 		$scope.timers = storage.get("timers");
 
+		var lastUpdated = 0;
 		var refreshInterval = $interval(update, 1000);
 
-		function update(){
+		// listen to storage change
+		window.addEventListener("storage", function(e){
+			// another instance has already updated the list
+			if(e.key == "timers"){
+				lastUpdated = Date.now();
+				$scope.timers = storage.get("timers");	// update internal memory
+			}
+		});
+
+		function update(forceUpdate){
 			var itemsModified = false;
 			var currentTime = Date.now();
+
+			// do nothing if another instance has already updated the information
+			if(!forceUpdate && lastUpdated - currentTime < 1000*60)	return;
 
 			$scope.timers.forEach(function(timer, i){
 				timer.remainingTime = timer.expectedTime - currentTime;
@@ -362,7 +375,7 @@ function controllers(tracker){
 						});
 						storage.set("timers", $scope.timers);
 
-						update();
+						update(true);
 					});
 			}
 		});
