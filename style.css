@@ -244,10 +244,12 @@ md-list.no-margin md-list-item > .md-button{
 
 /* Menu animation */
 #menu-more > .md-button{
-    margin-left: 0%;
-    -webkit-transition: margin-left 0.3s ease;
-    -moz-transition: margin-left 0.3s ease;
-    transition: margin-left 0.3s ease;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    -wekit-transform: translateX(0%);
+    -moz-transform: translateX(0%);
+    transform: translateX(0%);
 }
 #menu-more > .md-button:nth-child(1){
     -webkit-transition-delay: 0s;
@@ -280,7 +282,9 @@ md-list.no-margin md-list-item > .md-button{
     transition-delay: 0s;
 }
 #menu.closed #menu-more > .md-button{
-    margin-left: -150%;
+    -wekit-transform: translateX(-150%);
+    -moz-transform: translateX(-150%);
+    transform: translateX(-150%);
 }
 
 
