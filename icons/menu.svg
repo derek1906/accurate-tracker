@@ -1,10 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg
-   xmlns="http://www.w3.org/2000/svg"
-   version="1.1"
-   viewBox="0 0 32 32"
-   height="32px"
-   width="32px">
-  <path d="M 2.00174,0 C 0.89621,0 0,0.88773 0,2 0,3.10457 0.88926,4 2.00174,4 L 29.99826,4 C 31.10379,4 32,3.11227 32,2 32,0.89543 31.11074,0 29.99826,0 L 2.00174,0 Z m 0,10 C 0.89621,10 0,10.88773 0,12 c 0,1.10457 0.88926,2 2.00174,2 l 27.99652,0 C 31.10379,14 32,13.11227 32,12 32,10.89543 31.11074,10 29.99826,10 L 2.00174,10 Z m 0,10 C 0.89621,20 0,20.88773 0,22 c 0,1.10457 0.88926,2 2.00174,2 l 27.99652,0 C 31.10379,24 32,23.11227 32,22 32,20.89543 31.11074,20 29.99826,20 L 2.00174,20 Z"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="32px" height="24px" viewBox="0 0 32 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.7.2 (28276) - http://www.bohemiancoding.com/sketch -->
+    <title>menu copy</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icons" transform="translate(-119.000000, -256.000000)" fill="#000000">
+            <path d="M119,256 L119,260 L151,260 L151,256 L119,256 Z M119,266 L119,270 L151,270 L151,266 L119,266 Z M119,276 L119,280 L151,280 L151,276 L119,276 Z" id="menu-copy"></path>
+        </g>
+    </g>
 </svg>
