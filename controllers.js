@@ -205,7 +205,6 @@ function controllers(tracker){
 
 				case "highlightPoint":
 					$scope.mapMeta._points[data.stop_id].options.opacity = 1;
-					map("moveIntoBound", {latitude: data.mid_lat, longitude: data.mid_lon});
 					break;
 
 				case "dehighlightPoint":
@@ -265,6 +264,7 @@ function controllers(tracker){
 		};
 		$scope.highlightStop = function(stop){
 			map("highlightPoint", stop);
+			map("moveIntoBound", {latitude: stop.mid_lat, longitude: stop.mid_lon});
 		};
 		$scope.dehighlightStop = function(stop){
 			map("dehighlightPoint", stop);
@@ -559,25 +559,19 @@ function controllers(tracker){
 
 		// Buttons
 		btn("set", [{
-			text: "Show Route",
-			onDisplay: false,
+			text: "Hide Route",
+			onDisplay: true,
 			click: function(){
 				if(this.onDisplay){
 					map("clearPath");
 				}else{
-					getShapeAndStops($scope.vehicle.trip.shape_id).then(function(data){
-						map("setPath", data.path.map(function(point){
-							return {
-								latitude: point.shape_pt_lat,
-								longitude: point.shape_pt_lon
-							};
-						}));
-					});
+					showRoute();
 				}
 				this.onDisplay = !this.onDisplay;
 				this.text = ["Show Route", "Hide Route"][+this.onDisplay];
 			}
 		}]);
+
 
 		// Geolocation
 		geolocation().then(function(latlon){
@@ -626,9 +620,24 @@ function controllers(tracker){
 					}, 500);
 					console.log("Next stop index: %d", $scope.nextStopIndex);
 				});
+
+				// show route by default
+				showRoute();
 			}
 
 		});
+
+
+		function showRoute(){
+			getShapeAndStops($scope.vehicle.trip.shape_id).then(function(data){
+				map("setPath", data.path.map(function(point){
+					return {
+						latitude: point.shape_pt_lat,
+						longitude: point.shape_pt_lon
+					};
+				}));
+			});
+		}
 
 
 		$scope.$on("$destroy", function(){
