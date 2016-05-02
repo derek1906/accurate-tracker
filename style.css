@@ -81,6 +81,7 @@ md-list.no-margin md-list-item > .md-button{
 .overmap-timer{
     margin-bottom: 25px;
     position: relative;
+    cursor: default;
 }
 .overmap-timer > *{
     font-size: 12px;
@@ -94,7 +95,7 @@ md-list.no-margin md-list-item > .md-button{
 
 .overmap-timer-removeBubble{
     position: absolute;
-    padding: 10px 15px;
+    padding: 10px 5px 15px 10px;
     background: rgba(0, 0, 0, 0.6);
     border-radius: 5px 0 0 5px;
     height: 34px;
@@ -117,8 +118,16 @@ md-list.no-margin md-list-item > .md-button{
     border-left: 17px solid rgba(0, 0, 0, 0.6);
     border-right: 0px solid transparent;
     position: absolute;
-    top: 0;
+    top: 0px;
     right: -17px;
+    -webkit-clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+    clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+}
+.overmap-timer-removeBubble:hover{
+    background: rgba(20, 20, 20, 0.6);
+}
+.overmap-timer-removeBubble:hover::before{
+    border-left-color: rgba(20, 20, 20, 0.6);
 }
 .overmap-timer-removeBubble.ng-enter{
     opacity: 0;
@@ -285,12 +294,17 @@ md-list.no-margin md-list-item > .md-button{
 
 /* Menu animation */
 #menu-more > .md-button{
-    -webkit-transition: all 0.3s ease;
-    -moz-transition: all 0.3s ease;
-    transition: all 0.3s ease;
+    -webkit-transition: all 0.2s ease-out;
+    -moz-transition: all 0.2s ease-out;
+    transition: all 0.2s ease-out;
     -wekit-transform: translateX(0%);
     -moz-transform: translateX(0%);
     transform: translateX(0%);
+}
+#menu.closed #menu-more > .md-button{
+    -webkit-transition-timing-function: ease-in;
+    -moz-transition-timing-function: ease-in;
+    transition-timing-function: ease-in;
 }
 #menu-more > .md-button:nth-child(1){
     -webkit-transition-delay: 0s;
@@ -298,24 +312,24 @@ md-list.no-margin md-list-item > .md-button{
     transition-delay: 0s;
 }
 #menu-more > .md-button:nth-child(2){
-    -webkit-transition-delay: 0.05s;
-    -moz-transition-delay: 0.05s;
-    transition-delay: 0.05s;
+    -webkit-transition-delay: 0.1s;
+    -moz-transition-delay: 0.1s;
+    transition-delay: 0.1s;
 }
 #menu-more > .md-button:nth-child(3){
-    -webkit-transition-delay: 0.1s;
-    -moz-transition-delay: 0.1s;
-    transition-delay: 0.1s;
+    -webkit-transition-delay: 0.2s;
+    -moz-transition-delay: 0.2s;
+    transition-delay: 0.2s;
 }
 #menu.closed #menu-more > .md-button:nth-child(1){
+    -webkit-transition-delay: 0.2s;
+    -moz-transition-delay: 0.2s;
+    transition-delay: 0.2s;
+}
+#menu.closed #menu-more > .md-button:nth-child(2){
     -webkit-transition-delay: 0.1s;
     -moz-transition-delay: 0.1s;
     transition-delay: 0.1s;
-}
-#menu.closed #menu-more > .md-button:nth-child(2){
-    -webkit-transition-delay: 0.05s;
-    -moz-transition-delay: 0.05s;
-    transition-delay: 0.05s;
 }
 #menu.closed #menu-more > .md-button:nth-child(3){
     -webkit-transition-delay: 0s;
