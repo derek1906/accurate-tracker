@@ -88,6 +88,13 @@ md-list.no-margin md-list-item > .md-button{
 }
 .overmap-timer-interval{
     font-size: 48px;
+    align-items: baseline;
+}
+.overmap-timer-interval-minutes, .overmap-timer-interval-seconds{
+    width: 75px;
+}
+.overmap-timer-interval-minutes{
+    text-align: right;
 }
 .overmap-timer-interval-text{
     font-size: 18px;
