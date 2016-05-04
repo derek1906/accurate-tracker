@@ -40,7 +40,7 @@
                 .value("stop_details", {stops:{}, loaded: false})
                 .value("DATA_STORAGE_KEY", "stop_data")
                 .value("DEPARTURE_UPDATE_INTERVAL", 60*1000)    // 60 seconds
-                .config(function($routeProvider, $mdThemingProvider){
+                .config(function($routeProvider, $mdThemingProvider, $mdIconProvider){
                     $routeProvider
                         .when("/", {
                             templateUrl: "pages/landing.html",
@@ -69,6 +69,8 @@
                     $mdThemingProvider.theme('docs-dark', 'default')
                         .primaryPalette("grey")
                         .dark();
+
+                    $mdIconProvider.iconSet("ui", "icons/ui_icon_set.svg", 24);
                 });
         </script>
     </head>
@@ -90,16 +92,16 @@
             <div id="menu" layout="column" ng-class="{'closed': menuClosed}">
                 <div layout="column" layout-align="center" class="headbar">
                     <md-button id="menu-toggle-button" class="md-icon-button" ng-click="toggleMenu()" ng-class="{'hide': !atLanding}" aria-label="Toggle Menu">
-                        <md-icon md-svg-src="icons/menu.svg"></md-icon>
+                        <md-icon md-svg-icon="ui:menu"></md-icon>
                     </md-button>
                     <md-button class="md-icon-button" ng-click="navBack()" ng-class="{'hide': atLanding}" aria-label="Back">
-                        <md-icon md-svg-src="icons/arrow-left.svg"></md-icon>
+                        <md-icon md-svg-icon="ui:arrow-left"></md-icon>
                     </md-button>
                 </div>
                 <div layout="column" id="menu-more">
                     <md-button class="md-icon-button" aria-label="Favorites" ng-click="goToFavorites()">
                         <md-tooltip md-direction="right">Favorites</md-tooltip>
-                        <md-icon md-svg-src="icons/heart.svg"></md-icon>
+                        <md-icon md-svg-icon="ui:heart_solid"></md-icon>
                     </md-button>
                     <md-button class="md-icon-button" aria-label="Toggle Profanity" ng-click="toggleProfanity()">
                         <md-tooltip md-direction="right">All the Profanity</md-tooltip>
@@ -134,7 +136,7 @@
             <div id="about" ng-switch-when="about" layout="column">
                 <div layout="row" layout-align="center center">
                     <md-button class="md-icon-button" aria-label="Close" ng-click="clearOverlay()">
-                        <md-icon md-svg-src="icons/close.svg"></md-icon>
+                        <md-icon md-svg-icon="ui:close"></md-icon>
                     </md-button>
                     <h2 flex>Accurate CUMTD is brough to you by...</h2>
                 </div>

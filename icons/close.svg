@@ -5,11 +5,27 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   width="29px"
-   height="29px"
-   viewBox="0 0 29 29"
-   version="1.1">
+   id="svg2"
+   version="1.1"
+   viewBox="0 0 24 24"
+   height="24"
+   width="24">
+  <metadata
+     id="metadata10">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs8" />
   <path
-     d="M 14.500005,10.964461 25.106607,0.35785904 28.642141,3.8933929 18.035539,14.499995 28.642141,25.106596 25.106607,28.64213 14.500005,18.035529 3.8934034,28.64213 0.35786946,25.106596 10.964471,14.499995 0.35786946,3.8933929 3.8934034,0.35785904 14.500005,10.964461 Z"
-     style="fill-rule:evenodd;" />
+     id="path4"
+     style="fill-rule:evenodd"
+     d="M 11.999999,9.0000003 21,0 l 3,3 -9,9 9,9 -3,3 L 11.999999,15.000001 2.9999998,24 -2.7e-7,21 8.9999997,12 -2.7e-7,3 2.9999998,0 11.999999,9.0000003 Z" />
 </svg>

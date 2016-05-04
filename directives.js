@@ -51,8 +51,8 @@ function directives(tracker){
 			restrict: "E",
 			scope: true,
 			template:	'<md-button class="md-icon-button" ng-click="toggleFavorite()" aria-label="Toggle favorite">\
-			         		<md-icon ng-show="favorited" md-svg-src="icons/heart.svg"></md-icon>\
-			         		<md-icon ng-show="!favorited" md-svg-src="icons/emptyheart.svg"></md-icon>\
+			         		<md-icon ng-show="favorited" md-svg-icon="ui:heart_solid"></md-icon>\
+			         		<md-icon ng-show="!favorited" md-svg-icon="ui:heart_outline"></md-icon>\
 			         	</md-button>',
 			link: function(scope, element, attr){
 
