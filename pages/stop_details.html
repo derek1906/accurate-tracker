@@ -49,12 +49,12 @@
         <md-list-item class="departure-list-item"
                 ng-repeat="departure in departures" ng-click="goToTrip(departure.vehicle_id)" ng-class="departure.route.route_id | lowercase">
             <md-button class="md-icon-button md-primary" ng-click="addTimer(departure)" aria-label="Set timer">
-                <md-icon md-svg-src="icons/timer.svg"></md-icon>
+                <md-icon md-svg-icon="ui:timer"></md-icon>
             </md-button>
             <div class="departure-info" layout="column" layout-align="center start">
                 <span class="headsign" layout="row" layout-align="start center">
                     {{departure.headsign}}
-                    <md-icon class="istop-icon" md-svg-src="icons/istop.svg" ng-show="departure.is_istop">
+                    <md-icon class="istop-icon" md-svg-icon="ui:istop" ng-show="departure.is_istop">
                         <md-tooltip md-direction="right" md-delay="300">
                             Boarding is free<br>
                             (no iCard is needed)
