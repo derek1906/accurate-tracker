@@ -77,15 +77,15 @@ function services(tracker){
 	.service("icons", function icons(){
 		var icons = {
 			home: {
-				url: "icons/home.png",
+				url: "icons/map/home.png",
 				size: {width: 74, height: 88}
 			},
 			stop: {
-				url: "icons/stop.png",
+				url: "icons/map/stop.png",
 				size: {width: 62, height: 73}
 			},
 			bus: {
-				url: "icons/bus.png",
+				url: "icons/map/bus.png",
 				size: {width: 70, height: 83}
 			}
 		};
