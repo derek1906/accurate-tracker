@@ -62,6 +62,10 @@ function controllers(tracker){
 			_points: {},
 
 			path: [],
+			pathStroke: {
+				weight: 5,
+				color: "rgba(255, 243, 0, 204)"
+			},
 
 			loaded: false,
 			actionQueue: [],

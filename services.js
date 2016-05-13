@@ -125,6 +125,11 @@ function services(tracker){
 		}
 	})
 
+	// route colors
+	.service("routeColor", function routeColor(){
+		
+	})
+
 	// Load stops database - Fetch from web if data is outdated or missing
 	.service("loadStopsDetails", function loadStopsDetails(DATA_STORAGE_KEY, $q, stop_details, storage, getData){
 		var deferred;
