@@ -119,10 +119,9 @@
         </div>
         <div id="overmap-timers" ng-controller="overmapTimers">
             <div class="overmap-timer" ng-repeat="timer in timers track by timer.timer_id" layout="column" layout-align="center end" ng-right-click="displayRemove($event)">
-                <div class="overmap-timer-removeBubble" ng-if="rightClicked" ng-click="removeTimer($index)">Remove</div>
+                <div class="overmap-timer-removeBubble" ng-if="rightClicked" ng-click="removeTimer($index)" msg="remove" msg-page-id="ui"></div>
                 <md-tooltip class="multilineTooltip" md-direction="left" ng-if="!rightClicked">
-                    Original estimated arrival: {{timer.expectedTime | date:"shortTime"}}<br>
-                    Notify {{timer.minsBeforeExpected}} minutes before est. arrival
+                    Timer set for {{timer.timerInterval}} seconds
                 </md-tooltip>
                 <span>#{{timer.vehicle_id}} {{timer.headsign}}</span>
                 <span>At {{timer.stop.stop_name}}</span>

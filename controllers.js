@@ -295,24 +295,18 @@ function controllers(tracker){
 			if(!forceUpdate && lastUpdated - currentTime < 1000*60)	return;
 
 			$scope.timers.forEach(function(timer, i){
-				timer.remainingTime = timer.expectedTime - currentTime;
-				timer.remainingTimeForNotification = timer.targetTime - currentTime;
+				timer.remainingTime = timer.targetTime - currentTime;
 
 				// remove timer when it is done
 				if(timer.remainingTime <= 0){
 					$scope.timers[i] = undefined;
 					itemsModified = true;
-				}
-
-				// only notifies once
-				if(timer.remainingTimeForNotification <= 0 && !timer.notified){
-					timer.notified = true;
-					itemsModified = true;
-					new Notification(timer.minsBeforeExpected + " mins left", {body: timer.headsign + " @ " + timer.stop.stop_name});
+					new Notification("Your " + timer.timerInterval + " minutes timer is up.", {body: timer.headsign + " @ " + timer.stop.stop_name});
 				}
 
 			});
 
+			// remove empty spots
 			$scope.timers = $scope.timers.filter(function(timer){ return !!timer; });
 
 			// Stringify only when items removed
@@ -370,13 +364,16 @@ function controllers(tracker){
 							};
 						}
 					}).then(function(timerInterval){
+						var currentTime = Date.now();
+
 						$scope.timers.push({
 							headsign: data.headsign,
 							vehicle_id: data.vehicle_id,
 							stop: getStopDetails(data.stop_id),
-							expectedTime: expectedTime,
-							targetTime: expectedTime - timerInterval * 60 * 1000,
-							minsBeforeExpected: timerInterval,
+							/*expectedTime: expectedTime,*/
+							targetTime: currentTime + timerInterval * 60 * 1000,
+							/*minsBeforeExpected: timerInterval,*/
+							timerInterval: timerInterval,
 							timer_id: uuid()
 						});
 						storage.set("timers", $scope.timers);

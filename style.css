@@ -126,7 +126,7 @@ md-list.no-margin md-list-item > .md-button{
     border-right: 0px solid transparent;
     position: absolute;
     top: 0px;
-    right: -17px;
+    right: -16.5px;
     -webkit-clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
     clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
 }
