@@ -88,6 +88,19 @@ function controllers(tracker){
 			$scope.mapMeta.selfLocationOptions.icon = icons("home");
 			$scope.mapMeta.targetLocationOptions.icon = icons("stop");
 
+			$scope.mapMeta.backdrop = {
+				getTile: function(coord, zoomm, owner){
+					var div = owner.createElement("div");
+					div.style.background = "rgba(0, 0, 0, 0.6)";
+					div.style.width = this.tileSize.width + "px";
+					div.style.height = this.tileSize.height + "px";
+					return div;
+				},
+				tileSize: new google.maps.Size(1e5, 1e5),
+				name: "backdrop",
+				maxZoom: 17
+			};
+
 			$scope.$emit("mapLoaded");
 		});
 

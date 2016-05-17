@@ -6,7 +6,7 @@
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width">
 
         <link href="./bower_components/angular-material/angular-material.css" rel="stylesheet" />
-        <link href=".styles/style.css" rel="stylesheet" />
+        <link href="./styles/style.css" rel="stylesheet" />
 
         <script src="./bower_components/angular/angular.js" type="text/javascript" ></script>
         <script src="./bower_components/angular-animate/angular-animate.js" type="text/javascript" ></script>
@@ -81,9 +81,10 @@
             <div style="position: relative; height: 100%;">
                 <ui-gmap-google-map center='mapMeta.center' zoom='mapMeta.zoom' options="mapMeta.options" control="mapMeta.control">
                     <div ng-if="mapMeta.loaded">
+                        <ui-gmap-map-type options="mapMeta.backdrop"></ui-gmap-map-type>
                         <ui-gmap-marker idKey="-1" ng-if="mapMeta.selfLocation" options="mapMeta.selfLocationOptions" coords="mapMeta.selfLocation" events="mapMeta.selfLocationEvents"></ui-gmap-marker>
                         <ui-gmap-marker idKey="0" ng-if="mapMeta.targetLocation" options="mapMeta.targetLocationOptions" coords="mapMeta.targetLocation"></ui-gmap-marker>
-                        <ui-gmap-rectangle bounds='mapMeta.background.bounds' fill='mapMeta.background.fill' clickable="false"></ui-gmap-rectangle>
+                        <!--<ui-gmap-rectangle bounds='mapMeta.background.bounds' fill='mapMeta.background.fill' clickable="false"></ui-gmap-rectangle>-->
                         <ui-gmap-markers ng-if="mapMeta.points.length" models="mapMeta.points" options="'options'" coords="'coords'"></ui-gmap-markers>
                         <ui-gmap-polyline ng-if="mapMeta.path.length" path="mapMeta.path" stroke="mapMeta.pathStroke" clickable="false" geodesic="true" static="true"></ui-gmap-polyline>
                     </div>
@@ -121,7 +122,7 @@
             <div class="overmap-timer" ng-repeat="timer in timers track by timer.timer_id" layout="column" layout-align="center end" ng-right-click="displayRemove($event)">
                 <div class="overmap-timer-removeBubble" ng-if="rightClicked" ng-click="removeTimer($index)" msg="remove" msg-page-id="ui"></div>
                 <md-tooltip class="multilineTooltip" md-direction="left" ng-if="!rightClicked">
-                    Timer set for {{timer.timerInterval}} seconds
+                    Timer set for {{timer.timerInterval}} minutes
                 </md-tooltip>
                 <span>#{{timer.vehicle_id}} {{timer.headsign}}</span>
                 <span>At {{timer.stop.stop_name}}</span>
