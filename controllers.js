@@ -1,6 +1,6 @@
 function controllers(tracker){
 	tracker
-	.controller("Overall", function Overall($scope, $mdToast, $location, uiGmapIsReady, 
+	.controller("Overall", function Overall($scope, $mdToast, $location, $http, uiGmapIsReady, 
 									map, btn, getStopDetails, icons, TripManager, storage)
 	{
 		// Navigation button
@@ -31,8 +31,7 @@ function controllers(tracker){
 				mapTypeControl: false, streetViewControl: false, 
 				scaleControl: false, zoomControl: false, scrollwheel: false, disableDoubleClickZoom: false,
 				minZoom: 17, maxZoom: 17,
-				disableDefaultUI: true,
-				backgroundColor: "#000"
+				disableDefaultUI: true
 			},
 			center: { latitude: 40.1069778, longitude: -88.2272211 }, // main quad
 			zoom: 17,
@@ -91,7 +90,7 @@ function controllers(tracker){
 			$scope.mapMeta.backdrop = {
 				getTile: function(coord, zoomm, owner){
 					var div = owner.createElement("div");
-					div.style.background = "rgba(0, 0, 0, 0.6)";
+					div.style.background = "rgba(45, 56, 64, 0.65)";
 					div.style.width = this.tileSize.width + "px";
 					div.style.height = this.tileSize.height + "px";
 					return div;
@@ -100,6 +99,10 @@ function controllers(tracker){
 				name: "backdrop",
 				maxZoom: 17
 			};
+
+			$http.get("styles/map-style.json").then(function(styles){
+				$scope.mapMeta.control.getGMap().setOptions({styles: styles.data});
+			});
 
 			$scope.$emit("mapLoaded");
 		});
