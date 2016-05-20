@@ -633,18 +633,6 @@ function services(tracker){
 				return map.marker_sets[set_id] !== undefined;
 			},
 			/**
-			 * Remove a set by id
-			 * @param  {String} set_id id for the set to be removed
-			 * @return {Boolean}        True if the set can be removed
-			 */
-			removeSetById: function(set_id){
-				if(this.isSetExist(set_id)){
-					delete map.marker_sets[set_id];
-					return true;
-				}
-				return false;
-			},
-			/**
 			 * Get a set by id
 			 * @param  {String} set_id Set id
 			 * @return {Set}        Set
