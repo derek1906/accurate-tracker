@@ -102,7 +102,7 @@
                         <ui-gmap-markers ng-if="mapMeta.points.length" models="mapMeta.points" options="'options'" coords="'coords'"></ui-gmap-markers>
                         <ui-gmap-polyline ng-if="mapMeta.path.length" path="mapMeta.path" stroke="mapMeta.pathStroke" clickable="false" geodesic="true" static="true"></ui-gmap-polyline>
                         
-                        <ui-gmap-markers models="markers" options="'options'" coords="'location'"></ui-gmap-markers>
+                        <ui-gmap-markers models="markers" idKey="'idKey'" options="'options'" coords="'location'"></ui-gmap-markers>
                     </div>
                 </ui-gmap-google-map>
             </div>

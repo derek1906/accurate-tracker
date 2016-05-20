@@ -83,8 +83,8 @@ function controllers(tracker){
 			})()
 		};
 
-		$scope.markers = MapComponentManager.map.markers;
-		MapComponentManager.map.control = $scope.mapMeta.control;
+		// Pass control to MapComponentManager
+		$scope.markers = MapComponentManager.setControl($scope.mapMeta.control);
 
 	    uiGmapIsReady.promise().then(function(){
 			$scope.mapMeta.selfLocationOptions.icon = icons("home");
@@ -441,13 +441,33 @@ function controllers(tracker){
 			getNearbyStops(20).then(function(stops){
 				$scope.nearbyStops = stops;
 
+				/*
 				map("displayPoints", stops.map(function(stop){
 					return stop.stop_id;
-				}));
+				}));*/
+				var nearbyStopMarkers = new MapComponentManager.Set("nearbyStops");
+				stops.forEach(function(stop){
+					var stopMarker = new MapComponentManager.Marker(
+						stop.stop_id,
+						{
+							latitude: stop.mid_lat,
+							longitude: stop.mid_lon,
+							canIconHover: true,
+							iconName: "stop",
+							on: {
+								click: function(){
+									$scope.goToStop(stop);
+								}
+							}
+						}
+					);
+
+					nearbyStopMarkers.addMarker(stopMarker);
+				});
 			});
 
 			geolocation().then(function(latlon){
-				latlon.pan = true;
+				//latlon.pan = true;
 				//map("setSelfLocation", latlon);
 				var marker = MapComponentManager.getMarker("user", "self-location");
 
@@ -461,7 +481,8 @@ function controllers(tracker){
 					text: "Center yourself",
 					onDisplay: false,
 					click: function(){
-						map("setSelfLocation", latlon);
+						//map("setSelfLocation", latlon);
+						MapComponentManager.setCenter(latlon);
 					}
 				}]);
 			});
@@ -471,6 +492,12 @@ function controllers(tracker){
 		// events
 		$scope.doSearch = function(){
 			$location.path("/search");
+		};
+		$scope.centerStop = function(stop){
+			MapComponentManager.getMarker("nearbyStops", stop.stop_id).center().lightUp();
+		};
+		$scope.decenterStop = function(stop){
+			MapComponentManager.getMarker("nearbyStops", stop.stop_id).lightOut();
 		};
 	})
 

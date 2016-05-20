@@ -403,9 +403,16 @@ function services(tracker){
 		 * @param {Number} longitude Longitude of location
 		 */
 		function Location(latitude, longitude){
-			this.latitude = latitude;
-			this.longitude = longitude;
+			if(typeof arguments[0] === "object"){
+				this.latitude = arguments[0].latitude;
+				this.longitude = arguments[0].longitude;
+			}else{
+				this.latitude = latitude;
+				this.longitude = longitude;
+			}
 		}
+
+		var universalIdKey = 1;
 
 		/**
 		 * Marker class
@@ -430,6 +437,8 @@ function services(tracker){
 
 			var self = this;
 
+			this.idKey = universalIdKey++;
+
 			this.id = id;
 			this.prefs = prefs;
 			this.options = options;
@@ -440,16 +449,12 @@ function services(tracker){
 
 			this.events = {
 				mouseover: function(){
-					if(prefs.canIconHover){
-						self.options.icon = icons(prefs.iconName, true);
-					}
+					if(prefs.canIconHover)	self.lightUp();
 					if(prefs.on.mouseover)	prefs.on.mouseover(self);
 				},
 				mouseout: function(){
-					if(prefs.canIconHover){
-						self.options.icon = icons(prefs.iconName, false);
-					}
-					if(prefs.on.mouseout)	prefs.on.mouseout(self);
+					if(prefs.canIconHover)	self.lightOut();
+					if(prefs.on.mouseout) 	prefs.on.mouseout(self);
 				},
 				click: function(){
 					if(prefs.on.click)	prefs.on.click(self);
@@ -501,18 +506,15 @@ function services(tracker){
 		 * @return {Marker} Marker
 		 */
 		Marker.prototype.center = function(){
-			var self = this;
-			getMap(function(gmap){
-				var span = gmap.getBounds().toSpan();
-
-				// Add to the end of execution queue
-				setTimeout(function(){
-					gmap.panTo({
-						lat: self.location.latitude,
-						lng: self.location.longitude - span.lng() * 0.25
-					})
-				});
-			});
+			manager.setCenter(this.location);
+			return this;
+		}
+		Marker.prototype.lightUp = function(){
+			this.options.icon = icons(this.prefs.iconName, true);
+			return this;
+		}
+		Marker.prototype.lightOut = function(){
+			this.options.icon = icons(this.prefs.iconName, false);
 			return this;
 		}
 
@@ -524,6 +526,11 @@ function services(tracker){
 			this.id = id;
 			this.markers = [];
 			this.visible = true;
+
+			if(manager.isSetExist(id)){
+				manager.getSetById(id).removeSelf();
+			}
+			this.addSelf();
 		}
 		/**
 		 * Add a marker to a set
@@ -557,6 +564,15 @@ function services(tracker){
 			marker.removeSelf();
 			this.markers.splice(this.markers.indexOf(marker), 1);
 		};
+		Set.prototype.addSelf = function(){
+			map.marker_sets[this.id] = this;
+		}
+		Set.prototype.removeSelf = function(){
+			this.markers.forEach(function(marker){
+				marker.removeSelf();
+			});
+			delete map.marker_sets[this.id];
+		}
 		/**
 		 * Set the visibility of a set
 		 * @param {Boolean} visible Set visibility for all markers in a set
@@ -568,14 +584,8 @@ function services(tracker){
 			});
 		};
 
-		var map = {
-			marker_sets: {},
-			markers: [],
-			control: undefined,
-			ready: false,
-			proccessQueue: []
-		};
 
+		// All actions to the map should go through getMap
 		function getMap(callback){
 			function execute(){
 				if(map.control){
@@ -587,23 +597,46 @@ function services(tracker){
 			else         	map.proccessQueue.push(execute);
 		}
 
+		// Prcoess actions when map is loaded
 		uiGmapIsReady.promise().then(function(){
 			map.ready = true;
 			map.proccessQueue.forEach(function(proccess){ proccess(); });
 			map.proccessQueue = [];
 		});
 
-		var a = {
+
+		var map = {
+			marker_sets: {},
+			markers: [],
+			control: undefined,
+			ready: false,
+			proccessQueue: []
+		};
+
+		var manager = {
+			/**
+			 * Recieve control and return marker list reference for binding
+			 * @param {Object} control uiGMap control object
+			 * @return {Array} Maker list reference
+			 */
+			setControl: function(control){
+				map.control = control;
+				return map.markers;
+			},
+
+			/**
+			 * Return true if set exists
+			 * @param  {String}  set_id Set id
+			 * @return {Boolean}        True if set exists
+			 */
 			isSetExist: function(set_id){
 				return map.marker_sets[set_id] !== undefined;
 			},
-			addSet: function(set){
-				if(this.isSetExist(set.id)){
-					return false;
-				}
-				map.marker_sets[set.id] = set;
-				return set;
-			},
+			/**
+			 * Remove a set by id
+			 * @param  {String} set_id id for the set to be removed
+			 * @return {Boolean}        True if the set can be removed
+			 */
 			removeSetById: function(set_id){
 				if(this.isSetExist(set_id)){
 					delete map.marker_sets[set_id];
@@ -611,9 +644,20 @@ function services(tracker){
 				}
 				return false;
 			},
+			/**
+			 * Get a set by id
+			 * @param  {String} set_id Set id
+			 * @return {Set}        Set
+			 */
 			getSetById: function(set_id){
 				return map.marker_sets[set_id];
 			},
+			/**
+			 * Get a marker by set id and marker id
+			 * @param  {String} set_id    Set id
+			 * @param  {String} marker_id Marker id
+			 * @return {Marker}           Marker
+			 */
 			getMarker: function(set_id, marker_id){
 				var set = this.getSetById(set_id);
 				return set ? set.getMarkerById(marker_id) : undefined;
@@ -629,7 +673,6 @@ function services(tracker){
 				var set = this.getSetById(set_id);
 				if(!set){
 					set = new Set(set_id);
-					this.addSet(set);
 				}
 
 				var marker = set.getMarkerById(marker_id);
@@ -640,12 +683,36 @@ function services(tracker){
 
 				return marker;
 			},
+
+
+			/**
+			 * Set the "center" of the map
+			 * @param {Object} location [description]
+			 */
+			setCenter: function(location){
+				getMap(function(gmap){
+					var span = gmap.getBounds().toSpan();
+
+					// Add to the end of execution queue
+					setTimeout(function(){
+						gmap.panTo({
+							lat: location.latitude,
+							lng: location.longitude - span.lng() * 0.25
+						})
+					});
+				})
+			},
+
+			// Exposing classes
 			Set: Set,
 			Marker: Marker,
+			Location: Location,
+
+			// Internal data
 			map: map
 		};
-		window.a = a;
+		window.manager = manager;
 
-		return a;
+		return manager;
 	});
 }
