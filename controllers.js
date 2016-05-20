@@ -1,7 +1,7 @@
 function controllers(tracker){
 	tracker
 	.controller("Overall", function Overall($scope, $mdToast, $location, $http, uiGmapIsReady, 
-									map, btn, getStopDetails, icons, TripManager, storage)
+									map, btn, getStopDetails, icons, TripManager, storage, MapComponentManager)
 	{
 		// Navigation button
 		$scope.atLanding = true;
@@ -23,6 +23,10 @@ function controllers(tracker){
 
 			// Reset menu
 			$scope.menuClosed = true;
+	    });
+	    $scope.$on("$routeChangeError", function(e, current, previous, rejection){
+			var toast = $mdToast.simple().position("top right").textContent("Failed to load " + current.$$route.controller);
+			$mdToast.show(toast);
 	    });
 
 	    // Map information
@@ -78,12 +82,11 @@ function controllers(tracker){
 				}
 			})()
 		};
-	    uiGmapIsReady.promise().then(function(){
-			$scope.mapMeta.background = {
-				bounds: new google.maps.LatLngBounds({lat: 40.0234874, lng: -88.3181197}, {lat: 40.1691264, lng: -88.1260499}),
-				fill: {color: "#000000", opacity: 0.6}
-			};
 
+		$scope.markers = MapComponentManager.map.markers;
+		MapComponentManager.map.control = $scope.mapMeta.control;
+
+	    uiGmapIsReady.promise().then(function(){
 			$scope.mapMeta.selfLocationOptions.icon = icons("home");
 			$scope.mapMeta.targetLocationOptions.icon = icons("stop");
 
@@ -426,7 +429,8 @@ function controllers(tracker){
 		});
 	})
 
-	.controller("Landing", function Landing($scope, $location, $mdToast, getNearbyStops, loadStopsDetails, geolocation, map, btn){
+	.controller("Landing", function Landing($scope, $location, $mdToast, 
+			getNearbyStops, loadStopsDetails, geolocation, map, btn, MapComponentManager){
 		$scope.nearbyStops = [];
 
 		loadStopsDetails().then(function(){
@@ -444,7 +448,14 @@ function controllers(tracker){
 
 			geolocation().then(function(latlon){
 				latlon.pan = true;
-				map("setSelfLocation", latlon);
+				//map("setSelfLocation", latlon);
+				var marker = MapComponentManager.getMarker("user", "self-location");
+
+				marker
+					.setLocation(latlon.latitude, latlon.longitude)
+					.setVisible(true)
+					.center();
+
 
 				btn("set", [{
 					text: "Center yourself",

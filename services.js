@@ -74,27 +74,37 @@ function services(tracker){
 	})
 
 	// icons generator
-	.service("icons", function icons(){
+	.service("icons", function icons(uiGmapIsReady){
 		var icons = {
 			home: {
-				url: "icons/map/home.png",
-				size: {width: 74, height: 88}
+				url: "icons/map_icon_set.png",
+				size: {width: 74, height: 88},
+				origin: {x: 0, y: 0}
 			},
 			stop: {
-				url: "icons/map/stop.png",
-				size: {width: 62, height: 73}
+				url: "icons/map_icon_set.png",
+				size: {width: 62, height: 73},
+				origin: {x: 0, y: 88}
 			},
 			bus: {
-				url: "icons/map/bus.png",
-				size: {width: 70, height: 83}
+				url: "icons/map_icon_set.png",
+				size: {width: 70, height: 83},
+				origin: {x: 0, y: 161}
 			}
-		};
-		return function(name){
-			var icon = icons[name];
-			if(!icon.anchor){
-				icon.anchor = new google.maps.Point(icon.size.width/2, icon.size.height);
-			}
-			return icon;
+		}, icons_hover = {};
+
+		for(var key in icons){
+			var icon = icons[key];
+			icon.anchor = {x: icon.size.width/2, y: icon.size.height};
+
+			var icon_hover = icons_hover[key] = angular.copy(icon);
+			icon_hover.origin.x += icon.size.width;
+		}
+
+		return function (name, isHover){
+			if(!name)       	return undefined;
+			if(!icons[name])	throw "Icon \"" + name + "\" does not exist.";
+			else            	return isHover ? icons_hover[name] : icons[name];
 		}
 	})
 
@@ -384,5 +394,258 @@ function services(tracker){
 
 			return deferred.promise;
 		};
+	})
+
+	.service("MapComponentManager", function MapComponentManager(uiGmapIsReady, uuid, icons){
+		/**
+		 * Location class
+		 * @param {Number} latitude  Latitude of location
+		 * @param {Number} longitude Longitude of location
+		 */
+		function Location(latitude, longitude){
+			this.latitude = latitude;
+			this.longitude = longitude;
+		}
+
+		/**
+		 * Marker class
+		 * @param {String} id        Unique id
+		 * @param {Number} latitude  Latitude
+		 * @param {Number} longitude Longitude
+		 * @param {MarkerOptions} options   Follow MarkerOptions specification
+		 */
+		function Marker(id, prefs, options){
+			if(id === undefined)	throw "id is required for creating a marker.";
+			prefs = angular.extend({
+				latitude: 0,
+				longitude: 0,
+				canIconHover: false,
+				iconName: "",
+				on: {}
+			}, prefs);
+
+			options = angular.extend({
+				icon: icons(prefs.iconName)
+			});
+
+			var self = this;
+
+			this.id = id;
+			this.prefs = prefs;
+			this.options = options;
+
+			this.setLocation(prefs.latitude, prefs.longitude);
+			delete prefs.latitude;
+			delete prefs.longitude;
+
+			this.events = {
+				mouseover: function(){
+					if(prefs.canIconHover){
+						self.options.icon = icons(prefs.iconName, true);
+					}
+					if(prefs.on.mouseover)	prefs.on.mouseover(self);
+				},
+				mouseout: function(){
+					if(prefs.canIconHover){
+						self.options.icon = icons(prefs.iconName, false);
+					}
+					if(prefs.on.mouseout)	prefs.on.mouseout(self);
+				},
+				click: function(){
+					if(prefs.on.click)	prefs.on.click(self);
+				}
+			};
+		}
+		/**
+		 * Add self to global list
+		 */
+		Marker.prototype.addSelf = function(){
+			map.markers.push(this);
+		}
+		/**
+		 * Remove self from global list
+		 */
+		Marker.prototype.removeSelf = function(){
+			map.markers.splice(map.markers.indexOf(this), 1);
+		}
+		/**
+		 * Set location
+		 * @param {Number} latitude  Latitude
+		 * @param {Number} longitude Longitude
+		 * @return {Marker} Marker
+		 */
+		Marker.prototype.setLocation = function(latitude, longitude){
+			this.location = new Location(latitude, longitude);
+			return this;
+		}
+		/**
+		 * Set icon
+		 * @param {String} name Icon name
+		 * @return {Marker} Marker
+		 */
+		Marker.prototype.setIcon = function(name){
+			this.options.icon = icons(name);
+			return this;
+		}
+		/**
+		 * Set visibility for a marker
+		 * @param {Boolean} visible Visibilility
+		 * @return {Marker} Marker
+		 */
+		Marker.prototype.setVisible = function(visible){
+			this.options.visible = visible;
+			return this;
+		};
+		/**
+		 * Center marker
+		 * @return {Marker} Marker
+		 */
+		Marker.prototype.center = function(){
+			var self = this;
+			getMap(function(gmap){
+				var span = gmap.getBounds().toSpan();
+
+				// Add to the end of execution queue
+				setTimeout(function(){
+					gmap.panTo({
+						lat: self.location.latitude,
+						lng: self.location.longitude - span.lng() * 0.25
+					})
+				});
+			});
+			return this;
+		}
+
+		/**
+		 * Set class
+		 * @param {String} id Unique id
+		 */
+		function Set(id){
+			this.id = id;
+			this.markers = [];
+			this.visible = true;
+		}
+		/**
+		 * Add a marker to a set
+		 * @param {Marker} marker Marker to be added
+		 */
+		Set.prototype.addMarker = function(marker){
+			marker.addSelf();
+			this.markers.push(marker);
+		}
+		/**
+		 * Add an array of markers to a set
+		 * @param {Marker[]} markers An array of markers
+		 */
+		Set.prototype.addMarkers = function(markers){
+			var self = this;
+
+			this.markers = this.markers.concat(markers);
+			markers.forEach(function(marker){
+				marker.addSelf();
+			});
+		};
+		Set.prototype.getMarkerById = function(marker_id){
+			for(var i = 0; i < this.markers.length; i++){
+				if(this.markers[i].id == marker_id){
+					return this.markers[i];
+				}
+			}
+			return undefined;
+		};
+		Set.prototype.removeMarker = function(marker){
+			marker.removeSelf();
+			this.markers.splice(this.markers.indexOf(marker), 1);
+		};
+		/**
+		 * Set the visibility of a set
+		 * @param {Boolean} visible Set visibility for all markers in a set
+		 */
+		Set.prototype.setVisible = function(visible){
+			this.visible = visible;
+			this.markers.forEach(function(marker){
+				marker.setVisible(visible);
+			});
+		};
+
+		var map = {
+			marker_sets: {},
+			markers: [],
+			control: undefined,
+			ready: false,
+			proccessQueue: []
+		};
+
+		function getMap(callback){
+			function execute(){
+				if(map.control){
+					callback(map.control.getGMap());
+				}
+			}
+
+			if(map.ready)	execute();
+			else         	map.proccessQueue.push(execute);
+		}
+
+		uiGmapIsReady.promise().then(function(){
+			map.ready = true;
+			map.proccessQueue.forEach(function(proccess){ proccess(); });
+			map.proccessQueue = [];
+		});
+
+		var a = {
+			isSetExist: function(set_id){
+				return map.marker_sets[set_id] !== undefined;
+			},
+			addSet: function(set){
+				if(this.isSetExist(set.id)){
+					return false;
+				}
+				map.marker_sets[set.id] = set;
+				return set;
+			},
+			removeSetById: function(set_id){
+				if(this.isSetExist(set_id)){
+					delete map.marker_sets[set_id];
+					return true;
+				}
+				return false;
+			},
+			getSetById: function(set_id){
+				return map.marker_sets[set_id];
+			},
+			getMarker: function(set_id, marker_id){
+				var set = this.getSetById(set_id);
+				return set ? set.getMarkerById(marker_id) : undefined;
+			},
+			/**
+			 * Return marker by set id and marker id. Create if marker does not exist.
+			 * 
+			 * @param  {String} set_id    Set id
+			 * @param  {String} marker_id Marker id
+			 * @return {Marker}           Marker
+			 */
+			getAndCreateMarker: function(set_id, marker_id, default_marker){
+				var set = this.getSetById(set_id);
+				if(!set){
+					set = new Set(set_id);
+					this.addSet(set);
+				}
+
+				var marker = set.getMarkerById(marker_id);
+				if(!marker){
+					marker = default_marker;
+					set.addMarker(marker);
+				}
+
+				return marker;
+			},
+			Set: Set,
+			Marker: Marker,
+			map: map
+		};
+		window.a = a;
+
+		return a;
 	});
 }

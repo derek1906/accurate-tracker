@@ -73,6 +73,20 @@
                         .dark();
 
                     $mdIconProvider.iconSet("ui", "icons/ui_icon_set.svg", 24);
+                })
+                .run(function(MapComponentManager){
+                    // Preset markers
+                    MapComponentManager.getAndCreateMarker("user", "self-location", new MapComponentManager.Marker("self-location", {
+                        canIconHover: true,
+                        iconName: "home",
+                        on: {
+                            click: function(marker){
+                                marker.center();
+                            }
+                        }
+                    }, {
+                        visible: false
+                    }));
                 });
         </script>
     </head>
@@ -87,6 +101,8 @@
                         <!--<ui-gmap-rectangle bounds='mapMeta.background.bounds' fill='mapMeta.background.fill' clickable="false"></ui-gmap-rectangle>-->
                         <ui-gmap-markers ng-if="mapMeta.points.length" models="mapMeta.points" options="'options'" coords="'coords'"></ui-gmap-markers>
                         <ui-gmap-polyline ng-if="mapMeta.path.length" path="mapMeta.path" stroke="mapMeta.pathStroke" clickable="false" geodesic="true" static="true"></ui-gmap-polyline>
+                        
+                        <ui-gmap-markers models="markers" options="'options'" coords="'location'"></ui-gmap-markers>
                     </div>
                 </ui-gmap-google-map>
             </div>
