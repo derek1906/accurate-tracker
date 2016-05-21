@@ -458,13 +458,13 @@ function services(tracker){
 			this.events = {
 				mouseover: function(){
 					options.zIndex = 3;
-					if(prefs.label)       	options.labelClass = "marker-label";
+					if(prefs.label)       	self.showLabel();
 					if(prefs.canIconHover)	self.lightUp();
 					if(prefs.on.mouseover)	prefs.on.mouseover(self);
 				},
 				mouseout: function(){
 					options.zIndex = prefs.zIndex;
-					if(prefs.label)       	options.labelClass = "marker-label-hidden";
+					if(prefs.label)       	self.hideLabel();
 					if(prefs.canIconHover)	self.lightOut();
 					if(prefs.on.mouseout) 	prefs.on.mouseout(self);
 				},
@@ -521,15 +521,23 @@ function services(tracker){
 			if(always)	manager.setCenter(this.location);
 			else      	manager.moveIntoBound(this.location);
 			return this;
-		}
+		};
 		Marker.prototype.lightUp = function(){
 			this.options.icon = icons(this.prefs.iconName, true);
 			return this;
-		}
+		};
 		Marker.prototype.lightOut = function(){
 			this.options.icon = icons(this.prefs.iconName, false);
 			return this;
-		}
+		};
+		Marker.prototype.showLabel = function(){
+			this.options.labelClass = "marker-label";
+			return this;
+		};
+		Marker.prototype.hideLabel = function(){
+			this.options.labelClass = "marker-label-hidden";
+			return this;
+		};
 
 		/**
 		 * Set class

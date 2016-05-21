@@ -495,10 +495,10 @@ function controllers(tracker){
 			$location.path("/search");
 		};
 		$scope.centerStop = function(stop){
-			MapComponentManager.getMarker("nearbyStops", stop.stop_id).center().lightUp();
+			MapComponentManager.getMarker("nearbyStops", stop.stop_id).center().lightUp().showLabel();
 		};
 		$scope.decenterStop = function(stop){
-			MapComponentManager.getMarker("nearbyStops", stop.stop_id).lightOut();
+			MapComponentManager.getMarker("nearbyStops", stop.stop_id).lightOut().hideLabel();
 		};
 	})
 
