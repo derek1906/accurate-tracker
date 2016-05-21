@@ -79,9 +79,10 @@
                     MapComponentManager.getAndCreateMarker("user", "self-location", new MapComponentManager.Marker("self-location", {
                         canIconHover: true,
                         iconName: "home",
+                        label: "You are here",
                         on: {
                             click: function(marker){
-                                marker.center();
+                                marker.center(true);
                             }
                         }
                     }, {

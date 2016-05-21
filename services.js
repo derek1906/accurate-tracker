@@ -428,12 +428,20 @@ function services(tracker){
 				longitude: 0,
 				canIconHover: false,
 				iconName: "",
+				label: "",
+				zIndex: 1,
 				on: {}
 			}, prefs);
 
+			var icon = icons(prefs.iconName);
+
 			options = angular.extend({
-				icon: icons(prefs.iconName)
-			});
+				zIndex: prefs.zIndex,
+				icon: icon,
+				labelContent: prefs.label,
+				labelAnchor: getLabelAnchor(prefs.label, icon),
+				labelClass: "marker-label-hidden"
+			}, options);
 
 			var self = this;
 
@@ -449,10 +457,14 @@ function services(tracker){
 
 			this.events = {
 				mouseover: function(){
+					options.zIndex = 3;
+					if(prefs.label)       	options.labelClass = "marker-label";
 					if(prefs.canIconHover)	self.lightUp();
 					if(prefs.on.mouseover)	prefs.on.mouseover(self);
 				},
 				mouseout: function(){
+					options.zIndex = prefs.zIndex;
+					if(prefs.label)       	options.labelClass = "marker-label-hidden";
 					if(prefs.canIconHover)	self.lightOut();
 					if(prefs.on.mouseout) 	prefs.on.mouseout(self);
 				},
@@ -505,8 +517,9 @@ function services(tracker){
 		 * Center marker
 		 * @return {Marker} Marker
 		 */
-		Marker.prototype.center = function(){
-			manager.setCenter(this.location);
+		Marker.prototype.center = function(always){
+			if(always)	manager.setCenter(this.location);
+			else      	manager.moveIntoBound(this.location);
 			return this;
 		}
 		Marker.prototype.lightUp = function(){
@@ -597,6 +610,21 @@ function services(tracker){
 			else         	map.proccessQueue.push(execute);
 		}
 
+		// Calculate label anchor position
+		function getLabelAnchor(content, icon){
+			var MARKER_VERTIACL_MARGIN = 10;
+
+			var testLabel = document.createElement("div");
+			testLabel.textContent = content;
+			testLabel.classList.add("marker-label");
+			document.body.appendChild(testLabel);
+			var width = testLabel.clientWidth,
+				height = testLabel.clientHeight;
+			document.body.removeChild(testLabel);
+
+			return (width / 2) + " " + (height + icon.size.height + MARKER_VERTIACL_MARGIN);
+		}
+
 		// Prcoess actions when map is loaded
 		uiGmapIsReady.promise().then(function(){
 			map.ready = true;
@@ -647,7 +675,7 @@ function services(tracker){
 			 * @return {Marker}           Marker
 			 */
 			getMarker: function(set_id, marker_id){
-				var set = this.getSetById(set_id);
+				var set = manager.getSetById(set_id);
 				return set ? set.getMarkerById(marker_id) : undefined;
 			},
 			/**
@@ -658,7 +686,7 @@ function services(tracker){
 			 * @return {Marker}           Marker
 			 */
 			getAndCreateMarker: function(set_id, marker_id, default_marker){
-				var set = this.getSetById(set_id);
+				var set = manager.getSetById(set_id);
 				if(!set){
 					set = new Set(set_id);
 				}
@@ -688,7 +716,23 @@ function services(tracker){
 							lng: location.longitude - span.lng() * 0.25
 						})
 					});
-				})
+				});
+			},
+
+			moveIntoBound: function(location){
+				getMap(function(gmap){
+					var bounds = gmap.getBounds(),
+						sw = bounds.getSouthWest(),
+						ne = bounds.getNorthEast();
+					var halfBounds = new google.maps.LatLngBounds({
+						lat: sw.lat(),
+						lng: sw.lng() + bounds.toSpan().lng() * 0.5
+					}, ne);
+					var targetLatLng = new google.maps.LatLng(location.latitude, location.longitude);
+					if(!halfBounds.contains(targetLatLng)){
+						manager.setCenter(location);
+					}
+				});
 			},
 
 			// Exposing classes

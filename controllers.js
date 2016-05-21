@@ -454,6 +454,7 @@ function controllers(tracker){
 							longitude: stop.mid_lon,
 							canIconHover: true,
 							iconName: "stop",
+							label: stop.stop_name,
 							on: {
 								click: function(){
 									$scope.goToStop(stop);

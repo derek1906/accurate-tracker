@@ -68,7 +68,24 @@ md-list.no-margin md-list-item > .md-button{
     width: 100%;
     height: 100%;
 }
-
+.marker-label, .marker-label-hidden{
+    background: rgba(0,0,0,0.6);
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    pointer-events: none;
+    white-space: nowrap;
+    font-family: Montserrat;
+    position: absolute;
+    opacity: 1;
+    -webkit-transition: opacity 0.2s ease;
+    -moz-transition: opacity 0.2s ease;
+    transition: opacity 0.2s ease;
+}
+.marker-label-hidden{
+    opacity: 0;
+}
 
 /* Overmap timers */
 #overmap-timers{
