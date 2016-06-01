@@ -74,7 +74,16 @@
 
                     $mdIconProvider.iconSet("ui", "icons/ui_icon_set.svg", 24);
                 })
-                .run(function(MapComponentManager){
+                .run(function(MapComponentManager, loadStopsDetails){
+                    MapComponentManager.loaded(function(commands){
+                        commands.getAndCreateMarker("user", "self-location", {
+                            iconName: "home",
+                            visible: false,
+                            caption: "You are here"
+                        });
+                    });
+
+                    /*
                     // Preset markers
                     MapComponentManager.getAndCreateMarker("user", "self-location", new MapComponentManager.Marker("self-location", {
                         canIconHover: true,
@@ -88,6 +97,38 @@
                     }, {
                         visible: false
                     }));
+                    */
+
+                    loadStopsDetails().then(function(stops){
+                        console.log(stops);
+                        /*var all_stops = new MapComponentManager.Set("all-stops");
+                        for(var stop_id in stops){
+                            var stop = stops[stop_id],
+                                stop_marker = new MapComponentManager.Marker(stop_id, {
+                                    latitude: stop.mid_lat,
+                                    longitude: stop.mid_lon,
+                                    canIconHover: true,
+                                    iconName: "stop",
+                                    label: stop.stop_name
+                                });
+
+                            all_stops.addMarker(stop_marker);
+                        }*/
+
+                        MapComponentManager.loaded(function(commands){
+                            var all_stops = commands.addSet("all-stops");
+                            for(var stop_id in stops){
+                                var stop = stops[stop_id],
+                                    stop_marker = commands.createMarker({
+                                        position: {lat: stop.mid_lat, lng: stop.mid_lon},
+                                        iconName: "stop",
+                                        caption: stop.stop_name
+                                    });
+
+                                all_stops.setMarker(stop_id, stop_marker);
+                            }
+                        })
+                    });
                 });
         </script>
     </head>
@@ -103,7 +144,10 @@
                         <ui-gmap-markers ng-if="mapMeta.points.length" models="mapMeta.points" options="'options'" coords="'coords'"></ui-gmap-markers>
                         <ui-gmap-polyline ng-if="mapMeta.path.length" path="mapMeta.path" stroke="mapMeta.pathStroke" clickable="false" geodesic="true" static="true"></ui-gmap-polyline>
                         
+                        <!--
                         <ui-gmap-markers models="markers" idKey="'idKey'" options="'options'" coords="'location'"></ui-gmap-markers>
+                        <ui-gmap-window coords="mapMeta.tooltip.coords" show="mapMeta.tooltip.show" options="mapMeta.tooltip.options"></ui-gmap-window>
+                        -->
                     </div>
                 </ui-gmap-google-map>
             </div>

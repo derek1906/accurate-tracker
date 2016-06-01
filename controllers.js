@@ -84,7 +84,7 @@ function controllers(tracker){
 		};
 
 		// Pass control to MapComponentManager
-		$scope.markers = MapComponentManager.setControl($scope.mapMeta.control);
+		//$scope.markers = MapComponentManager.setMeta($scope.mapMeta);
 
 	    uiGmapIsReady.promise().then(function(){
 			$scope.mapMeta.selfLocationOptions.icon = icons("home");
@@ -445,6 +445,8 @@ function controllers(tracker){
 				map("displayPoints", stops.map(function(stop){
 					return stop.stop_id;
 				}));*/
+
+				/*
 				var nearbyStopMarkers = new MapComponentManager.Set("nearbyStops");
 				stops.forEach(function(stop){
 					var stopMarker = new MapComponentManager.Marker(
@@ -465,27 +467,44 @@ function controllers(tracker){
 
 					nearbyStopMarkers.addMarker(stopMarker);
 				});
+				*/
+			/*
+				MapComponentManager.loaded(function(commands){
+					var nearbyStopMarkers = commands.addSet("nearbyStops").empty();
+
+					stops.forEach(function(stop){
+						var stopMarker = commands.createMarker({
+							position: {lat: stop.mid_lat, lng: stop.mid_lon},
+							caption: stop.stop_name
+						});
+
+						nearbyStopMarkers.setMarker(stop.stop_id, stopMarker);
+					});
+
+				});*/
 			});
 
 			geolocation().then(function(latlon){
 				//latlon.pan = true;
 				//map("setSelfLocation", latlon);
-				var marker = MapComponentManager.getMarker("user", "self-location");
+				MapComponentManager.loaded(function(commands){
+					var marker = commands.getMarker("user", "self-location");
 
-				marker
-					.setLocation(latlon.latitude, latlon.longitude)
-					.setVisible(true)
-					.center();
+					marker.set("position", {lat: latlon.latitude, lng: latlon.longitude});
+					marker.set("visible", true);
+					marker.center();
 
 
-				btn("set", [{
-					text: "Center yourself",
-					onDisplay: false,
-					click: function(){
-						//map("setSelfLocation", latlon);
-						MapComponentManager.setCenter(latlon);
-					}
-				}]);
+					btn("set", [{
+						text: "Center yourself",
+						onDisplay: false,
+						click: function(){
+							//map("setSelfLocation", latlon);
+							marker.center();
+						}
+					}]);
+				});
+				
 			});
 		});
 
@@ -495,10 +514,14 @@ function controllers(tracker){
 			$location.path("/search");
 		};
 		$scope.centerStop = function(stop){
-			MapComponentManager.getMarker("nearbyStops", stop.stop_id).center().lightUp().showLabel();
+			MapComponentManager.loaded(function(commands){
+				//commands.getMarker("nearbyStops", stop.stop_id).center().lightUp().showLabel();
+				commands.getMarker("nearbyStops", stop.stop_id).moveIntoBound();
+			});
+			
 		};
 		$scope.decenterStop = function(stop){
-			MapComponentManager.getMarker("nearbyStops", stop.stop_id).lightOut().hideLabel();
+			//MapComponentManager.getMarker("nearbyStops", stop.stop_id).lightOut().hideLabel();
 		};
 	})
 
