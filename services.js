@@ -411,6 +411,7 @@ function services(tracker){
 			 *	- iconName
 			 *	- caption
 			 *	- iconHoverable
+			 *	- level	(bottom, common, focus, top)
 			 */
 			function MarkerTooltip(options, map){
 				//console.log("Tooltip constructor", map);
@@ -432,6 +433,7 @@ function services(tracker){
 					iconName: options.iconName,
 					caption: options.caption,
 					iconHoverable: options.iconHoverable === undefined ? false : true,
+					level: options.level || "common",
 					events: options.events
 				});
 
@@ -441,6 +443,9 @@ function services(tracker){
 
 				// initialize icon
 				marker.setIcon(icons(options.iconName));
+
+				// initialize zIndex
+				this.setLevel(this.get("level"));
 
 				// set up events
 				marker.addListener("click", function(){
@@ -482,10 +487,12 @@ function services(tracker){
 					case "position":
 						return this.draw();
 					case "iconName":
-						this.marker.setIcon(icons(this.get("iconName")));
+						this.marker.setIcon(icons(value));
 						return this.calculateOffset();
 					case "caption":
 						return this.modifyContent();
+					case "level":
+						return this.setLevel(value);
 				}
 			}
 			MarkerTooltip.prototype.modifyContent = function(){
@@ -504,6 +511,21 @@ function services(tracker){
 				if(!eventsCalls || !eventsCalls[eventName])	return;
 
 				eventsCalls[eventName]();
+			}
+
+			/**
+			 * @private
+			 */
+			MarkerTooltip.prototype.setLevel = function(level){
+				var levels = {
+					bottom:	1,
+					common:	2,
+					focus: 	3,
+					top:   	4
+				};
+
+				if(!(level in levels))	return;
+				this.marker.setZIndex(levels[level]);
 			}
 
 			MarkerTooltip.prototype.onAdd = function(){
@@ -542,6 +564,8 @@ function services(tracker){
 			}
 
 			MarkerTooltip.prototype.showLabel = function(){
+				if(!this.get("caption"))	return;
+
 				var tooltip = this.tooltip = document.createElement("div");
 				tooltip.style.position = "absolute";
 
@@ -549,16 +573,20 @@ function services(tracker){
 				this.modifyContent();
 
 				var panes = this.getPanes();
-				if(panes)	panes.mapPane.appendChild(tooltip);
+				if(panes)	panes.floatPane.appendChild(tooltip);
 
+				this.setLevel("focus");
 				this.draw();
 			}
 
 			MarkerTooltip.prototype.hideLabel = function(){
+				if(!this.get("caption"))	return;
+
 				var tooltip = this.tooltip;
 
 				if(!tooltip)	return;
 
+				this.setLevel(this.get("level"));
 				this.onRemove();
 			}
 

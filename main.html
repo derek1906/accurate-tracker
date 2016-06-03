@@ -81,7 +81,8 @@
                             iconName: "home",
                             visible: false,
                             caption: "You are here",
-                            iconHoverable: true
+                            iconHoverable: true,
+                            level: "focus"
                         });
                     });
 
@@ -125,7 +126,8 @@
                                         position: {lat: stop.mid_lat, lng: stop.mid_lon},
                                         iconName: "stop",
                                         caption: stop.stop_name,
-                                        iconHoverable: true
+                                        iconHoverable: true,
+                                        level: "common"
                                     });
 
                                 all_stops.setMarker(stop_id, stop_marker);
