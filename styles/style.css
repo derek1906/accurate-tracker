@@ -79,6 +79,9 @@ md-list.no-margin md-list-item > .md-button{
     font-family: Montserrat;
     position: absolute;
     opacity: 1;
+    -webkit-transform: translate(-50%, -100%);
+    -moz-transform: translate(-50%, -100%);
+    transform: translate(-50%, -100%);
     -webkit-transition: opacity 0.2s ease;
     -moz-transition: opacity 0.2s ease;
     transition: opacity 0.2s ease;

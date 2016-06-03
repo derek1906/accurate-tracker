@@ -77,9 +77,11 @@
                 .run(function(MapComponentManager, loadStopsDetails){
                     MapComponentManager.loaded(function(commands){
                         commands.getAndCreateMarker("user", "self-location", {
+                            position: {lat: 0, lng: 0},
                             iconName: "home",
                             visible: false,
-                            caption: "You are here"
+                            caption: "You are here",
+                            iconHoverable: true
                         });
                     });
 
@@ -122,7 +124,8 @@
                                     stop_marker = commands.createMarker({
                                         position: {lat: stop.mid_lat, lng: stop.mid_lon},
                                         iconName: "stop",
-                                        caption: stop.stop_name
+                                        caption: stop.stop_name,
+                                        iconHoverable: true
                                     });
 
                                 all_stops.setMarker(stop_id, stop_marker);

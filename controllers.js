@@ -490,7 +490,7 @@ function controllers(tracker){
 				MapComponentManager.loaded(function(commands){
 					var marker = commands.getMarker("user", "self-location");
 
-					marker.set("position", {lat: latlon.latitude, lng: latlon.longitude});
+					marker.setPosition({lat: latlon.latitude, lng: latlon.longitude});
 					marker.set("visible", true);
 					marker.center();
 
@@ -516,7 +516,8 @@ function controllers(tracker){
 		$scope.centerStop = function(stop){
 			MapComponentManager.loaded(function(commands){
 				//commands.getMarker("nearbyStops", stop.stop_id).center().lightUp().showLabel();
-				commands.getMarker("nearbyStops", stop.stop_id).moveIntoBound();
+				//commands.getMarker("nearbyStops", stop.stop_id).moveIntoBound();
+				commands.getMarker("all-stops", stop.stop_id).moveIntoBound();
 			});
 			
 		};
