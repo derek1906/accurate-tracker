@@ -517,12 +517,15 @@ function controllers(tracker){
 			MapComponentManager.loaded(function(commands){
 				//commands.getMarker("nearbyStops", stop.stop_id).center().lightUp().showLabel();
 				//commands.getMarker("nearbyStops", stop.stop_id).moveIntoBound();
-				commands.getMarker("all-stops", stop.stop_id).moveIntoBound();
+				commands.getMarker("all-stops", stop.stop_id).moveIntoBound().lightUp().showLabel();
 			});
 			
 		};
 		$scope.decenterStop = function(stop){
 			//MapComponentManager.getMarker("nearbyStops", stop.stop_id).lightOut().hideLabel();
+			MapComponentManager.loaded(function(commands){
+				commands.getMarker("all-stops", stop.stop_id).lightOut().hideLabel();
+			});
 		};
 	})
 

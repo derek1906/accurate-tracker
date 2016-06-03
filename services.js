@@ -78,18 +78,18 @@ function services(tracker){
 		var icons = {
 			"home": {
 				url: "icons/map_icon_set.png",
-				size: {width: 74, height: 88},
+				size: {width: 66, height: 80},
 				origin: {x: 0, y: 0}
 			},
 			"stop": {
 				url: "icons/map_icon_set.png",
-				size: {width: 62, height: 73},
-				origin: {x: 0, y: 88}
+				size: {width: 54, height: 65},
+				origin: {x: 0, y: 80}
 			},
 			"bus": {
 				url: "icons/map_icon_set.png",
 				size: {width: 70, height: 83},
-				origin: {x: 0, y: 161}
+				origin: {x: 0, y: 145}
 			}
 		}, icons_hover = {};
 
@@ -453,20 +453,14 @@ function services(tracker){
 				});
 
 				marker.addListener("mouseover", function(){
-					var iconHoverable = self.get("iconHoverable");
-					if(iconHoverable){
-						marker.setIcon(icons(self.get("iconName"), true));
-					}
+					if(self.get("iconHoverable"))	self.lightUp();
 					self.showLabel();
 
 					self.handleCustomEvent("mouseover");
 				});
 
 				marker.addListener("mouseout", function(){
-					var iconHoverable = self.get("iconHoverable");
-					if(iconHoverable){
-						marker.setIcon(icons(self.get("iconName"), false));
-					}
+					if(self.get("iconHoverable"))	self.lightOut();
 					self.hideLabel();
 
 					self.handleCustomEvent("mouseout");
@@ -514,6 +508,7 @@ function services(tracker){
 			}
 
 			/**
+			 * ==================================================
 			 * @private
 			 */
 			MarkerTooltip.prototype.setLevel = function(level){
@@ -526,6 +521,17 @@ function services(tracker){
 
 				if(!(level in levels))	return;
 				this.marker.setZIndex(levels[level]);
+			}
+
+			MarkerTooltip.prototype.calculateOffset = function(){
+				var MARKER_VERTIACL_MARGIN = 10;
+			
+				var markerIcon = this.marker.getIcon();
+				if(!markerIcon){
+					return this.set("offsetTop", 0);
+				}else{
+					return this.set("offsetTop", markerIcon.size.height + MARKER_VERTIACL_MARGIN);
+				}
 			}
 
 			MarkerTooltip.prototype.onAdd = function(){
@@ -558,6 +564,11 @@ function services(tracker){
 				}
 			}
 
+			/**
+			 * ==================================================
+			 * @public
+			 */
+
 			MarkerTooltip.prototype.setPosition = function(position){
 				this.set("position", position instanceof google.maps.LatLng ?
 					position : new google.maps.LatLng(position));
@@ -577,6 +588,8 @@ function services(tracker){
 
 				this.setLevel("focus");
 				this.draw();
+
+				return this;
 			}
 
 			MarkerTooltip.prototype.hideLabel = function(){
@@ -588,17 +601,20 @@ function services(tracker){
 
 				this.setLevel(this.get("level"));
 				this.onRemove();
+
+				return this;
 			}
 
-			MarkerTooltip.prototype.calculateOffset = function(){
-				var MARKER_VERTIACL_MARGIN = 10;
-			
-				var markerIcon = this.marker.getIcon();
-				if(!markerIcon){
-					return this.set("offsetTop", 0);
-				}else{
-					return this.set("offsetTop", markerIcon.size.height + MARKER_VERTIACL_MARGIN);
-				}
+			MarkerTooltip.prototype.lightUp = function(){
+				this.marker.setIcon(icons(this.get("iconName"), true));
+
+				return this;
+			}
+
+			MarkerTooltip.prototype.lightOut = function(){
+				this.marker.setIcon(icons(this.get("iconName"), false));
+
+				return this;
 			}
 
 			MarkerTooltip.prototype.center = function(){
@@ -614,6 +630,8 @@ function services(tracker){
 						lng: position.lng() - span.lng() * 0.25
 					});
 				});
+
+				return this;
 			}
 
 			MarkerTooltip.prototype.moveIntoBound = function(){
@@ -630,6 +648,8 @@ function services(tracker){
 				if(!halfBounds.contains(targetLatLng)){
 					this.center();
 				}
+
+				return this;
 			}
 
 
