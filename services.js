@@ -412,20 +412,14 @@ function services(tracker){
 			 *	- caption
 			 *	- iconHoverable
 			 *	- level	(bottom, common, focus, top)
+			 *	- events (object containing functions)
+			 *	- data (custom data)
 			 */
 			function MarkerTooltip(options, map){
 				//console.log("Tooltip constructor", map);
 
 				var self = this;
 				var marker = this.marker = new google.maps.Marker();
-
-				/*
-				marker.changed = function(property){
-					if(property == "icon"){
-						self.calculateOffset();
-					}
-				}
-				*/
 			
 				this.setValues({
 					position: new google.maps.LatLng(options.position),
@@ -434,7 +428,8 @@ function services(tracker){
 					caption: options.caption,
 					iconHoverable: options.iconHoverable === undefined ? false : true,
 					level: options.level || "common",
-					events: options.events
+					events: options.events,
+					data: options.data
 				});
 
 				// shared properties
@@ -504,7 +499,8 @@ function services(tracker){
 				
 				if(!eventsCalls || !eventsCalls[eventName])	return;
 
-				eventsCalls[eventName]();
+				// pass custom data to event handler
+				eventsCalls[eventName](this.get("data"), this);
 			}
 
 			/**

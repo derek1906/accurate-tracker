@@ -74,7 +74,7 @@
 
                     $mdIconProvider.iconSet("ui", "icons/ui_icon_set.svg", 24);
                 })
-                .run(function(MapComponentManager, loadStopsDetails){
+                .run(function($location, MapComponentManager, loadStopsDetails){
                     MapComponentManager.loaded(function(commands){
                         commands.getAndCreateMarker("user", "self-location", {
                             position: {lat: 0, lng: 0},
@@ -82,42 +82,16 @@
                             visible: false,
                             caption: "You are here",
                             iconHoverable: true,
-                            level: "focus"
+                            level: "focus",
+                            events: {
+                                click: function(data, self){
+                                    self.center();
+                                }
+                            }
                         });
                     });
 
-                    /*
-                    // Preset markers
-                    MapComponentManager.getAndCreateMarker("user", "self-location", new MapComponentManager.Marker("self-location", {
-                        canIconHover: true,
-                        iconName: "home",
-                        label: "You are here",
-                        on: {
-                            click: function(marker){
-                                marker.center(true);
-                            }
-                        }
-                    }, {
-                        visible: false
-                    }));
-                    */
-
                     loadStopsDetails().then(function(stops){
-                        console.log(stops);
-                        /*var all_stops = new MapComponentManager.Set("all-stops");
-                        for(var stop_id in stops){
-                            var stop = stops[stop_id],
-                                stop_marker = new MapComponentManager.Marker(stop_id, {
-                                    latitude: stop.mid_lat,
-                                    longitude: stop.mid_lon,
-                                    canIconHover: true,
-                                    iconName: "stop",
-                                    label: stop.stop_name
-                                });
-
-                            all_stops.addMarker(stop_marker);
-                        }*/
-
                         MapComponentManager.loaded(function(commands){
                             var all_stops = commands.addSet("all-stops");
                             for(var stop_id in stops){
@@ -127,7 +101,13 @@
                                         iconName: "stop",
                                         caption: stop.stop_name,
                                         iconHoverable: true,
-                                        level: "common"
+                                        level: "common",
+                                        data: stop,
+                                        events: {
+                                            click: function(stop){
+                                                $location.path("/stop/" + stop.stop_id);
+                                            }
+                                        }
                                     });
 
                                 all_stops.setMarker(stop_id, stop_marker);

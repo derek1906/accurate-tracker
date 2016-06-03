@@ -485,8 +485,6 @@ function controllers(tracker){
 			});
 
 			geolocation().then(function(latlon){
-				//latlon.pan = true;
-				//map("setSelfLocation", latlon);
 				MapComponentManager.loaded(function(commands){
 					var marker = commands.getMarker("user", "self-location");
 
@@ -499,7 +497,6 @@ function controllers(tracker){
 						text: "Center yourself",
 						onDisplay: false,
 						click: function(){
-							//map("setSelfLocation", latlon);
 							marker.center();
 						}
 					}]);
@@ -515,14 +512,11 @@ function controllers(tracker){
 		};
 		$scope.centerStop = function(stop){
 			MapComponentManager.loaded(function(commands){
-				//commands.getMarker("nearbyStops", stop.stop_id).center().lightUp().showLabel();
-				//commands.getMarker("nearbyStops", stop.stop_id).moveIntoBound();
 				commands.getMarker("all-stops", stop.stop_id).moveIntoBound().lightUp().showLabel();
 			});
 			
 		};
 		$scope.decenterStop = function(stop){
-			//MapComponentManager.getMarker("nearbyStops", stop.stop_id).lightOut().hideLabel();
 			MapComponentManager.loaded(function(commands){
 				commands.getMarker("all-stops", stop.stop_id).lightOut().hideLabel();
 			});
