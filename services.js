@@ -430,6 +430,7 @@ function services(tracker){
 					level: options.level || "common",
 					events: options.events,
 					isHiding: true,
+					onGoingAnimation: undefined,
 					data: options.data,
 				});
 
@@ -502,6 +503,15 @@ function services(tracker){
 
 				// pass custom data to event handler
 				eventsCalls[eventName](this.get("data"), this);
+			}
+
+			/**
+			 * @override setMap
+			 * @param {Map} map
+			 */
+			MarkerTooltip.prototype.setMap = function(map){
+				google.maps.OverlayView.prototype.setMap.call(this, map);
+				this.marker.setMap(map);
 			}
 
 			/**
@@ -622,18 +632,26 @@ function services(tracker){
 			MarkerTooltip.prototype.setMarkerOpacity = function(finalOpacity){
 				var self = this;
 
-				$({value: self.marker.getOpacity()}).animate({
+				var onGoingAnimation = this.get("onGoingAnimation");
+				if(onGoingAnimation)	onGoingAnimation.stop();
+
+				onGoingAnimation = $({value: self.marker.getOpacity()}).animate({
 					value: finalOpacity
 				}, {
 					duration: 100,
 					step: function(){
 						self.marker.setOpacity(this.value);
+					},
+					complete: function(){
+						self.marker.setOpacity(this.value);
 					}
 				});
+
+				this.set("onGoingAnimation", onGoingAnimation);
 			}
 
 			MarkerTooltip.prototype.center = function(){
-				var map = this.getMap(), self = this;
+				var map = manager.map, self = this;
 
 				var span = map.getBounds().toSpan();
 
@@ -650,7 +668,7 @@ function services(tracker){
 			}
 
 			MarkerTooltip.prototype.moveIntoBound = function(){
-				var map = this.getMap(), self = this;
+				var map = manager.map, self = this;
 
 				var bounds = map.getBounds(),
 					sw = bounds.getSouthWest(),
@@ -721,8 +739,8 @@ function services(tracker){
 						lng: ne.lng() - bounds.toSpan().lng() * 0.5
 					});
 
-				var t0 = Date.now();
-
+				// hide markers when not in 2x viewport, reduce opacity when in 
+				// the left side of screen
 				for(var set_id in marker_sets){
 					var set = marker_sets[set_id];
 					for(var marker_id in set.markers){
@@ -731,28 +749,24 @@ function services(tracker){
 						var targetLatLng = marker.get("position");
 						if(eastBounds.contains(targetLatLng)){
 							if(marker.get("isHiding")){
-								marker.marker.setMap(map);
+								marker.setMap(map);
 								marker.set("isHiding", false);
 							}
 							marker.setMarkerOpacity(1);
 						}else if(westBounds.contains(targetLatLng)){
 							if(marker.get("isHiding")){
-								marker.marker.setMap(map);
+								marker.setMap(map);
 								marker.set("isHiding", false);
 							}
 							marker.setMarkerOpacity(0.3);
 						}else{
 							if(!marker.get("isHiding")){
-								marker.marker.setMap(null);
+								marker.setMap(null);
 								marker.set("isHiding", true);
 							}
 						}
 					}
 				}
-
-				var t1 = Date.now();
-
-				console.log("Time taken:", (t1-t0)/1000 + "s");
 			});
 
 			manager.proccessQueue.forEach(function(proccess){ proccess(); });
