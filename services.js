@@ -398,7 +398,7 @@ function services(tracker){
 
 	.service("MapComponentManager", function MapComponentManager(uiGmapIsReady, icons, $q){
 
-		uiGmapIsReady.promise().then(function(map){
+		uiGmapIsReady.promise().then(function(maps){
 
 			/**
 			 * @class A marker tooltip class
@@ -429,7 +429,8 @@ function services(tracker){
 					iconHoverable: options.iconHoverable === undefined ? false : true,
 					level: options.level || "common",
 					events: options.events,
-					data: options.data
+					isHiding: true,
+					data: options.data,
 				});
 
 				// shared properties
@@ -464,7 +465,7 @@ function services(tracker){
 
 				// setMap
 				this.setMap(map);
-				marker.setMap(map);
+				//marker.setMap(map);
 			}
 			MarkerTooltip.prototype = new google.maps.OverlayView;
 
@@ -490,7 +491,7 @@ function services(tracker){
 				var tooltip = this.tooltip;
 				if(!tooltip)	return;
 
-				tooltip.textContent = this.get("caption");
+				this.tooltipInner.textContent = this.get("caption");
 				this.calculateOffset();
 			}
 
@@ -557,6 +558,7 @@ function services(tracker){
 				if(tooltip && tooltip.parentNode){
 					tooltip.parentNode.removeChild(tooltip);
 					delete this.tooltip;
+					delete this.tooltipInner;
 				}
 			}
 
@@ -573,11 +575,15 @@ function services(tracker){
 			MarkerTooltip.prototype.showLabel = function(){
 				if(!this.get("caption"))	return;
 
-				var tooltip = this.tooltip = document.createElement("div");
-				tooltip.style.position = "absolute";
+				var tooltip = this.tooltip = document.createElement("div"),
+					inner = this.tooltipInner = document.createElement("div");
+
+				tooltip.appendChild(inner);
 
 				tooltip.classList.add("marker-label");
+				inner.classList.add("marker-label-inner");
 				this.modifyContent();
+
 
 				var panes = this.getPanes();
 				if(panes)	panes.floatPane.appendChild(tooltip);
@@ -611,6 +617,19 @@ function services(tracker){
 				this.marker.setIcon(icons(this.get("iconName"), false));
 
 				return this;
+			}
+
+			MarkerTooltip.prototype.setMarkerOpacity = function(finalOpacity){
+				var self = this;
+
+				$({value: self.marker.getOpacity()}).animate({
+					value: finalOpacity
+				}, {
+					duration: 100,
+					step: function(){
+						self.marker.setOpacity(this.value);
+					}
+				});
 			}
 
 			MarkerTooltip.prototype.center = function(){
@@ -667,10 +686,74 @@ function services(tracker){
 				return this;
 			}
 
-			manager.map = map[0].map;
+			var map = maps[0].map;
+
+			manager.map = map;
 			manager.ready = true;
 			manager.MarkerTooltip = MarkerTooltip;
 			manager.MarkerSet = MarkerSet;
+
+			// set up events
+			map.addListener("dragstart", function(){
+				manager.dragging = true;
+			});
+			map.addListener("dragend", function(){
+				manager.dragging = false;
+			});
+			map.addListener("idle", function(){
+				console.log("idle");
+
+				var bounds = map.getBounds(),
+					sw = bounds.getSouthWest(),
+					ne = bounds.getNorthEast();
+				var eastBounds = new google.maps.LatLngBounds({
+						lat: sw.lat() - bounds.toSpan().lat(),
+						lng: sw.lng() + bounds.toSpan().lng() * 0.5
+					}, {
+						lat: ne.lat() + bounds.toSpan().lat(),
+						lng: ne.lng() + bounds.toSpan().lng()
+					}),
+					westBounds = new google.maps.LatLngBounds({
+						lat: sw.lat() - bounds.toSpan().lat(),
+						lng: sw.lng() - bounds.toSpan().lng()
+					}, {
+						lat: ne.lat() + bounds.toSpan().lat(),
+						lng: ne.lng() - bounds.toSpan().lng() * 0.5
+					});
+
+				var t0 = Date.now();
+
+				for(var set_id in marker_sets){
+					var set = marker_sets[set_id];
+					for(var marker_id in set.markers){
+						var marker = set.markers[marker_id];
+
+						var targetLatLng = marker.get("position");
+						if(eastBounds.contains(targetLatLng)){
+							if(marker.get("isHiding")){
+								marker.marker.setMap(map);
+								marker.set("isHiding", false);
+							}
+							marker.setMarkerOpacity(1);
+						}else if(westBounds.contains(targetLatLng)){
+							if(marker.get("isHiding")){
+								marker.marker.setMap(map);
+								marker.set("isHiding", false);
+							}
+							marker.setMarkerOpacity(0.3);
+						}else{
+							if(!marker.get("isHiding")){
+								marker.marker.setMap(null);
+								marker.set("isHiding", true);
+							}
+						}
+					}
+				}
+
+				var t1 = Date.now();
+
+				console.log("Time taken:", (t1-t0)/1000 + "s");
+			});
 
 			manager.proccessQueue.forEach(function(proccess){ proccess(); });
 			manager.proccessQueue = [];
@@ -732,7 +815,8 @@ function services(tracker){
 				}
 			},
 			sets: marker_sets,
-			commands: commands
+			commands: commands,
+			dragging: false
 		};
 
 		window.manager = manager;

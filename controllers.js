@@ -512,7 +512,8 @@ function controllers(tracker){
 		};
 		$scope.centerStop = function(stop){
 			MapComponentManager.loaded(function(commands){
-				commands.getMarker("all-stops", stop.stop_id).moveIntoBound().lightUp().showLabel();
+				if(!MapComponentManager.dragging)
+					commands.getMarker("all-stops", stop.stop_id).moveIntoBound().lightUp().showLabel();
 			});
 			
 		};
