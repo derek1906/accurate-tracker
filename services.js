@@ -450,15 +450,19 @@ function services(tracker){
 				});
 
 				marker.addListener("mouseover", function(){
-					if(self.get("iconHoverable"))	self.lightUp();
-					self.showLabel();
+					if(self.get("iconHoverable")){
+						self.lightUp();
+						self.showLabel();
+					}
 
 					self.handleCustomEvent("mouseover");
 				});
 
 				marker.addListener("mouseout", function(){
-					if(self.get("iconHoverable"))	self.lightOut();
-					self.hideLabel();
+					if(self.get("iconHoverable")){
+						self.lightOut();
+						self.hideLabel();
+					}
 
 					self.handleCustomEvent("mouseout");
 				});
@@ -584,7 +588,14 @@ function services(tracker){
 			}
 
 			MarkerTooltip.prototype.showLabel = function(){
-				if(!this.get("caption"))	return;
+				if(!this.get("caption"))	return this;	// empty caption
+				if(this.tooltip)        	return this;	// already showing
+
+				// remember state in case marker has to wait for onAdd
+				this.set("isLabelShowing", true);
+
+				var panes = this.getPanes();
+				if(!panes)	return this;	// map not ready
 
 				var tooltip = this.tooltip = document.createElement("div"),
 					inner = this.tooltipInner = document.createElement("div");
@@ -595,23 +606,20 @@ function services(tracker){
 				inner.classList.add("marker-label-inner");
 				this.modifyContent();
 
-				var panes = this.getPanes();
-				if(panes)	panes.floatPane.appendChild(tooltip);
+				panes.floatPane.appendChild(tooltip);
 
 				this.setLevel("focus");
 				this.draw();
 
-				// remember state in case marker goes out of viewport
-				this.set("isLabelShowing", true);
 				return this;
 			}
 
 			MarkerTooltip.prototype.hideLabel = function(){
-				if(!this.get("caption"))	return;
+				if(!this.get("caption"))	return this;
 
 				var tooltip = this.tooltip;
 
-				if(!tooltip)	return;
+				if(!tooltip)	return this;
 
 				this.setLevel(this.get("level"));
 				this.onRemove();
@@ -706,6 +714,16 @@ function services(tracker){
 			MarkerSet.prototype.empty = function(){
 				this.markers = {};
 				return this;
+			}
+			MarkerSet.prototype.show = function(){
+				for(var marker_id in this.markers){
+					this.markers[marker_id].setMap(map);
+				}
+			}
+			MarkerSet.prototype.hide = function(){
+				for(var marker_id in this.markers){
+					this.markers[marker_id].setMap(null);
+				}
 			}
 
 			var map = maps[0].map;

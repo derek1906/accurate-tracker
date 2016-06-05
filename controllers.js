@@ -38,7 +38,7 @@ function controllers(tracker){
 				disableDefaultUI: true
 			},
 			center: { latitude: 40.1069778, longitude: -88.2272211 }, // main quad
-			zoom: 17,
+			zoom: 18,
 			control: {},
 			background: {},
 
@@ -563,7 +563,7 @@ function controllers(tracker){
 				};
 			});
 
-		var hightlightedStop = null;
+		var highlightedStop = null;
 
 		// go to first stop in search results
 		$scope.goToFirstOption = function(e){
@@ -574,19 +574,26 @@ function controllers(tracker){
 		};
 		$scope.stopOnClick = function(stop){
 			$scope.goToStop(stop);
-			$scope.dehighlightStop(stop);
 		}
 		$scope.highlightStop = function(stop){
 			MapComponentManager.loaded(function(commands){
-				highlightStop = commands.getMarker("all-stops", stop.stop_id).moveIntoBound();
-				highlightStop.lightUp().showLabel();
+				if(highlightedStop)	highlightedStop.set("iconHoverable", true);
+
+				highlightedStop = commands.getMarker("all-stops", stop.stop_id).moveIntoBound();
+				highlightedStop.lightUp().showLabel();
+				highlightedStop.set("iconHoverable", false);
 			});
 		};
 		$scope.dehighlightStop = function(stop){
 			MapComponentManager.loaded(function(commands){
-				highlightStop.lightOut().hideLabel();
+				highlightedStop.lightOut().hideLabel();
+				highlightedStop.set("iconHoverable", true);
 			});
 		};
+
+		$scope.$on("$destroy", function(){
+			if(highlightedStop) highlightedStop.set("iconHoverable", true);
+		});
 	})
 
 	.controller("Favorites", function Favorites($scope, loadStopsDetails, storage, getStopDetails, map){
@@ -601,12 +608,14 @@ function controllers(tracker){
 	})
 
 	.controller("StopDetails", function StopDetails($scope, $routeParams, $interval, $mdToast,
-										loadStopsDetails, getStopDetails, getUpcomingBuses, map, timer, DEPARTURE_UPDATE_INTERVAL)
+										loadStopsDetails, getStopDetails, getUpcomingBuses, map, timer, DEPARTURE_UPDATE_INTERVAL, MapComponentManager)
 	{
 		var stop_id = $scope.stop_id = $routeParams.id;
 		var refreshInterval = undefined;
 
 		//map("reset");
+		
+		var targetMarker = null;
 
 		loadStopsDetails()
 			.then(function(){
@@ -617,10 +626,17 @@ function controllers(tracker){
 					return;
 				}
 				
+				/*
 				map("setTargetLocation", {
 					latitude: stop.mid_lat,
 					longitude: stop.mid_lon,
 					pan: true
+				});
+				*/
+			
+				MapComponentManager.loaded(function(commands){
+					targetMarker = commands.getMarker("all-stops", stop.stop_id).showLabel().lightUp().center();
+					targetMarker.set("iconHoverable", false);
 				});
 
 				$scope.update();
@@ -629,6 +645,7 @@ function controllers(tracker){
 
 		$scope.$on("$destroy", function(){
 			if(refreshInterval)	$interval.cancel(refreshInterval);
+			if(targetMarker) targetMarker.hideLabel().lightOut().set("iconHoverable", true);
 		});
 
 		$scope.update = function(){
