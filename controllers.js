@@ -430,7 +430,8 @@ function controllers(tracker){
 	})
 
 	.controller("Landing", function Landing($scope, $location, $mdToast, 
-			getNearbyStops, loadStopsDetails, geolocation, map, btn, MapComponentManager){
+			getNearbyStops, loadStopsDetails, geolocation, map, btn, MapComponentManager)
+	{
 		$scope.nearbyStops = [];
 
 		loadStopsDetails().then(function(){
@@ -524,16 +525,18 @@ function controllers(tracker){
 		};
 	})
 
-	.controller("Search", function Search($scope, $location, geolocation, loadStopsDetails, getAutocomplete, map){
+	.controller("Search", function Search($scope, $location, geolocation, loadStopsDetails, getAutocomplete, map, MapComponentManager){
 		// focus input
 		setTimeout(function(){
 			document.getElementById("search-input").focus();
 		});
 
+		/*
 		map("reset");
 		geolocation().then(function(latlng){
 			map("moveTo", latlng);
 		})
+		*/
 
 		loadStopsDetails()
 			.then(function(){
@@ -545,17 +548,22 @@ function controllers(tracker){
 					getAutocomplete($scope.searchTerm).then(function(list){
 						$scope.isSearching = false;
 						$scope.searchResults = list;
+
+						/*
 						map("displayPoints", list.map(function(stop){
 							return stop.stop_id;
 						}));
 						if(list.length){
 							map("highlightPoint", list[0]);
 						}
+						*/
 					}, function(){
 						$scope.isSearching = false;
 					});
 				};
 			});
+
+		var hightlightedStop = null;
 
 		// go to first stop in search results
 		$scope.goToFirstOption = function(e){
@@ -563,6 +571,21 @@ function controllers(tracker){
 			if($scope.searchResults.length){
 				$scope.goToStop($scope.searchResults[0]);
 			}
+		};
+		$scope.stopOnClick = function(stop){
+			$scope.goToStop(stop);
+			$scope.dehighlightStop(stop);
+		}
+		$scope.highlightStop = function(stop){
+			MapComponentManager.loaded(function(commands){
+				highlightStop = commands.getMarker("all-stops", stop.stop_id).moveIntoBound();
+				highlightStop.lightUp().showLabel();
+			});
+		};
+		$scope.dehighlightStop = function(stop){
+			MapComponentManager.loaded(function(commands){
+				highlightStop.lightOut().hideLabel();
+			});
 		};
 	})
 

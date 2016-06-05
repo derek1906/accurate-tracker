@@ -463,10 +463,6 @@ function services(tracker){
 					self.handleCustomEvent("mouseout");
 				});
 
-
-				// setMap
-				this.setMap(map);
-				//marker.setMap(map);
 			}
 			MarkerTooltip.prototype = new google.maps.OverlayView;
 
@@ -543,6 +539,11 @@ function services(tracker){
 
 			MarkerTooltip.prototype.onAdd = function(){
 				//console.log("onAdd");
+				
+				// check if label previously showing
+				if(this.get("isLabelShowing")){
+					this.showLabel();
+				}
 			}
 
 			MarkerTooltip.prototype.draw = function(){
@@ -594,13 +595,14 @@ function services(tracker){
 				inner.classList.add("marker-label-inner");
 				this.modifyContent();
 
-
 				var panes = this.getPanes();
 				if(panes)	panes.floatPane.appendChild(tooltip);
 
 				this.setLevel("focus");
 				this.draw();
 
+				// remember state in case marker goes out of viewport
+				this.set("isLabelShowing", true);
 				return this;
 			}
 
@@ -614,6 +616,8 @@ function services(tracker){
 				this.setLevel(this.get("level"));
 				this.onRemove();
 
+				// reset state
+				this.set("isLabelShowing", false);
 				return this;
 			}
 
@@ -719,7 +723,6 @@ function services(tracker){
 				manager.dragging = false;
 			});
 			map.addListener("idle", function(){
-				console.log("idle");
 
 				var bounds = map.getBounds(),
 					sw = bounds.getSouthWest(),
@@ -767,6 +770,7 @@ function services(tracker){
 						}
 					}
 				}
+
 			});
 
 			manager.proccessQueue.forEach(function(proccess){ proccess(); });

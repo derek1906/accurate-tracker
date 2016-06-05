@@ -41,7 +41,7 @@
     </div>
     <md-list class="page-scrollable-content no-margin">
         <md-list-item class="nearbyStop-info" ng-repeat="stop in searchResults track by $index"
-                ng-click="goToStop(stop)" ng-mouseover="highlightStop(stop)" ng-mouseout="dehighlightStop(stop)">
+                ng-click="stopOnClick(stop)" ng-mouseover="highlightStop(stop)" ng-mouseout="dehighlightStop(stop)">
             <fav-button stop-id="stop.stop_id" class="md-primary"></fav-button>
             <span>{{stop.stop_name}}</span>
         </md-list-item>
