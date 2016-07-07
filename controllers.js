@@ -93,7 +93,7 @@ function controllers(tracker){
 			$scope.mapMeta.backdrop = {
 				getTile: function(coord, zoomm, owner){
 					var div = owner.createElement("div");
-					div.style.background = "rgba(45, 56, 64, 0.65)";
+					div.style.background = "rgba(14, 28, 39, 0.0)";        //Color and opacity of transparent screen
 					div.style.width = this.tileSize.width + "px";
 					div.style.height = this.tileSize.height + "px";
 					return div;
