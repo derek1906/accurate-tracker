@@ -19,9 +19,9 @@
 </style>
 <link href="./styles/route-color.css" rel="stylesheet" />
 <div class="headbar" layout="row" layout-align="start center" flex="none">
-    <fav-button stop-id="stop.stop_id"></fav-button>
+    <fav-button stop-id="stop.stop_id" ng-show="!stopNotExists"></fav-button>
     <h2>
-        <span>{{stop.stop_name}}</span>
+        <span>{{stop.stop_name || "nope.avi"}}</span>
     </h2>
 </div>
 <md-content flex class="main-content" layout="column">

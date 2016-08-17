@@ -19,10 +19,13 @@
         <span class="page-subtitle" msg="default-subtitle"</span>
     </div>
 
-    <md-list class="page-scrollable-content departures no-margin">
-        <md-list-item class="favStop-info" ng-repeat="stop in stops track by stop.stop_id" ng-click="goToStop(stop)">
+    <md-list class="page-scrollable-content departures no-margin" ng-show="stops.length">
+        <md-list-item class="favStop-info" ng-repeat="stop in stops track by stop.stop_id"
+                    ng-click="goToStop(stop)" ng-mouseover="centerStop(stop)" ng-mouseout="decenterStop(stop)">
             <fav-button stop-id="stop.stop_id" class="md-primary"></fav-button>
             <span>{{stop.stop_name}}</span>
         </md-list-item>
     </md-list>
+
+    <span ng-show="!stops.length" msg="empty-list"></span>
 </md-content>

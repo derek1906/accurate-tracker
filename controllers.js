@@ -437,7 +437,7 @@ function controllers(tracker){
 	})
 
 	.controller("Landing", function Landing($scope, $location, $mdToast, 
-			getNearbyStops, loadStopsDetails, geolocation, map, btn, MapComponentManager)
+			getNearbyStops, loadStopsDetails, geolocation, map, btn, MapComponentManager, delayedCall)
 	{
 		$scope.nearbyStops = [];
 
@@ -518,16 +518,17 @@ function controllers(tracker){
 		$scope.doSearch = function(){
 			$location.path("/search");
 		};
+
 		$scope.centerStop = function(stop){
 			MapComponentManager.loaded(function(commands){
-				if(!MapComponentManager.dragging)
-					commands.getMarker("all-stops", stop.stop_id).moveIntoBound().lightUp().showLabel().setIcon("stop_selected_v2", true);
+				if(!MapComponentManager.dragging){
+					commands.getMarker("all-stops", stop.stop_id).delayedCenter().lightUp().showLabel().setIcon("stop_selected_v2", true);
+				}
 			});
-			
 		};
 		$scope.decenterStop = function(stop){
 			MapComponentManager.loaded(function(commands){
-				commands.getMarker("all-stops", stop.stop_id).lightOut().hideLabel().setIcon("stop_v2", false);
+				commands.getMarker("all-stops", stop.stop_id).cancelDelayedCenter().lightOut().hideLabel().setIcon("stop_v2", false);
 			});
 		};
 	})
@@ -603,7 +604,7 @@ function controllers(tracker){
 		});
 	})
 
-	.controller("Favorites", function Favorites($scope, loadStopsDetails, storage, getStopDetails, map){
+	.controller("Favorites", function Favorites($scope, loadStopsDetails, storage, getStopDetails, map, MapComponentManager){
 		loadStopsDetails().then(function(){
 
 			$scope.stops = storage.get("favorites").map(function(stop_id){
@@ -612,6 +613,20 @@ function controllers(tracker){
 
 			map("reset");
 		});
+
+
+		$scope.centerStop = function(stop){
+			MapComponentManager.loaded(function(commands){
+				if(!MapComponentManager.dragging)
+					commands.getMarker("all-stops", stop.stop_id).moveIntoBound().lightUp().showLabel().setIcon("stop_selected_v2", true);
+			});
+			
+		};
+		$scope.decenterStop = function(stop){
+			MapComponentManager.loaded(function(commands){
+				commands.getMarker("all-stops", stop.stop_id).lightOut().hideLabel().setIcon("stop_v2", false);
+			});
+		};
 	})
 
 	.controller("StopDetails", function StopDetails($scope, $routeParams, $interval, $mdToast,

@@ -93,17 +93,17 @@ function services(tracker){
 			},
 
 			"home_v2": {
-				url: "icons/map/Markers.svg",
+				url: "icons/map_icon_set_v2.svg",
 				size: {width: 42, height: 76},
 				origin: {x: 0, y: 0}
 			},
 			"stop_v2": {
-				url: "icons/map/Markers.svg",
+				url: "icons/map_icon_set_v2.svg",
 				size: {width: 42, height: 76},
 				origin: {x: 0, y: 76}
 			},
 			"stop_selected_v2": {
-				url: "icons/map/Markers.svg",
+				url: "icons/map_icon_set_v2.svg",
 				size: {width: 42, height: 76},
 				origin: {x: 0, y: 152}
 			}
@@ -412,7 +412,27 @@ function services(tracker){
 		};
 	})
 
-	.service("MapComponentManager", function MapComponentManager(uiGmapIsReady, icons, $q){
+	.service("delayedCall", function(){
+		return function(delayInMs, callback){
+			var timer = 0;
+
+			return {
+				call: function(){
+					var args = arguments;
+					if(timer)	clearTimeout(timer);
+
+					timer = setTimeout(function(){
+						callback.apply(null, args);
+					}, delayInMs);
+				},
+				cancel: function(){
+					clearTimeout(timer);
+				}
+			};
+		};
+	})
+
+	.service("MapComponentManager", function MapComponentManager(uiGmapIsReady, icons, $q, delayedCall){
 		var isLoaded = false;
 
 		//uiGmapIsReady.promise().then(function(maps){
@@ -702,6 +722,18 @@ function services(tracker){
 					});
 				});
 
+				return this;
+			}
+
+			var delayedCenter = delayedCall(500, function(marker){
+				if(!manager.dragging)	marker.center();
+			});
+			MarkerTooltip.prototype.delayedCenter = function(){
+				delayedCenter.call(this);
+				return this;
+			};
+			MarkerTooltip.prototype.cancelDelayedCenter = function(){
+				delayedCenter.cancel();
 				return this;
 			}
 
