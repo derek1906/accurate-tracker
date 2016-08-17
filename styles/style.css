@@ -1,7 +1,8 @@
 @import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
 
 body{
-    background: rgba(0, 0, 0, 0.6);
+    /*background: rgba(0, 0, 0, 0.6);*/
+    background: #011B2E;
 }
 body{
     width: 100%;
@@ -30,8 +31,8 @@ body{
     background-clip: padding-box;
 }
 ::selection {
-    color: white;
-    background: rgba(0, 0, 0, 0.5);
+    color: #011B2E;
+    background: rgba(255, 255, 255, 0.5);
     text-shadow: none;
 }
 
@@ -87,6 +88,10 @@ md-list.no-margin md-list-item > .md-button{
     pointer-events: none;
     white-space: nowrap;
     font-family: Montserrat;
+}
+#map-container{
+    width: 100%;
+    height: 100%;
 }
 
 /* Overmap timers */
@@ -226,9 +231,9 @@ md-list.no-margin md-list-item > .md-button{
     -webkit-filter: blur(0px);
     -moz-filter: blur(0px);
     filter: blur(0px);
-    transition: filter 0.3s ease;
+    /*transition: filter 0.3s ease;
     -webkit-transition: -webkit-filter 0.3s ease;
-    -moz-transition: -moz-filter 0.3s ease;
+    -moz-transition: -moz-filter 0.3s ease;*/
 }
 .overlayControlled.about{
     -webkit-filter: blur(10px);

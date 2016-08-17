@@ -19,6 +19,8 @@
         <script src="./bower_components/lodash/lodash.js"></script>
         <script src="./bower_components/jquery/dist/jquery.min.js"></script>
 
+        <script src="https://maps.googleapis.com/maps/api/js"></script>
+
         <script src="./services.js"></script>
         <script src="./controllers.js"></script>
         <script src="./filters.js"></script>
@@ -74,11 +76,24 @@
 
                     $mdIconProvider.iconSet("ui", "icons/ui_icon_set.svg", 24);
                 })
-                .run(function($location, MapComponentManager, loadStopsDetails){
+                .run(function($location, MapComponentManager, loadStopsDetails, $http){
+                    $http.get("styles/map-style.json").then(function(styles){
+                        MapComponentManager.load(document.getElementById("map-container"), {
+                            mapTypeControl: false, streetViewControl: false, 
+                            scaleControl: false, zoomControl: false, scrollwheel: false, disableDoubleClickZoom: false,
+                            minZoom: 17, maxZoom: 17,
+                            disableDefaultUI: true, clickableIcons: false,
+                            center: { lat: 40.1069778, lng: -88.2272211 }, // main quad
+                            zoom: 17,
+                            styles: styles.data,
+                            backgroundColor: "none"
+                        });
+                    });
+
                     MapComponentManager.loaded(function(commands){
                         commands.getAndCreateMarker("user", "self-location", {
                             position: {lat: 0, lng: 0},
-                            iconName: "home",
+                            iconName: "home_v2",
                             visible: false,
                             caption: "You are here",
                             iconHoverable: true,
@@ -98,7 +113,7 @@
                                 var stop = stops[stop_id],
                                     stop_marker = commands.createMarker({
                                         position: {lat: stop.mid_lat, lng: stop.mid_lon},
-                                        iconName: "stop",
+                                        iconName: "stop_v2",
                                         caption: stop.stop_name,
                                         iconHoverable: true,
                                         level: "common",
@@ -120,21 +135,7 @@
     <body ng-app="tracker" ng-controller="Overall">
         <div id="map" class="overlayControlled" ng-class="overlayPage">
             <div style="position: relative; height: 100%;">
-                <ui-gmap-google-map center='mapMeta.center' zoom='mapMeta.zoom' options="mapMeta.options" control="mapMeta.control">
-                    <div ng-if="mapMeta.loaded">
-                        <ui-gmap-map-type options="mapMeta.backdrop"></ui-gmap-map-type>
-                        <ui-gmap-marker idKey="-1" ng-if="mapMeta.selfLocation" options="mapMeta.selfLocationOptions" coords="mapMeta.selfLocation" events="mapMeta.selfLocationEvents"></ui-gmap-marker>
-                        <ui-gmap-marker idKey="0" ng-if="mapMeta.targetLocation" options="mapMeta.targetLocationOptions" coords="mapMeta.targetLocation"></ui-gmap-marker>
-                        <!--<ui-gmap-rectangle bounds='mapMeta.background.bounds' fill='mapMeta.background.fill' clickable="false"></ui-gmap-rectangle>-->
-                        <ui-gmap-markers ng-if="mapMeta.points.length" models="mapMeta.points" options="'options'" coords="'coords'"></ui-gmap-markers>
-                        <ui-gmap-polyline ng-if="mapMeta.path.length" path="mapMeta.path" stroke="mapMeta.pathStroke" clickable="false" geodesic="true" static="true"></ui-gmap-polyline>
-                        
-                        <!--
-                        <ui-gmap-markers models="markers" idKey="'idKey'" options="'options'" coords="'location'"></ui-gmap-markers>
-                        <ui-gmap-window coords="mapMeta.tooltip.coords" show="mapMeta.tooltip.show" options="mapMeta.tooltip.options"></ui-gmap-window>
-                        -->
-                    </div>
-                </ui-gmap-google-map>
+                <div id="map-container"></div>
             </div>
         </div>
         <div id="wrapper" layout="row" class="overlayControlled" ng-class="overlayPage">

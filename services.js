@@ -90,6 +90,22 @@ function services(tracker){
 				url: "icons/map_icon_set.png",
 				size: {width: 70, height: 83},
 				origin: {x: 0, y: 145}
+			},
+
+			"home_v2": {
+				url: "icons/map/Markers.svg",
+				size: {width: 42, height: 76},
+				origin: {x: 0, y: 0}
+			},
+			"stop_v2": {
+				url: "icons/map/Markers.svg",
+				size: {width: 42, height: 76},
+				origin: {x: 0, y: 76}
+			},
+			"stop_selected_v2": {
+				url: "icons/map/Markers.svg",
+				size: {width: 42, height: 76},
+				origin: {x: 0, y: 152}
 			}
 		}, icons_hover = {};
 
@@ -397,8 +413,11 @@ function services(tracker){
 	})
 
 	.service("MapComponentManager", function MapComponentManager(uiGmapIsReady, icons, $q){
+		var isLoaded = false;
 
-		uiGmapIsReady.promise().then(function(maps){
+		//uiGmapIsReady.promise().then(function(maps){
+		
+		function setup(map){
 
 			/**
 			 * @class A marker tooltip class
@@ -595,7 +614,7 @@ function services(tracker){
 				this.set("isLabelShowing", true);
 
 				var panes = this.getPanes();
-				if(!panes)	return this;	// map not ready
+				if(!panes)	return this;	// panes not ready
 
 				var tooltip = this.tooltip = document.createElement("div"),
 					inner = this.tooltipInner = document.createElement("div");
@@ -638,6 +657,13 @@ function services(tracker){
 			MarkerTooltip.prototype.lightOut = function(){
 				this.marker.setIcon(icons(this.get("iconName"), false));
 
+				return this;
+			}
+
+			MarkerTooltip.prototype.setIcon = function(iconName, hoverState){
+				if(iconName){
+					this.marker.setIcon(icons(iconName, !!hoverState));
+				}
 				return this;
 			}
 
@@ -726,7 +752,7 @@ function services(tracker){
 				}
 			}
 
-			var map = maps[0].map;
+			//var map = maps[0].map;
 
 			manager.map = map;
 			manager.ready = true;
@@ -779,7 +805,7 @@ function services(tracker){
 								marker.setMap(map);
 								marker.set("isHiding", false);
 							}
-							marker.setMarkerOpacity(0.3);
+							marker.setMarkerOpacity(0.2);
 						}else{
 							if(!marker.get("isHiding")){
 								marker.setMap(null);
@@ -793,7 +819,8 @@ function services(tracker){
 
 			manager.proccessQueue.forEach(function(proccess){ proccess(); });
 			manager.proccessQueue = [];
-		});
+		//});
+		}
 
 
 		var marker_sets = {};
@@ -841,7 +868,7 @@ function services(tracker){
 		var manager = {
 			proccessQueue: [],
 			ready: false,
-			map: map,
+			map: undefined,
 			loaded: function(callback){
 				if(manager.ready)	callback(manager.commands);
 				else{
@@ -849,6 +876,16 @@ function services(tracker){
 						callback(manager.commands);
 					});
 				}
+			},
+			load: function(element, options){
+				if(!isLoaded){
+					var map = new google.maps.Map(element, options);
+					
+					setup(map);
+					isLoaded = true;
+				}
+
+		        return manager.map;
 			},
 			sets: marker_sets,
 			commands: commands,

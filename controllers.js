@@ -90,6 +90,7 @@ function controllers(tracker){
 			$scope.mapMeta.selfLocationOptions.icon = icons("home");
 			$scope.mapMeta.targetLocationOptions.icon = icons("stop");
 
+			/*
 			$scope.mapMeta.backdrop = {
 				getTile: function(coord, zoomm, owner){
 					var div = owner.createElement("div");
@@ -102,6 +103,7 @@ function controllers(tracker){
 				name: "backdrop",
 				maxZoom: 17
 			};
+			*/
 
 			$http.get("styles/map-style.json").then(function(styles){
 				$scope.mapMeta.control.getGMap().setOptions({styles: styles.data});
@@ -241,7 +243,7 @@ function controllers(tracker){
 					$scope.mapMeta.path = [];
 			}
 
-			$scope.mapMeta.control.refresh();
+			//$scope.mapMeta.control.refresh();
 	    });
 
 	    // Global functions
@@ -292,6 +294,11 @@ function controllers(tracker){
 		$scope.dehighlightStop = function(stop){
 			map("dehighlightPoint", stop);
 		};
+
+
+
+		// testing
+		$scope.$emit("mapLoaded");
 	})
 
 	.controller("overmapTimers", function OvermapTimers($scope, $mdDialog, $interval, $mdToast, storage, uuid, getStopDetails){
@@ -514,13 +521,13 @@ function controllers(tracker){
 		$scope.centerStop = function(stop){
 			MapComponentManager.loaded(function(commands){
 				if(!MapComponentManager.dragging)
-					commands.getMarker("all-stops", stop.stop_id).moveIntoBound().lightUp().showLabel();
+					commands.getMarker("all-stops", stop.stop_id).moveIntoBound().lightUp().showLabel().setIcon("stop_selected_v2", true);
 			});
 			
 		};
 		$scope.decenterStop = function(stop){
 			MapComponentManager.loaded(function(commands){
-				commands.getMarker("all-stops", stop.stop_id).lightOut().hideLabel();
+				commands.getMarker("all-stops", stop.stop_id).lightOut().hideLabel().setIcon("stop_v2", false);
 			});
 		};
 	})
@@ -580,13 +587,13 @@ function controllers(tracker){
 				if(highlightedStop)	highlightedStop.set("iconHoverable", true);
 
 				highlightedStop = commands.getMarker("all-stops", stop.stop_id).moveIntoBound();
-				highlightedStop.lightUp().showLabel();
+				highlightedStop.lightUp().showLabel().setIcon("stop_selected_v2", true);
 				highlightedStop.set("iconHoverable", false);
 			});
 		};
 		$scope.dehighlightStop = function(stop){
 			MapComponentManager.loaded(function(commands){
-				highlightedStop.lightOut().hideLabel();
+				highlightedStop.lightOut().hideLabel().setIcon("stop_v2", false);
 				highlightedStop.set("iconHoverable", true);
 			});
 		};
