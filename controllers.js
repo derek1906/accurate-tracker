@@ -657,7 +657,7 @@ function controllers(tracker){
 				*/
 			
 				MapComponentManager.loaded(function(commands){
-					targetMarker = commands.getMarker("all-stops", stop.stop_id).showLabel().lightUp().center();
+					targetMarker = commands.getMarker("all-stops", stop.stop_id).showLabel().lightUp().center().setIcon("stop_selected_v2", true);
 					targetMarker.set("iconHoverable", false);
 				});
 
@@ -667,7 +667,8 @@ function controllers(tracker){
 
 		$scope.$on("$destroy", function(){
 			if(refreshInterval)	$interval.cancel(refreshInterval);
-			if(targetMarker) targetMarker.hideLabel().lightOut().set("iconHoverable", true);
+			//if(targetMarker) targetMarker.hideLabel().lightOut().set("iconHoverable", true);
+			if(targetMarker) targetMarker.hideLabel().lightOut().setIcon("stop_v2").set("iconHoverable", true);
 		});
 
 		$scope.update = function(){

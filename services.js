@@ -683,6 +683,7 @@ function services(tracker){
 			MarkerTooltip.prototype.setIcon = function(iconName, hoverState){
 				if(iconName){
 					this.marker.setIcon(icons(iconName, !!hoverState));
+					this.set("iconName", iconName);
 				}
 				return this;
 			}
