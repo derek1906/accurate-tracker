@@ -517,7 +517,6 @@ function services(tracker){
 					case "position":
 						return this.draw();
 					case "iconName":
-						this.marker.setIcon(icons(value));
 						return this.calculateOffset();
 					case "caption":
 						return this.modifyContent();
@@ -712,10 +711,10 @@ function services(tracker){
 			MarkerTooltip.prototype.center = function(){
 				var map = manager.map, self = this;
 
-				var span = map.getBounds().toSpan();
 
 				// Add to the end of execution queue
 				setTimeout(function(){
+					var span = map.getBounds().toSpan();
 					var position = self.get("position");
 					map.panTo({
 						lat: position.lat(),
@@ -913,9 +912,12 @@ function services(tracker){
 			load: function(element, options){
 				if(!isLoaded){
 					var map = new google.maps.Map(element, options);
-					
-					setup(map);
-					isLoaded = true;
+
+					// add listener to run when the map is loaded
+					google.maps.event.addListenerOnce(map, "idle", function(){
+						setup(map);
+						isLoaded = true;
+					});
 				}
 
 		        return manager.map;

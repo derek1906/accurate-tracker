@@ -317,6 +317,12 @@ function controllers(tracker){
 			}
 		});
 
+		function timerDone(timer){
+			new Notification("Your " + timer.timerInterval + "-minute timer is up.", {body: timer.headsign + " @ " + timer.stop.stop_name});
+			var audio = new Audio("assets/alert.mp3");
+			audio.play();
+		}
+
 		function update(forceUpdate){
 			var itemsModified = false;
 			var currentTime = Date.now();
@@ -331,7 +337,7 @@ function controllers(tracker){
 				if(timer.remainingTime <= 0){
 					$scope.timers[i] = undefined;
 					itemsModified = true;
-					new Notification("Your " + timer.timerInterval + " minutes timer is up.", {body: timer.headsign + " @ " + timer.stop.stop_name});
+					timerDone(timer);
 				}
 
 			});
@@ -374,6 +380,14 @@ function controllers(tracker){
 							};
 							$scope.setTimer = function(){
 								var toast = $mdToast.simple().position("top right")
+
+								function returnData(){
+									$mdDialog.hide({
+										targetTime: expectedTime - $scope.timerInterval,
+										timerInterval: $scope.timerInterval
+									});
+								}
+
 								if(!window.Notification){
 									toast.textContent("Your browser does not support notifications.");
 									$mdToast.show(toast);
@@ -381,11 +395,11 @@ function controllers(tracker){
 									toast.textContent("You must allow notifications.");
 									$mdToast.show(toast);
 								}else if(Notification.permission == "granted"){
-									$mdDialog.hide($scope.timerInterval);
+									returnData();
 								}else{
 									Notification.requestPermission(function(permission){
-										if(permission == "granted"){
-											$mdDialog.hide($scope.timerInterval);
+										if(permission === "granted"){
+											returnData();
 										}else{
 											toast.textContent("You must allow notifications.");
 										}
@@ -393,7 +407,7 @@ function controllers(tracker){
 								}
 							};
 						}
-					}).then(function(timerInterval){
+					}).then(function(formData){
 						var currentTime = Date.now();
 
 						$scope.timers.push({
@@ -401,9 +415,9 @@ function controllers(tracker){
 							vehicle_id: data.vehicle_id,
 							stop: getStopDetails(data.stop_id),
 							/*expectedTime: expectedTime,*/
-							targetTime: currentTime + timerInterval * 60 * 1000,
+							targetTime: /*currentTime + timerInterval * 60 * 1000,*/ formData.targetTime,
 							/*minsBeforeExpected: timerInterval,*/
-							timerInterval: timerInterval,
+							timerInterval: formData.timerInterval,
 							timer_id: uuid()
 						});
 						storage.set("timers", $scope.timers);
@@ -587,14 +601,14 @@ function controllers(tracker){
 			MapComponentManager.loaded(function(commands){
 				if(highlightedStop)	highlightedStop.set("iconHoverable", true);
 
-				highlightedStop = commands.getMarker("all-stops", stop.stop_id).moveIntoBound();
-				highlightedStop.lightUp().showLabel().setIcon("stop_selected_v2", true);
+				highlightedStop = commands.getMarker("all-stops", stop.stop_id);
+				highlightedStop.delayedCenter().lightUp().showLabel().setIcon("stop_selected_v2", true);
 				highlightedStop.set("iconHoverable", false);
 			});
 		};
 		$scope.dehighlightStop = function(stop){
 			MapComponentManager.loaded(function(commands){
-				highlightedStop.lightOut().hideLabel().setIcon("stop_v2", false);
+				highlightedStop.cancelDelayedCenter().lightOut().hideLabel().setIcon("stop_v2", false);
 				highlightedStop.set("iconHoverable", true);
 			});
 		};
