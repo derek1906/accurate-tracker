@@ -171,7 +171,7 @@
                 <md-tooltip class="multilineTooltip" md-direction="left" ng-if="!rightClicked">
                     Timer set for {{timer.timerInterval}} minutes
                 </md-tooltip>
-                <span>#{{timer.vehicle_id}} {{timer.headsign}}</span>
+                <span>Bus #{{timer.vehicle_id}} {{timer.headsign}}</span>
                 <span>At {{timer.stop.stop_name}}</span>
                 <div class="overmap-timer-interval" layout="row" layout-align="end end">
                     <div class="overmap-timer-interval-minutes">{{timer.remainingTime | date:"m"}}</div>:<div class="overmap-timer-interval-seconds">{{timer.remainingTime | date:"ss"}}</div><div class="overmap-timer-interval-text">min</div>
@@ -187,7 +187,7 @@
                     <md-button class="md-icon-button" aria-label="Close" ng-click="clearOverlay()">
                         <md-icon md-svg-icon="ui:close"></md-icon>
                     </md-button>
-                    <h2 flex>Accurate CUMTD is brough to you by...</h2>
+                    <h2 flex>Accurate Tracker is brough to you by...</h2>
                 </div>
                 <div layout="row" flex>
                     <div layout="column" layout-align="start center" flex>

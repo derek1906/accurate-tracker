@@ -317,10 +317,20 @@ function controllers(tracker){
 			}
 		});
 
+		/** Executed when a timer is done */
 		function timerDone(timer){
-			new Notification("Your " + timer.timerInterval + "-minute timer is up.", {body: timer.headsign + " @ " + timer.stop.stop_name});
+			var notification = new Notification("Your bus will be coming in " + timer.timerInterval + " minutes!", {
+				body: timer.headsign + " @ " + timer.stop.stop_name,
+				icon: "icons/notification_icon.png",
+				requireInteraction: true	/* Chrome specific */
+			});
 			var audio = new Audio("assets/alert.mp3");
+			audio.loop = true;
 			audio.play();
+
+			notification.onclose = function(){
+				audio.pause();
+			};
 		}
 
 		function update(forceUpdate){
@@ -376,14 +386,14 @@ function controllers(tracker){
 								$scope.timerInterval = Math.min($scope.timerInterval + 1, Math.floor((expectedTime - Date.now()) / 1000 / 60));
 							};
 							$scope.decrease = function(){ 
-								$scope.timerInterval = Math.max($scope.timerInterval - 1, 1);
+								$scope.timerInterval = Math.max($scope.timerInterval - 1, 0);
 							};
 							$scope.setTimer = function(){
 								var toast = $mdToast.simple().position("top right")
 
 								function returnData(){
 									$mdDialog.hide({
-										targetTime: expectedTime - $scope.timerInterval,
+										targetTime: expectedTime - $scope.timerInterval * 60 * 1000,
 										timerInterval: $scope.timerInterval
 									});
 								}
