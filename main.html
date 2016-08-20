@@ -131,6 +131,21 @@
                             }
                         })
                     });
+
+                    MapComponentManager.loaded(function(commands){
+                        commands.getAndCreateMarker("bus-route", "bus-location", {
+                            position: {lat: 0, lng: 0},
+                            visible: false,
+                            caption: "Bus is here",
+                            iconHoverable: false,
+                            level: "focus",
+                            events: {
+                                click: function(data, self){
+                                    self.center();
+                                }
+                            }
+                        })
+                    });
                 });
         </script>
     </head>

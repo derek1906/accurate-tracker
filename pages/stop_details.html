@@ -49,7 +49,7 @@
     <md-list class="page-scrollable-content departures no-margin">
         <md-list-item class="departure-list-item"
                 ng-repeat="departure in departures" ng-click="selectRoute(departure)"
-                ng-class="departure.route.route_id | lowercase">
+                ng-class="[(departure.route.route_id | lowercase), {selected: departure.trip.shape_id == selectedDeparture.entry.trip.shape_id}]">
             <div class="departure-info" layout="column" layout-align="center start">
                 <span class="headsign" layout="row" layout-align="start center">
                     {{departure.headsign}}

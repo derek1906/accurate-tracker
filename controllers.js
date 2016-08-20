@@ -652,7 +652,8 @@ function controllers(tracker){
 	})
 
 	.controller("StopDetails", function StopDetails($scope, $routeParams, $interval, $mdToast,
-										loadStopsDetails, getStopDetails, getUpcomingBuses, map, timer, DEPARTURE_UPDATE_INTERVAL, MapComponentManager, getShapeAndStops, ROUTE_COLORS)
+										loadStopsDetails, getStopDetails, getUpcomingBuses, map, timer, DEPARTURE_UPDATE_INTERVAL,
+										MapComponentManager, getShapeAndStops, ROUTE_COLORS, getData)
 	{
 		var stop_id = $scope.stop_id = $routeParams.id;
 		var refreshInterval = undefined;
@@ -661,7 +662,7 @@ function controllers(tracker){
 		
 		var targetMarker = null;
 
-		var selectedDeparture = {
+		$scope.selectedDeparture = {
 			route: null,
 			entry: null
 		};
@@ -717,10 +718,12 @@ function controllers(tracker){
 		};
 
 		$scope.selectRoute = function(departure){
-			var onlyDeselecting = departure === selectedDeparture.entry;
+			var onlyDeselecting = $scope.selectedDeparture.entry && departure.trip.shape_id === $scope.selectedDeparture.entry.trip.shape_id;
 
 			// hide existing route
 			$scope.deselectRoute();
+
+			console.log(departure)
 
 			// return if user is trying to deselect entry
 			if(onlyDeselecting)	return true;
@@ -736,14 +739,14 @@ function controllers(tracker){
 						return {lat: point.shape_pt_lat, lng: point.shape_pt_lon};
 					});
 
-					selectedDeparture.route = new google.maps.Polyline({
+					$scope.selectedDeparture.route = new google.maps.Polyline({
 						path: latlngs,
 						geodesic: true,
 						strokeColor: ROUTE_COLORS[departure.route.route_id.toLowerCase().split(" ")[0]],
 						strokeOpacity: 1.0,
 						strokeWeight: 5
 					});
-					selectedDeparture.route.setMap(MapComponentManager.map);
+					$scope.selectedDeparture.route.setMap(MapComponentManager.map);
 
 					// filter stops
 					commands.getSet("all-stops").hide();
@@ -753,19 +756,37 @@ function controllers(tracker){
 				});
 			});
 
+			getData("GetVehicle", {vehicle_id: departure.vehicle_id}).then(function(res){
+				var vehicle = res.vehicles[0];
+				
+				// return if user selected another route to display
+				if(!departure.selected)	return;
+
+				MapComponentManager.loaded(function(commands){
+					var location = commands.getMarker("bus-route", "bus-location");
+					location.setPosition({
+						lat: vehicle.location.lat, lng: vehicle.location.lon
+					});
+					location.set("visible", true);
+					location.center();
+				});
+			});
+
 			// mark as selected
-			selectedDeparture.entry = departure;
-			selectedDeparture.entry.selected = true;
+			$scope.selectedDeparture.entry = departure;
+			$scope.selectedDeparture.entry.selected = true;
 		};
 
 		$scope.deselectRoute = function(){
-			if(selectedDeparture.entry){
+			if($scope.selectedDeparture.entry){
 				MapComponentManager.loaded(function(commands){
-					selectedDeparture.route.setMap(null);
-					selectedDeparture.route = null;
+					$scope.selectedDeparture.route.setMap(null);
+					$scope.selectedDeparture.route = null;
 
-					selectedDeparture.entry.selected = false;
-					selectedDeparture.entry = null;
+					$scope.selectedDeparture.entry.selected = false;
+					$scope.selectedDeparture.entry = null;
+
+					commands.getMarker("bus-route", "bus-location").set("visible", false);
 
 					commands.getSet("all-stops").show();
 				});
