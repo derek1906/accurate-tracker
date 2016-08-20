@@ -1,0 +1,26 @@
+function routeColors(tracker){
+	tracker.value("ROUTE_COLORS", {
+		"yellow"      	: "#fff300",
+		"yellowhopper"	: "#fff300",
+		"red"         	: "#f11714",
+		"lavender"    	: "#a78ac2",
+		"blue"        	: "#315aac",
+		"green"       	: "#008061",
+		"greenhopper" 	: "#008061",
+		"orange"      	: "#faa003",
+		"orangehopper"	: "#faa003",
+		"grey"        	: "#808285",
+		"bronze"      	: "#aa703e",
+		"brown"       	: "#68301d",
+		"gold"        	: "#c9a23b",
+		"ruby"        	: "#981b4c",
+		"teal"        	: "#006893",
+		"silver"      	: "#d1d2d4",
+		"navy"        	: "#292c8b",
+		"pink"        	: "#facbdf",
+		"raven"       	: "#262a2d",
+		"illini"      	: "#6d3065",
+		"lime"        	: "#91e633",
+		"transport"   	: "#c24964",
+	});
+}

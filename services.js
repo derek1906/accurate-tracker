@@ -755,6 +755,14 @@ function services(tracker){
 				return this;
 			}
 
+			MarkerTooltip.prototype.show = function(){
+				this.setMap(map);
+			}
+
+			MarkerTooltip.prototype.hide = function(){
+				this.setMap(null);
+			}
+
 
 			function MarkerSet(set_id){
 				this.set_id = set_id;
@@ -784,7 +792,6 @@ function services(tracker){
 				}
 			}
 
-			//var map = maps[0].map;
 
 			manager.map = map;
 			manager.ready = true;

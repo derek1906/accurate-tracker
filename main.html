@@ -26,6 +26,7 @@
         <script src="./filters.js"></script>
         <script src="./directives.js"></script>
         <script src="./initStorage.js"></script>
+        <script src="./route_colors.js"></script>
         <script>
             // Create module "tracker"
             var tracker = angular.module("tracker", ["ngMaterial", "ngRoute", "uiGmapgoogle-maps"]);
@@ -39,6 +40,7 @@
                 ["favorites", []],
                 ["timers", []]
             ]);
+            routeColors(tracker);
 
             tracker
                 .value("stop_details", {stops:{}, loaded: false})

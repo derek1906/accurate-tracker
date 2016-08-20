@@ -424,9 +424,7 @@ function controllers(tracker){
 							headsign: data.headsign,
 							vehicle_id: data.vehicle_id,
 							stop: getStopDetails(data.stop_id),
-							/*expectedTime: expectedTime,*/
-							targetTime: /*currentTime + timerInterval * 60 * 1000,*/ formData.targetTime,
-							/*minsBeforeExpected: timerInterval,*/
+							targetTime: formData.targetTime,
 							timerInterval: formData.timerInterval,
 							timer_id: uuid()
 						});
@@ -654,7 +652,7 @@ function controllers(tracker){
 	})
 
 	.controller("StopDetails", function StopDetails($scope, $routeParams, $interval, $mdToast,
-										loadStopsDetails, getStopDetails, getUpcomingBuses, map, timer, DEPARTURE_UPDATE_INTERVAL, MapComponentManager)
+										loadStopsDetails, getStopDetails, getUpcomingBuses, map, timer, DEPARTURE_UPDATE_INTERVAL, MapComponentManager, getShapeAndStops, ROUTE_COLORS)
 	{
 		var stop_id = $scope.stop_id = $routeParams.id;
 		var refreshInterval = undefined;
@@ -662,6 +660,11 @@ function controllers(tracker){
 		//map("reset");
 		
 		var targetMarker = null;
+
+		var selectedDeparture = {
+			route: null,
+			entry: null
+		};
 
 		loadStopsDetails()
 			.then(function(){
@@ -686,13 +689,15 @@ function controllers(tracker){
 				});
 
 				$scope.update();
-				refreshInterval = $interval($scope.update, DEPARTURE_UPDATE_INTERVAL);
+				//refreshInterval = $interval($scope.update, DEPARTURE_UPDATE_INTERVAL);
 			}, function(){/*error*/});
 
 		$scope.$on("$destroy", function(){
 			if(refreshInterval)	$interval.cancel(refreshInterval);
 			//if(targetMarker) targetMarker.hideLabel().lightOut().set("iconHoverable", true);
 			if(targetMarker) targetMarker.hideLabel().lightOut().setIcon("stop_v2").set("iconHoverable", true);
+
+			$scope.deselectRoute();
 		});
 
 		$scope.update = function(){
@@ -709,6 +714,62 @@ function controllers(tracker){
 
 		$scope.addTimer = function(departure){
 			timer("prompt", departure);
+		};
+
+		$scope.selectRoute = function(departure){
+			var onlyDeselecting = departure === selectedDeparture.entry;
+
+			// hide existing route
+			$scope.deselectRoute();
+
+			// return if user is trying to deselect entry
+			if(onlyDeselecting)	return true;
+
+			// create new route
+			getShapeAndStops(departure.trip.shape_id).then(function(data){
+				MapComponentManager.loaded(function(commands){
+					// return if user selected another route to display
+					if(!departure.selected)	return;
+
+					// display path
+					var latlngs = data.path.map(function(point){
+						return {lat: point.shape_pt_lat, lng: point.shape_pt_lon};
+					});
+
+					selectedDeparture.route = new google.maps.Polyline({
+						path: latlngs,
+						geodesic: true,
+						strokeColor: ROUTE_COLORS[departure.route.route_id.toLowerCase().split(" ")[0]],
+						strokeOpacity: 1.0,
+						strokeWeight: 5
+					});
+					selectedDeparture.route.setMap(MapComponentManager.map);
+
+					// filter stops
+					commands.getSet("all-stops").hide();
+					data.stops.forEach(function(stop){
+						commands.getMarker("all-stops", stop.stop_id.split(":")[0]).show();
+					});
+				});
+			});
+
+			// mark as selected
+			selectedDeparture.entry = departure;
+			selectedDeparture.entry.selected = true;
+		};
+
+		$scope.deselectRoute = function(){
+			if(selectedDeparture.entry){
+				MapComponentManager.loaded(function(commands){
+					selectedDeparture.route.setMap(null);
+					selectedDeparture.route = null;
+
+					selectedDeparture.entry.selected = false;
+					selectedDeparture.entry = null;
+
+					commands.getSet("all-stops").show();
+				});
+			}
 		};
 	})
 	.controller("TripDetails", function TripDetails($scope, $routeParams, $q, 
