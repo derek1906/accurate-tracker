@@ -658,10 +658,10 @@ function controllers(tracker){
 		var stop_id = $scope.stop_id = $routeParams.id;
 		var refreshInterval = undefined;
 
-		//map("reset");
-		
+		// target marker
 		var targetMarker = null;
 
+		// store data about selected departure
 		$scope.selectedDeparture = {
 			route: null,
 			entry: null
@@ -676,13 +676,6 @@ function controllers(tracker){
 					return;
 				}
 				
-				/*
-				map("setTargetLocation", {
-					latitude: stop.mid_lat,
-					longitude: stop.mid_lon,
-					pan: true
-				});
-				*/
 			
 				MapComponentManager.loaded(function(commands){
 					targetMarker = commands.getMarker("all-stops", stop.stop_id).showLabel().lightUp().center().setIcon("stop_selected_v2", true);
@@ -690,7 +683,7 @@ function controllers(tracker){
 				});
 
 				$scope.update();
-				//refreshInterval = $interval($scope.update, DEPARTURE_UPDATE_INTERVAL);
+				refreshInterval = $interval($scope.update, DEPARTURE_UPDATE_INTERVAL);
 			}, function(){/*error*/});
 
 		$scope.$on("$destroy", function(){
@@ -793,7 +786,7 @@ function controllers(tracker){
 					commands.getSet("all-stops").show();
 
 					// move to stop location
-					commands.getMarker("all-stops", stop_id).center();
+					targetMarker.center();
 				});
 			}
 		};
