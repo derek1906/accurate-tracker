@@ -786,9 +786,14 @@ function controllers(tracker){
 					$scope.selectedDeparture.entry.selected = false;
 					$scope.selectedDeparture.entry = null;
 
+					// hide bus location
 					commands.getMarker("bus-route", "bus-location").set("visible", false);
 
+					// display all stops
 					commands.getSet("all-stops").show();
+
+					// move to stop location
+					commands.getMarker("all-stops", stop_id).center();
 				});
 			}
 		};
