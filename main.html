@@ -19,7 +19,7 @@
         <script src="./bower_components/lodash/lodash.js"></script>
         <script src="./bower_components/jquery/dist/jquery.min.js"></script>
 
-        <script src="https://maps.googleapis.com/maps/api/js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAoqsttDzqa1L8Z4fs8_eW5QouMx7txwF0"></script>
 
         <script src="./services.js"></script>
         <script src="./controllers.js"></script>
@@ -136,7 +136,7 @@
                         commands.getAndCreateMarker("bus-route", "bus-location", {
                             position: {lat: 0, lng: 0},
                             visible: false,
-                            caption: "Bus is here",
+                            caption: "Bus was here a moment ago",
                             iconHoverable: false,
                             level: "focus",
                             events: {
@@ -233,6 +233,9 @@
                             Github <a href="https://www.github.com/derek1906" target="_blank">@derek1906</a>
                         </p>
                     </div>
+                </div>
+                <div layout="row" layout-align="center center">
+                    <h3 flex>Transit data are provided by CUMTD.</h3>
                 </div>
             </div>
             <div id="splash" ng-switch-when="splash" layout="column" layout-align="center center">
