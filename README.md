@@ -20,4 +20,8 @@ Rendestops uses Bower to manage dependencies. Important dependencies includes:
 - `angular-route`
 - `jquery`
 
+This webapp is intended to be used with Google App Engine. `app.yaml` is not provided and has to be created and configured to serve files in `/public`.
+
+Favicon is located in `/public/icons` and a `robots.txt` is also provided in `/public/assets`.
+
 Copyright 2016 - Derek Leung, Vincent Chang
