@@ -704,6 +704,8 @@ function controllers(tracker){
 					var toast = $mdToast.simple().textContent("Error: " + msg).position("top right");
 					$mdToast.show(toast);
 				});
+
+			// TODO: update bus location
 		};
 
 		$scope.addTimer = function(departure){
