@@ -1,2 +1,4 @@
 User-agent: *
 Disallow: /templates/
+Disallow: /pages/
+Disallow: /bower_components/
