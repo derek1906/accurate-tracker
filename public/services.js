@@ -107,6 +107,7 @@ function services(tracker){
 				size: {width: 42, height: 76},
 				origin: {x: 0, y: 152}
 			}
+
 		}, icons_hover = {};
 
 		for(var key in icons){
@@ -116,6 +117,29 @@ function services(tracker){
 			var icon_hover = icons_hover[key] = angular.copy(icon);
 			icon_hover.origin.x += icon.size.width;
 		}
+
+		var busMarkerList = [
+			["yellow", "yellowhopper"], "red", "lavender", "blue", ["green", "greenhopper"],
+			["orange", "orangehopper"], "grey", "bronze", "brown", "gold",
+			"ruby", "teal", "silver", "navy", "pink",
+			"raven", "illini", "lime", "transport"
+		];
+
+		busMarkerList.forEach(function(busName, i){
+			function addBusMarker(name){
+				icons_hover["bus-" + name] = icons["bus-" + name] = {
+					url: "icons/bus_icon_set.svg",
+					size: {width: 65, height: 65},
+					origin: {x: i % 5 * 65, y: (i / 5 | 0) * 65},
+					anchor: {x: 65 / 2, y: 65 / 2}
+				};
+			}
+			if(typeof busName === "string"){
+				addBusMarker(busName);
+			}else{
+				busName.forEach(addBusMarker);
+			}
+		});
 
 		return function (name, isHover){
 			if(!name)       	return undefined;
@@ -575,7 +599,7 @@ function services(tracker){
 				if(!markerIcon){
 					return this.set("offsetTop", 0);
 				}else{
-					return this.set("offsetTop", markerIcon.size.height + MARKER_VERTIACL_MARGIN);
+					return this.set("offsetTop", MARKER_VERTIACL_MARGIN + markerIcon.anchor.y);
 				}
 			}
 

@@ -713,12 +713,12 @@ function controllers(tracker){
 		};
 
 		$scope.selectRoute = function(departure){
-			var onlyDeselecting = $scope.selectedDeparture.entry && departure.trip.shape_id === $scope.selectedDeparture.entry.trip.shape_id;
+			var onlyDeselecting = $scope.selectedDeparture.entry && departure.vehicle_id === $scope.selectedDeparture.entry.vehicle_id;
 
 			// hide existing route
 			$scope.deselectRoute();
 
-			console.log(departure)
+			var routeName = departure.route.route_id.toLowerCase().split(" ")[0];
 
 			// return if user is trying to deselect entry
 			if(onlyDeselecting)	return true;
@@ -737,7 +737,7 @@ function controllers(tracker){
 					$scope.selectedDeparture.route = new google.maps.Polyline({
 						path: latlngs,
 						geodesic: true,
-						strokeColor: ROUTE_COLORS[departure.route.route_id.toLowerCase().split(" ")[0]],
+						strokeColor: ROUTE_COLORS[routeName],
 						strokeOpacity: 1.0,
 						strokeWeight: 5
 					});
@@ -759,6 +759,7 @@ function controllers(tracker){
 
 				MapComponentManager.loaded(function(commands){
 					var location = commands.getMarker("bus-route", "bus-location");
+					location.setIcon("bus-" + routeName);
 					location.setPosition({
 						lat: vehicle.location.lat, lng: vehicle.location.lon
 					});
