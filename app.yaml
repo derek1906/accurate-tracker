@@ -1,0 +1,14 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /$
+  static_files: public/main.html
+  upload: public/main.html
+  secure: always
+
+- url: /(.+)
+  static_files: public/\1
+  upload: public/(.*)
+  secure: always
