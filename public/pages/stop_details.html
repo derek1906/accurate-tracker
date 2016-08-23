@@ -66,7 +66,7 @@
                         </md-tooltip>
                     </md-icon>
                 </span>
-                <span class="destination">To {{departure.destination.stop_id | stopID}} - {{departure.expected | date : "HH:mm"}}</span>
+                <span class="destination">To {{departure.destination.stop_id | stopID}} • Arriving at {{departure.expected | date : "HH:mm"}}</span>
             </div>
             <!-- Expected minutes remaining -->
             <div class="md-secondary" layout="column" layout-align="center center" ng-show="departure.expected_mins">
