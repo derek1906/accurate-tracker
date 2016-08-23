@@ -66,15 +66,15 @@ function controllers(tracker){
 			$location.path("/favorites");
 		};
 		$scope.goToStop = function(stop){
-			$location.path("/stop/" + stop.stop_id);
+			return $scope.goToStopId(stop.stop_id);
+		};
+		$scope.goToStopId = function(stop_id){
+			$location.path("/stop/" + stop_id);
 
 			// replace previous entry to maintain history consistency
 			if(!$scope.atLanding){
 				$location.replace();
 			}
-		};
-		$scope.goToTrip = function(vehicle_id){
-			$location.path("/trip/" + vehicle_id);
 		};
 	})
 
@@ -343,7 +343,7 @@ function controllers(tracker){
 		});
 	})
 
-	.controller("Favorites", function Favorites($scope, loadStopsDetails, storage, getStopDetails, map, MapComponentManager){
+	.controller("Favorites", function Favorites($scope, loadStopsDetails, storage, getStopDetails, getStopIdInfo, map, MapComponentManager){
 		loadStopsDetails().then(function(){
 
 			$scope.stops = storage.get("favorites").map(function(stop_id){
@@ -353,24 +353,30 @@ function controllers(tracker){
 
 
 		$scope.centerStop = function(stop){
+			var stop_id = getStopIdInfo(stop.stop_id).stop_id;
+
 			MapComponentManager.loaded(function(commands){
 				if(!MapComponentManager.dragging)
-					commands.getMarker("all-stops", stop.stop_id).moveIntoBound().lightUp().showLabel().setIcon("stop_selected_v2", true);
+					commands.getMarker("all-stops", stop_id).moveIntoBound().lightUp().showLabel().setIcon("stop_selected_v2", true);
 			});
 			
 		};
 		$scope.decenterStop = function(stop){
+			var stop_id = getStopIdInfo(stop.stop_id).stop_id;
+
 			MapComponentManager.loaded(function(commands){
-				commands.getMarker("all-stops", stop.stop_id).lightOut().hideLabel().setIcon("stop_v2", false);
+				commands.getMarker("all-stops", stop_id).lightOut().hideLabel().setIcon("stop_v2", false);
 			});
 		};
 	})
 
 	.controller("StopDetails", function StopDetails($scope, $routeParams, $interval, $mdToast,
-										loadStopsDetails, getStopDetails, getUpcomingBuses, map, timer, DEPARTURE_UPDATE_INTERVAL,
-										MapComponentManager, getShapeAndStops, ROUTE_COLORS, getData)
+			loadStopsDetails, getStopDetails, getStopIdInfo, getUpcomingBuses, map, timer, DEPARTURE_UPDATE_INTERVAL,
+			MapComponentManager, getShapeAndStops, ROUTE_COLORS, getData)
 	{
+		var stop = $scope.id = {};
 		var stop_id = $scope.stop_id = $routeParams.id;
+		var stop_points_list = $scope.stop_points_list = [];
 		var refreshInterval = undefined;
 
 		// target marker
@@ -382,24 +388,32 @@ function controllers(tracker){
 			entry: null
 		};
 
-		loadStopsDetails()
-			.then(function(){
-				var stop = $scope.stop = getStopDetails(stop_id);
+		loadStopsDetails().then(function(){
+			var stop = $scope.stop = getStopDetails(stop_id),
+				stopInfo = getStopIdInfo(stop_id);
 
-				if(!stop){
-					$scope.stopNotExists = true;
-					return;
-				}
-				
+			var combinedStop = $scope.combinedStop = getStopDetails(stopInfo.stop_id);
+
+			if(!stop){
+				$scope.stopNotExists = true;
+				return;
+			}
 			
-				MapComponentManager.loaded(function(commands){
-					targetMarker = commands.getMarker("all-stops", stop.stop_id).showLabel().lightUp().center().setIcon("stop_selected_v2", true);
-					targetMarker.set("iconHoverable", false);
-				});
+			stop_points_list = $scope.stop_points_list = [combinedStop].concat(combinedStop.stop_points);
 
-				$scope.update();
-				refreshInterval = $interval($scope.update, DEPARTURE_UPDATE_INTERVAL);
-			}, function(){/*error*/});
+			if(stopInfo.stop_point_id !== ""){
+				// stop point mode
+				console.log("stop point mode", combinedStop);
+			}
+		
+			MapComponentManager.loaded(function(commands){
+				targetMarker = commands.getMarker("all-stops", stopInfo.stop_id).showLabel().lightUp().center().setIcon("stop_selected_v2", true);
+				targetMarker.set("iconHoverable", false);
+			});
+
+			$scope.update();
+			refreshInterval = $interval($scope.update, DEPARTURE_UPDATE_INTERVAL);
+		}, function(){/*error*/});
 
 		$scope.$on("$destroy", function(){
 			if(refreshInterval)	$interval.cancel(refreshInterval);

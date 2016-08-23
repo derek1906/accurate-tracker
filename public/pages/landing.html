@@ -28,7 +28,7 @@
 
     <div ng-show="!nearbyStops.length" layout="column" layout-align="center end">
         <md-progress-linear md-mode="indeterminate" class="md-warn"></md-progress-linear>
-        <div>Waiting for location service...</div>
+        <div>Waiting for location services...</div>
     </div>
     <md-list class="page-scrollable-content no-margin">
         <md-list-item class="nearbyStop-info" ng-repeat="stop in nearbyStops track by stop.stop_id"

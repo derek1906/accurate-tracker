@@ -349,16 +349,35 @@ function services(tracker){
 		};
 	})
 
-	// Get stop details from database
-	.service("getStopDetails", function getStopDetails(stop_details){
+	// parse stop id
+	.service("getStopIdInfo", function getStopInfo(){
 		return function(stop_id){
-			var parts = stop_id.split(":");
-			if(parts.length == 2){
-				return stop_details.stops[parts[0]].stop_points.filter(function(stop){
-					return stop.stop_id == stop_id;
+			if(typeof stop_id !== "string")	return null;
+
+			var parts = stop_id.split(":"),
+				combinedStopId = parts[0],
+				stopPointId = parts.length === 2 ? parts[1] : "";
+
+			return {
+				stop_id: combinedStopId,
+				stop_point_id: stopPointId
+			};
+		}
+	})
+
+	// Get stop details from database
+	.service("getStopDetails", function getStopDetails(stop_details, getStopIdInfo){
+		return function(stop_id){
+			var stopInfo = getStopIdInfo(stop_id),
+				combinedStop = stop_details.stops[stopInfo.stop_id];
+
+			if(stopInfo.stop_point_id !== ""){
+				// fast enough
+				return combinedStop.stop_points.filter(function(stop){
+					return stop.stop_id === stop_id;
 				})[0];
 			}else{
-				return stop_details.stops[stop_id];
+				return combinedStop;
 			}
 		};
 	})

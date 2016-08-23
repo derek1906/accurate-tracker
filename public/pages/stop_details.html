@@ -22,7 +22,13 @@
 <div class="headbar" layout="row" layout-align="start center" flex="none">
     <fav-button stop-id="stop.stop_id" ng-show="!stopNotExists"></fav-button>
     <h2>
-        <span>{{stop.stop_name || "nope.avi"}}</span>
+        <span ng-if="!combinedStop.stop_name">nope.avi</span>
+        <md-select class="md-no-underline" ng-if="combinedStop.stop_name" ng-model="stop_id" ng-change="goToStopId(stop_id)"
+            aria-label="Stop point">
+            <md-option ng-repeat="stop_point in stop_points_list" ng-value="stop_point.stop_id">
+                {{stop_point.stop_name}}
+            </md-option>
+        </md-select>
     </h2>
 </div>
 <md-content flex class="main-content" layout="column">
@@ -60,7 +66,7 @@
                         </md-tooltip>
                     </md-icon>
                 </span>
-                <span class="destination">To {{departure.destination.stop_id | stopID}}</span>
+                <span class="destination">To {{departure.destination.stop_id | stopID}} - {{departure.expected | date : "HH:mm"}}</span>
             </div>
             <!-- Expected minutes remaining -->
             <div class="md-secondary" layout="column" layout-align="center center" ng-show="departure.expected_mins">
