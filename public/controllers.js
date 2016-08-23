@@ -1,6 +1,6 @@
 function controllers(tracker){
 	tracker
-	.controller("Overall", function Overall($scope, $mdToast, $location, $http, uiGmapIsReady, 
+	.controller("Overall", function Overall($scope, $mdToast, $location, $http, 
 									map, btn, getStopDetails, icons, TripManager, storage, MapComponentManager)
 	{
 		// Navigation button
@@ -29,222 +29,11 @@ function controllers(tracker){
 			$mdToast.show(toast);
 	    });
 
-	    // Map information
-	    $scope.mapMeta = {
-			options: {
-				mapTypeControl: false, streetViewControl: false, 
-				scaleControl: false, zoomControl: false, scrollwheel: false, disableDoubleClickZoom: false,
-				minZoom: 17, maxZoom: 17,
-				disableDefaultUI: true
-			},
-			center: { latitude: 40.1069778, longitude: -88.2272211 }, // main quad
-			zoom: 18,
-			control: {},
-			background: {},
-
-			selfLocation: undefined,
-			selfLocationOptions: {
-				opacity: 0.6
-			},
-			selfLocationEvents: {
-				// temp hack
-				mouseover: function(){
-					$scope.mapMeta.selfLocationOptions.opacity = 1;
-				},
-				mouseout: function(){
-					$scope.mapMeta.selfLocationOptions.opacity = 0.6;
-				}
-			},
-			targetLocation: undefined,
-			targetLocationOptions: {
-				opacity: 1
-			},
-			points: [],
-			pointsOptions: {
-			},
-			_points: {},
-
-			path: [],
-			pathStroke: {
-				weight: 5,
-				color: "rgba(255, 243, 0, 204)"
-			},
-
-			loaded: false,
-			actionQueue: [],
-
-			// universal id generator
-			universalId: (function(){
-				var id = 1;
-
-				return function(){
-					return id++;
-				}
-			})()
-		};
-
-		// Pass control to MapComponentManager
-		//$scope.markers = MapComponentManager.setMeta($scope.mapMeta);
-
-	    uiGmapIsReady.promise().then(function(){
-			$scope.mapMeta.selfLocationOptions.icon = icons("home");
-			$scope.mapMeta.targetLocationOptions.icon = icons("stop");
-
-			/*
-			$scope.mapMeta.backdrop = {
-				getTile: function(coord, zoomm, owner){
-					var div = owner.createElement("div");
-					div.style.background = "rgba(14, 28, 39, 0.0)";        //Color and opacity of transparent screen
-					div.style.width = this.tileSize.width + "px";
-					div.style.height = this.tileSize.height + "px";
-					return div;
-				},
-				tileSize: new google.maps.Size(1e5, 1e5),
-				name: "backdrop",
-				maxZoom: 17
-			};
-			*/
-
-			$http.get("styles/map-style.json").then(function(styles){
-				$scope.mapMeta.control.getGMap().setOptions({styles: styles.data});
-			});
-
-			$scope.$emit("mapLoaded");
-		});
-
-		$scope.$on("mapLoaded", function(e){
+	    // when map is loaded
+		MapComponentManager.loaded(function(commands){
 			console.log("[Map]", "Map loaded.");
-			$scope.mapMeta.loaded = true;
-			
-			var queue = $scope.mapMeta.actionQueue;
-			for(var i = 0; i < queue.length; i++){
-				var entry = $scope.mapMeta.actionQueue[i];
-				map(entry.action, entry.data);
-			}
-
 			$scope.clearOverlay();
 		});
-
-	    // Map events
-	    $scope.$on("map", function(e, obj){
-			//console.log("[Map]", obj.action);
-			var data = obj.data;
-
-			if(!$scope.mapMeta.loaded){
-				console.log("[Map] Map not loaded. Request \"%s\" stored in queue.", obj.action);
-				$scope.mapMeta.actionQueue.push({
-					action: obj.action,
-					data: data
-				});
-				return;
-			}
-
-			// handle action
-			switch(obj.action){
-				case "reset":
-					$scope.mapMeta.selfLocation = undefined;
-					$scope.mapMeta.targetLocation = undefined;
-					$scope.mapMeta.points = [];
-					$scope.mapMeta._points = {};
-					$scope.mapMeta.path = [];
-					break;
-
-				case "setSelfLocation":
-					$scope.mapMeta.selfLocation = data;
-					if(data){
-						if(data.pan)	map("moveTo", data);
-					}
-					$scope.mapMeta.selfLocationEvents.click = function(){
-						map("moveTo", data);
-					};
-					break;
-
-				case "setTargetLocation":
-					$scope.mapMeta.targetLocation = data;
-
-					if(data){
-						if(data.pan)	map("moveTo", data);
-						else        	map("moveIntoBound", data);
-					}
-					break;
-
-				case "moveTo":
-					var gmap = $scope.mapMeta.control.getGMap();
-					var span = gmap.getBounds().toSpan();
-					// Added to the end of execution queue
-					setTimeout(function(){
-						gmap.panTo({
-							lat: data.latitude,
-							lng: data.longitude - span.lng() * 0.25
-						})
-					});
-					break;
-
-				case "moveIntoBound":
-					// get bound of screen left half
-					var bounds = $scope.mapMeta.control.getGMap().getBounds(),
-						sw = bounds.getSouthWest(),
-						ne = bounds.getNorthEast();
-					var halfBounds = new google.maps.LatLngBounds({
-						lat: sw.lat(),
-						lng: sw.lng() + bounds.toSpan().lng() * 0.5
-					}, ne);
-					var targetLatLng = new google.maps.LatLng(data.latitude, data.longitude);
-					if(!halfBounds.contains(targetLatLng)){
-						map("moveTo", data);
-					}
-
-					break;
-
-				case "displayPoints":
-					$scope.mapMeta._points = {};
-					$scope.mapMeta.points = data.map(function(stop_id, i){
-						var stop = getStopDetails(stop_id),
-							coords = {
-								latitude: stop.mid_lat || stop.stop_lat,
-								longitude: stop.mid_lon || stop.stop_lon
-							};
-						var point = {
-							coords: coords,
-							id: $scope.mapMeta.universalId(),
-							events: {
-								click: function(){
-									$scope.goToStop(stop);
-								},
-								mouseover: function(){
-									map("highlightPoint", stop);
-								},
-								mouseout: function(){
-									map("dehighlightPoint", stop);
-								}
-							},
-							options: {
-								opacity: 0.3,
-								icon: icons("stop")
-							}
-						};
-						$scope.mapMeta._points[stop_id] = point;
-						return point;
-					});
-					break;
-
-				case "highlightPoint":
-					$scope.mapMeta._points[data.stop_id].options.opacity = 1;
-					break;
-
-				case "dehighlightPoint":
-					$scope.mapMeta._points[data.stop_id].options.opacity = 0.3;
-					break;
-
-				case "setPath":
-					$scope.mapMeta.path = data;
-					break;
-				case "clearPath":
-					$scope.mapMeta.path = [];
-			}
-
-			//$scope.mapMeta.control.refresh();
-	    });
 
 	    // Global functions
 	    $scope.toggleMenu = function(){
@@ -287,18 +76,6 @@ function controllers(tracker){
 		$scope.goToTrip = function(vehicle_id){
 			$location.path("/trip/" + vehicle_id);
 		};
-		$scope.highlightStop = function(stop){
-			map("highlightPoint", stop);
-			map("moveIntoBound", {latitude: stop.mid_lat, longitude: stop.mid_lon});
-		};
-		$scope.dehighlightStop = function(stop){
-			map("dehighlightPoint", stop);
-		};
-
-
-
-		// testing
-		$scope.$emit("mapLoaded");
 	})
 
 	.controller("overmapTimers", function OvermapTimers($scope, $mdDialog, $interval, $mdToast, storage, uuid, getStopDetails){
@@ -465,53 +242,9 @@ function controllers(tracker){
 
 		loadStopsDetails().then(function(){
 
-			map("setTargetLocation", undefined);
-
 			// Get nearby stops by user's geolocation
 			getNearbyStops(20).then(function(stops){
 				$scope.nearbyStops = stops;
-
-				/*
-				map("displayPoints", stops.map(function(stop){
-					return stop.stop_id;
-				}));*/
-
-				/*
-				var nearbyStopMarkers = new MapComponentManager.Set("nearbyStops");
-				stops.forEach(function(stop){
-					var stopMarker = new MapComponentManager.Marker(
-						stop.stop_id,
-						{
-							latitude: stop.mid_lat,
-							longitude: stop.mid_lon,
-							canIconHover: true,
-							iconName: "stop",
-							label: stop.stop_name,
-							on: {
-								click: function(){
-									$scope.goToStop(stop);
-								}
-							}
-						}
-					);
-
-					nearbyStopMarkers.addMarker(stopMarker);
-				});
-				*/
-			/*
-				MapComponentManager.loaded(function(commands){
-					var nearbyStopMarkers = commands.addSet("nearbyStops").empty();
-
-					stops.forEach(function(stop){
-						var stopMarker = commands.createMarker({
-							position: {lat: stop.mid_lat, lng: stop.mid_lon},
-							caption: stop.stop_name
-						});
-
-						nearbyStopMarkers.setMarker(stop.stop_id, stopMarker);
-					});
-
-				});*/
 			});
 
 			geolocation().then(function(latlon){
@@ -561,13 +294,6 @@ function controllers(tracker){
 			document.getElementById("search-input").focus();
 		});
 
-		/*
-		map("reset");
-		geolocation().then(function(latlng){
-			map("moveTo", latlng);
-		})
-		*/
-
 		loadStopsDetails()
 			.then(function(){
 				$scope.isSearching = false;
@@ -578,15 +304,6 @@ function controllers(tracker){
 					getAutocomplete($scope.searchTerm).then(function(list){
 						$scope.isSearching = false;
 						$scope.searchResults = list;
-
-						/*
-						map("displayPoints", list.map(function(stop){
-							return stop.stop_id;
-						}));
-						if(list.length){
-							map("highlightPoint", list[0]);
-						}
-						*/
 					}, function(){
 						$scope.isSearching = false;
 					});
@@ -632,8 +349,6 @@ function controllers(tracker){
 			$scope.stops = storage.get("favorites").map(function(stop_id){
 				return getStopDetails(stop_id);
 			});
-
-			map("reset");
 		});
 
 
@@ -794,103 +509,4 @@ function controllers(tracker){
 			}
 		};
 	})
-	.controller("TripDetails", function TripDetails($scope, $routeParams, $q, 
-										loadStopsDetails, geolocation, TripManager, getData, getShapeAndStops, map, btn)
-	{
-		var vehicle_id = $routeParams.id;
-		var arrival_times = [];
-
-		var nextStop = undefined;
-		$scope.nextStopIndex = 0;
-
-		map("reset");
-
-		// Buttons
-		btn("set", [{
-			text: "Hide Route",
-			onDisplay: true,
-			click: function(){
-				if(this.onDisplay){
-					map("clearPath");
-				}else{
-					showRoute();
-				}
-				this.onDisplay = !this.onDisplay;
-				this.text = ["Show Route", "Hide Route"][+this.onDisplay];
-			}
-		}]);
-
-
-		// Geolocation
-		geolocation().then(function(latlon){
-			latlon.pan = false;
-			map("setSelfLocation", latlon);
-		});
-
-		// main
-		getData("GetVehicle", {vehicle_id: vehicle_id}).then(function(res){
-			$scope.vehicle = res.vehicles[0];
-			nextStop = res.vehicles[0].next_stop_id;
-
-			return loadStopsDetails();
-		})
-		.then(function(){
-
-			map("setTargetLocation", {
-				latitude: $scope.vehicle.location.lat,
-				longitude: $scope.vehicle.location.lon
-			});
-
-			var trip = $scope.vehicle.trip;
-			if(trip){
-				// display arrival times
-				getData("GetStopTimesByTrip", {trip_id: $scope.vehicle.trip.trip_id}).then(function(res){
-					$scope.arrival_times = res.stop_times;
-
-					res.stop_times.forEach(function(stop, i){
-						if(stop.stop_point.stop_id == nextStop){
-							$scope.nextStopIndex = i;
-						}
-					});
-
-					map("displayPoints", res.stop_times.map(function(stop){
-						return stop.stop_point.stop_id;
-					}));
-
-					// scroll to correct position
-					setTimeout(function(){
-						var container = document.querySelector("#arrivals");
-						var nextStop = document.querySelectorAll("#arrivals md-list-item")[$scope.nextStopIndex];
-
-						$("#arrivals").animate({
-							scrollTop: nextStop.offsetTop - container.clientHeight /3
-						});
-					}, 500);
-					console.log("Next stop index: %d", $scope.nextStopIndex);
-				});
-
-				// show route by default
-				showRoute();
-			}
-
-		});
-
-
-		function showRoute(){
-			getShapeAndStops($scope.vehicle.trip.shape_id).then(function(data){
-				map("setPath", data.path.map(function(point){
-					return {
-						latitude: point.shape_pt_lat,
-						longitude: point.shape_pt_lon
-					};
-				}));
-			});
-		}
-
-
-		$scope.$on("$destroy", function(){
-			console.log("clearPath");
-			map("clearPath");
-		});
-	});
 }

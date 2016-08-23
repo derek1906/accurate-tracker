@@ -57,7 +57,7 @@ function services(tracker){
 	// shortcut for broadcasting map events
 	.service("map", function map($rootScope){
 		return function(action, data){
-			$rootScope.$broadcast("map", {action: action, data: data});
+			//$rootScope.$broadcast("map", {action: action, data: data});
 		};
 	})
 
@@ -74,7 +74,7 @@ function services(tracker){
 	})
 
 	// icons generator
-	.service("icons", function icons(uiGmapIsReady){
+	.service("icons", function icons(){
 		var icons = {
 			"home": {
 				url: "icons/map_icon_set.png",
@@ -456,10 +456,8 @@ function services(tracker){
 		};
 	})
 
-	.service("MapComponentManager", function MapComponentManager(uiGmapIsReady, icons, $q, delayedCall){
+	.service("MapComponentManager", function MapComponentManager(icons, $q, delayedCall){
 		var isLoaded = false;
-
-		//uiGmapIsReady.promise().then(function(maps){
 		
 		function setup(map){
 

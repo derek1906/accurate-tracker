@@ -16,9 +16,6 @@
         <script src="./bower_components/angular-material/angular-material.js" type="text/javascript" ></script>
         <script src="./bower_components/angular-route/angular-route.js" type="text/javascript" ></script>
         <script src="./bower_components/angular-messages/angular-messages.js" type="text/javascript" ></script>
-        <script src="./bower_components/angular-google-maps/dist/angular-google-maps.min.js"></script>
-        <script src="./bower_components/angular-simple-logger/dist/angular-simple-logger.min.js"></script>
-        <script src="./bower_components/lodash/lodash.js"></script>
         <script src="./bower_components/jquery/dist/jquery.min.js"></script>
 
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAoqsttDzqa1L8Z4fs8_eW5QouMx7txwF0"></script>
@@ -31,7 +28,7 @@
         <script src="./route_colors.js"></script>
         <script>
             // Create module "tracker"
-            var tracker = angular.module("tracker", ["ngMaterial", "ngRoute", "uiGmapgoogle-maps"]);
+            var tracker = angular.module("tracker", ["ngMaterial", "ngRoute"]);
 
             // set up services
             services(tracker);
@@ -72,10 +69,6 @@
                         .when("/stop/:id", {
                             templateUrl: "pages/stop_details.html",
                             controller: "StopDetails"
-                        })
-                        .when("/trip/:id", {
-                            templateUrl: "pages/trip_details.html",
-                            controller: "TripDetails"
                         })
                         .when("/favorites", {
                             templateUrl: "pages/favorites.html",
