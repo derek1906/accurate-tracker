@@ -250,10 +250,10 @@ function services(tracker){
 	})
 
 	// Handle communications to the API server
-	.service("getData", function getData($q, $http){
+	.service("getData", function getData($q, $http, $filter){
 		var key = "77b92e5ceef640868adfc924c1735ac3";
 
-		return function(method, data){
+		var interface = function(method, data){
 			var deferred = $q.defer();
 			console.log("[getData]", method, angular.copy(data));
 
@@ -275,6 +275,18 @@ function services(tracker){
 
 			return deferred.promise;
 		};
+
+		window.getUsage = function(){
+			var date = new Date();
+			date.setDate(date.getDate() - 1);	// yesterday
+			var dateString = $filter("date")(date, "yyyy-MM-dd");
+
+			interface("GetApiUsage", { start_date: dateString }).then(function(data){
+				console.log("Stats for " + dateString + ":\n" + JSON.stringify(data.days[0].versions[0], null, 4));
+			});
+		};
+
+		return interface;
 	})
 
 	// Handle communications to the autocomplete API server
