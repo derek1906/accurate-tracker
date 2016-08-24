@@ -1,3 +1,7 @@
+#map{
+	touch-action: none;
+}
+
 #wrapper{
 	width: 100%;
 }
@@ -37,6 +41,11 @@
 
 #menu{
     padding: 0px 0px;
+}
+
+#menu #menu-more{
+	position: absolute;
+	top: 64px;
 }
 
 /* search */

@@ -52,7 +52,7 @@
 <div class="headbar" layout="row" layout-align="start center" flex="nogrow">
     <fav-button stop-id="stop.stop_id" ng-show="!stopNotExists"
         flex-order="0" flex-order-xs="2"></fav-button>
-    <h2 flex-order="1" flex="nogrow">
+    <h2 flex-order="1" flex-order-xs="0" flex="nogrow">
         <span ng-if="!combinedStop.stop_name">nope.avi</span>
         <md-select class="md-no-underline" ng-if="combinedStop.stop_name" ng-model="stop_id" ng-change="goToStopId(stop_id)"
             aria-label="Stop point">
@@ -61,6 +61,7 @@
             </md-option>
         </md-select>
     </h2>
+    <div flex flex-order="2" flex-order-xs="1"></div>
 </div>
 <md-content flex class="main-content" layout="column">
     <div class="page-header" flex="none" ng-show="isSearching">
