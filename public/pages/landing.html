@@ -30,7 +30,7 @@
         <md-progress-linear md-mode="indeterminate" class="md-warn"></md-progress-linear>
         <div>Waiting for location services...</div>
     </div>
-    <md-list class="page-scrollable-content no-margin">
+    <md-list class="page-scrollable-content no-margin" hide show-gt-xs>
         <md-list-item class="nearbyStop-info" ng-repeat="stop in nearbyStops track by stop.stop_id"
                 ng-click="goToStop(stop)" ng-mouseover="centerStop(stop)" ng-mouseout="decenterStop(stop)">
             <fav-button stop-id="stop.stop_id" class="md-primary"></fav-button>

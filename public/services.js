@@ -488,7 +488,8 @@ function services(tracker){
 	})
 
 	.service("MapComponentManager", function MapComponentManager(icons, $q, delayedCall){
-		var isLoaded = false;
+		var isLoaded = false,
+			smallScreen = window.matchMedia("(max-width: 600px)").matches;	// initialize once at startup
 		
 		function setup(map){
 
@@ -769,10 +770,17 @@ function services(tracker){
 				setTimeout(function(){
 					var span = map.getBounds().toSpan();
 					var position = self.get("position");
-					map.panTo({
-						lat: position.lat(),
-						lng: position.lng() - span.lng() * 0.25
-					});
+
+					// responsive!
+					if(smallScreen){
+						map.panTo({
+							lat: position.lat(), lng: position.lng()
+						});
+					}else{
+						map.panTo({
+							lat: position.lat(), lng: position.lng() - span.lng() * 0.25
+						});
+					}
 				});
 
 				return this;
@@ -859,7 +867,6 @@ function services(tracker){
 				manager.dragging = false;
 			});
 			map.addListener("idle", function(){
-
 				var bounds = map.getBounds(),
 					sw = bounds.getSouthWest(),
 					ne = bounds.getNorthEast();
@@ -886,22 +893,40 @@ function services(tracker){
 						var marker = set.markers[marker_id];
 
 						var targetLatLng = marker.get("position");
-						if(eastBounds.contains(targetLatLng)){
-							if(marker.get("isHiding")){
-								marker.setMap(map);
-								marker.set("isHiding", false);
+
+						if(smallScreen){
+							// markers don't need to be dimmed in mobile layout
+							if(bounds.contains(targetLatLng)){
+								if(marker.get("isHiding")){
+									marker.setMap(map);
+									marker.set("isHiding", false);
+								}
+								marker.setMarkerOpacity(1);
+							}else{
+								if(!marker.get("isHiding")){
+									marker.setMap(null);
+									marker.set("isHiding", true);
+								}
 							}
-							marker.setMarkerOpacity(1);
-						}else if(westBounds.contains(targetLatLng)){
-							if(marker.get("isHiding")){
-								marker.setMap(map);
-								marker.set("isHiding", false);
-							}
-							marker.setMarkerOpacity(0.2);
 						}else{
-							if(!marker.get("isHiding")){
-								marker.setMap(null);
-								marker.set("isHiding", true);
+							// large screens
+							if(eastBounds.contains(targetLatLng)){
+								if(marker.get("isHiding")){
+									marker.setMap(map);
+									marker.set("isHiding", false);
+								}
+								marker.setMarkerOpacity(1);
+							}else if(westBounds.contains(targetLatLng)){
+								if(marker.get("isHiding")){
+									marker.setMap(map);
+									marker.set("isHiding", false);
+								}
+								marker.setMarkerOpacity(0.2);
+							}else{
+								if(!marker.get("isHiding")){
+									marker.setMap(null);
+									marker.set("isHiding", true);
+								}
 							}
 						}
 					}

@@ -1,0 +1,46 @@
+#wrapper{
+	width: 100%;
+}
+
+.page-header{
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+.page-header > .page-title{
+	display: none;
+}
+.page-header > .page-subtitle{
+	display: block;
+	font-size: 0.6em;
+	text-align: center;
+	background: #0490a1;
+	padding: 0px 0.3em;
+}
+
+
+/* overmap-buttons */
+#overmap-buttons{
+	display: none;
+}
+
+.headbar{
+	background: rgba(0, 0, 0, 0.6);
+	font-size: 0.7em;
+	overflow: hidden;
+}
+
+#content > .headbar{
+	padding-right: 16px;
+}
+
+#menu{
+    padding: 0px 0px;
+}
+
+/* search */
+.nearbyStop-info{
+	font-size: 1.3em !important;
+	margin-bottom: 0 !important;
+}

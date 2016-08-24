@@ -17,11 +17,42 @@
         margin-left: 8px;
         cursor: help;
     }
+
+    /* mobile styles */
+    @media (max-width: 600px) {
+        .page-header{
+            bottom: 40%;
+            margin-bottom: 0px;
+            z-index: 2;
+        }
+        .departures{
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            overflow: auto;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1;
+        }
+        .departure-info{
+            padding-top: 0.3em;
+            padding-bottom: 0.3em;
+            padding-left: 0.5em;
+        }
+        .departures .headsign, .departures .expected_mins{
+            font-size: 1em;
+        }
+        .departures .destination, .departures .min_label{
+            font-size: 0.8em;
+        }
+    }
 </style>
 <link href="./styles/route-color.css" rel="stylesheet" />
-<div class="headbar" layout="row" layout-align="start center" flex="none">
-    <fav-button stop-id="stop.stop_id" ng-show="!stopNotExists"></fav-button>
-    <h2>
+<div class="headbar" layout="row" layout-align="start center" flex="nogrow">
+    <fav-button stop-id="stop.stop_id" ng-show="!stopNotExists"
+        flex-order="0" flex-order-xs="2"></fav-button>
+    <h2 flex-order="1" flex="nogrow">
         <span ng-if="!combinedStop.stop_name">nope.avi</span>
         <md-select class="md-no-underline" ng-if="combinedStop.stop_name" ng-model="stop_id" ng-change="goToStopId(stop_id)"
             aria-label="Stop point">
@@ -58,7 +89,7 @@
                 ng-class="[(departure.route.route_id | lowercase), {selected: departure.vehicle_id == selectedDeparture.entry.vehicle_id}]">
             <div class="departure-info" layout="column" layout-align="center start">
                 <span class="headsign" layout="row" layout-align="start center">
-                    {{departure.headsign}}
+                    {{departure.headsign}} ({{departure.expected | date : "HH:mm"}})
                     <md-icon class="istop-icon" md-svg-icon="ui:istop" ng-show="departure.is_istop">
                         <md-tooltip md-direction="right" md-delay="300">
                             Boarding is free<br>
@@ -66,7 +97,7 @@
                         </md-tooltip>
                     </md-icon>
                 </span>
-                <span class="destination">To {{departure.destination.stop_id | stopID}} • Arriving at {{departure.expected | date : "HH:mm"}}</span>
+                <span class="destination">To {{departure.destination.stop_id | stopID}}</span>
             </div>
             <!-- Expected minutes remaining -->
             <div class="md-secondary" layout="column" layout-align="center center" ng-show="departure.expected_mins">
@@ -78,7 +109,7 @@
                 <span class="expected_mins">Due</span>
             </div>
             <!-- Timer icon: Shows only when expected time is greater than 1 minute -->
-            <md-button class="md-icon-button md-secondary" ng-show="departure.expected_mins" ng-click="addTimer(departure)" aria-label="Set timer">
+            <md-button class="md-icon-button md-secondary" ng-show="departure.expected_mins" ng-click="addTimer(departure)" aria-label="Set timer" hide-xs>
                 <md-icon md-svg-icon="ui:timer"></md-icon>
             </md-button>
         </md-list-item>

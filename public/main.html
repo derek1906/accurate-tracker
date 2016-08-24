@@ -9,6 +9,7 @@
 
         <link href="./bower_components/angular-material/angular-material.css" rel="stylesheet" />
         <link href="./styles/style.css" rel="stylesheet" />
+        <link href="./styles/mobile-style.css" media="(max-width: 600px)" rel="stylesheet" />
 
         <script src="./bower_components/angular/angular.js" type="text/javascript" ></script>
         <script src="./bower_components/angular-animate/angular-animate.js" type="text/javascript" ></script>
@@ -162,7 +163,7 @@
             </div>
         </div>
         <div id="wrapper" layout="row" class="overlayControlled" ng-class="overlayPage">
-            <div id="menu" layout="column" ng-class="{'closed': menuClosed}">
+            <div id="menu" layout="column" ng-class="{'closed': menuClosed}" flex="nogrow">
                 <div layout="column" layout-align="center" class="headbar">
                     <md-button id="menu-toggle-button" class="md-icon-button" ng-click="toggleMenu()" ng-class="{'hide': !atLanding}" aria-label="Toggle Menu">
                         <md-icon md-svg-icon="ui:menu"></md-icon>
