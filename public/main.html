@@ -4,6 +4,7 @@
         <title>Rendestops</title>
 
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width">
+        <meta name="theme-color" content="#011B2E">
 
         <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1" />
 
@@ -87,6 +88,7 @@
                 })
                 .run(function($location, MapComponentManager, loadStopsDetails, $http){
                     $http.get("styles/map-style.json").then(function(styles){
+                        // set up maps
                         MapComponentManager.load(document.getElementById("map-container"), {
                             mapTypeControl: false, streetViewControl: false, 
                             scaleControl: false, zoomControl: false, scrollwheel: false, disableDoubleClickZoom: false,

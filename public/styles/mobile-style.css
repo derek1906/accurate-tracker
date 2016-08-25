@@ -43,6 +43,7 @@
     padding: 0px 0px;
 }
 
+/* Menu is expanding the #content and blocking the map */
 #menu #menu-more{
 	position: absolute;
 	top: 64px;
