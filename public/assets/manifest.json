@@ -3,7 +3,7 @@
     "orientation":  "portrait",
     "icons": [{
 		"sizes": "48x48",
-		"src": "icons/notification_icon.png"
+		"src": "icons/favicon.ico"
 	}, {
 		"sizes": "128x128",
 		"src": "icons/notification_icon.png"
