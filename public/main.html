@@ -5,6 +5,8 @@
 
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width">
         <meta name="theme-color" content="#011B2E">
+        
+        <link rel="manifest" href="manifest.json">
 
         <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1" />
 
@@ -58,6 +60,7 @@
                 .value("stop_details", {stops:{}, loaded: false})
                 .value("DATA_STORAGE_KEY", "stop_data")
                 .value("DEPARTURE_UPDATE_INTERVAL", 60*1000)    // 60 seconds
+                .value("isSmallScreen", window.matchMedia("(max-width: 600px)").matches)
                 .config(function($routeProvider, $mdThemingProvider, $mdIconProvider){
                     $routeProvider
                         .when("/", {
@@ -86,19 +89,20 @@
 
                     $mdIconProvider.iconSet("ui", "icons/ui_icon_set.svg", 24);
                 })
-                .run(function($location, MapComponentManager, loadStopsDetails, $http){
+                .run(function($location, MapComponentManager, loadStopsDetails, $http, isSmallScreen){
                     $http.get("styles/map-style.json").then(function(styles){
                         // set up maps
                         MapComponentManager.load(document.getElementById("map-container"), {
-                            mapTypeControl: false, streetViewControl: false, 
-                            scaleControl: false, zoomControl: false, scrollwheel: false, disableDoubleClickZoom: false,
-                            minZoom: 17, maxZoom: 17,
-                            disableDefaultUI: true, clickableIcons: false,
-                            center: { lat: 40.1069778, lng: -88.2272211 }, // main quad
-                            zoom: 17,
-                            styles: styles.data,
-                            backgroundColor: "none"
-                        });
+                                mapTypeControl: false, streetViewControl: false, 
+                                scaleControl: false, zoomControl: false, scrollwheel: false, disableDoubleClickZoom: false,
+                                minZoom: 17, maxZoom: 17,
+                                disableDefaultUI: true, clickableIcons: false,
+                                center: { lat: 40.1069778, lng: -88.2272211 }, // main quad
+                                zoom: 17,
+                                styles: styles.data,
+                                backgroundColor: "none"
+                            }
+                        );
                     });
 
                     MapComponentManager.loaded(function(commands){

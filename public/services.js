@@ -487,9 +487,9 @@ function services(tracker){
 		};
 	})
 
-	.service("MapComponentManager", function MapComponentManager(icons, $q, delayedCall){
+	.service("MapComponentManager", function MapComponentManager(icons, $q, delayedCall, isSmallScreen){
 		var isLoaded = false,
-			smallScreen = window.matchMedia("(max-width: 600px)").matches;	// initialize once at startup
+			smallScreen = isSmallScreen;	// initialize once at startup
 		
 		function setup(map){
 
@@ -522,7 +522,7 @@ function services(tracker){
 					iconHoverable: options.iconHoverable === undefined ? false : true,
 					level: options.level || "common",
 					events: options.events,
-					isHiding: true,
+					isHiding: false,
 					onGoingAnimation: undefined,
 					data: options.data,
 				});
@@ -818,16 +818,19 @@ function services(tracker){
 
 			MarkerTooltip.prototype.show = function(){
 				this.setMap(map);
+				this.set("isHiding", false);
 			}
 
 			MarkerTooltip.prototype.hide = function(){
 				this.setMap(null);
+				this.set("isHiding", true);
 			}
 
 
 			function MarkerSet(set_id){
 				this.set_id = set_id;
 				this.markers = {};
+				this.isHiding = false;
 			}
 			MarkerSet.prototype.setMarker = function(marker_id, marker){
 				this.markers[marker_id] = marker;
@@ -843,13 +846,15 @@ function services(tracker){
 				return this;
 			}
 			MarkerSet.prototype.show = function(){
+				this.isHiding = false;
 				for(var marker_id in this.markers){
-					this.markers[marker_id].setMap(map);
+					this.markers[marker_id].show();
 				}
 			}
 			MarkerSet.prototype.hide = function(){
+				this.isHiding = true;
 				for(var marker_id in this.markers){
-					this.markers[marker_id].setMap(null);
+					this.markers[marker_id].hide();
 				}
 			}
 
@@ -889,44 +894,51 @@ function services(tracker){
 				// the left side of screen
 				for(var set_id in marker_sets){
 					var set = marker_sets[set_id];
+
+					// skip enitre set if set is set to hidden
+					if(set.isHiding)	continue;
+
 					for(var marker_id in set.markers){
 						var marker = set.markers[marker_id];
+
+						if(marker.get("isHiding"))	continue;
 
 						var targetLatLng = marker.get("position");
 
 						if(smallScreen){
 							// markers don't need to be dimmed in mobile layout
 							if(bounds.contains(targetLatLng)){
-								if(marker.get("isHiding")){
-									marker.setMap(map);
-									marker.set("isHiding", false);
-								}
-								marker.setMarkerOpacity(1);
+								//if(marker.get("isHiding")){
+									if(!marker.getMap())	marker.setMap(map);
+									//marker.set("isHiding", false);
+									//marker.showLabel();
+								//}
 							}else{
-								if(!marker.get("isHiding")){
+								//if(!marker.get("isHiding")){
 									marker.setMap(null);
-									marker.set("isHiding", true);
-								}
+									//marker.set("isHiding", true)
+									//marker.hideLabel();
+								//}
 							}
 						}else{
 							// large screens
 							if(eastBounds.contains(targetLatLng)){
-								if(marker.get("isHiding")){
-									marker.setMap(map);
-									marker.set("isHiding", false);
-								}
+								//if(marker.get("isHiding")){
+									if(!marker.getMap())	marker.setMap(map);
+									//marker.set("isHiding", false);
+								//}
 								marker.setMarkerOpacity(1);
 							}else if(westBounds.contains(targetLatLng)){
-								if(marker.get("isHiding")){
-									marker.setMap(map);
-									marker.set("isHiding", false);
-								}
+								//if(marker.get("isHiding")){
+									if(!marker.getMap())	marker.setMap(map);
+									//marker.set("isHiding", false);
+								//}
 								marker.setMarkerOpacity(0.2);
 							}else{
-								if(!marker.get("isHiding")){
+								//if(!marker.get("isHiding")){
 									marker.setMap(null);
-									marker.set("isHiding", true);
-								}
+									//marker.set("isHiding", true);
+								//}
 							}
 						}
 					}
@@ -936,7 +948,6 @@ function services(tracker){
 
 			manager.proccessQueue.forEach(function(proccess){ proccess(); });
 			manager.proccessQueue = [];
-		//});
 		}
 
 

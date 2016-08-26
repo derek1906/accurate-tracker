@@ -1,0 +1,18 @@
+{
+    "display":      "standalone",
+    "orientation":  "portrait",
+    "icons": [{
+		"sizes": "48x48",
+		"src": "icons/notification_icon.png"
+	}, {
+		"sizes": "128x128",
+		"src": "icons/notification_icon.png"
+	}],
+    "start_url": "/",
+    "short_name": "Rendestops",
+	"name": "Rendestops",
+	"description": "Bus tracker for the Champaign-Urbana community.",
+	"background_color": "#011B2E",
+	"theme_color": "#011B2E",
+	"scope": "/"
+}

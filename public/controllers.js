@@ -447,6 +447,8 @@ function controllers(tracker){
 			// hide existing route
 			$scope.deselectRoute();
 
+			MapComponentManager.map.set("minZoom", 12);
+
 			var routeName = departure.route.route_id.toLowerCase().split(" ")[0];
 
 			// return if user is trying to deselect entry
@@ -503,6 +505,8 @@ function controllers(tracker){
 		};
 
 		$scope.deselectRoute = function(){
+			MapComponentManager.map.set("minZoom", 17);
+
 			if($scope.selectedDeparture.entry){
 				MapComponentManager.loaded(function(commands){
 					$scope.selectedDeparture.route.setMap(null);

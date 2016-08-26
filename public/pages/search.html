@@ -11,6 +11,22 @@
         box-sizing: content-box;
     }
 
+    #search-input::placeholder{
+        color: rgba(255, 255, 255, .7);
+    }
+    #search-input::-webkit-input-placeholder {
+        color: rgba(255, 255, 255, .7);
+    }
+    #search-input:-moz-placeholder {
+        color: rgba(255, 255, 255, .7);
+    }
+    #search-input::-moz-placeholder {
+        color: rgba(255, 255, 255, .7);
+    }
+    #search-input:-ms-input-placeholder {
+        color: rgba(255, 255, 255, .7);
+    }
+
     .nearbyStop-info{
         margin-bottom: 23px;
         font-size: 28px;
@@ -30,7 +46,7 @@
 </style>
 
 <div class="headbar" layout="row" layout-align="start center" flex="none">
-    <input id="search-input" placeholder="search" ng-model="searchTerm" ng-model-options="{debounce: 200}"
+    <input id="search-input" placeholder="search bus stop" ng-model="searchTerm" ng-model-options="{debounce: 200}"
         ng-change="performSearch()"
         ng-keypress="goToFirstOption($event)">
 </div>

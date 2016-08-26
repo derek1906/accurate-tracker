@@ -11,6 +11,22 @@
         box-sizing: content-box;
     }
 
+    #search-input::placeholder{
+        color: rgba(255, 255, 255, .7);
+    }
+    #search-input::-webkit-input-placeholder {
+        color: rgba(255, 255, 255, .7);
+    }
+    #search-input:-moz-placeholder {
+        color: rgba(255, 255, 255, .7);
+    }
+    #search-input::-moz-placeholder {
+        color: rgba(255, 255, 255, .7);
+    }
+    #search-input:-ms-input-placeholder {
+        color: rgba(255, 255, 255, .7);
+    }
+
     .nearbyStop-info{
         margin-bottom: 23px;
         font-size: 28px;
@@ -18,7 +34,7 @@
 </style>
 
 <div class="headbar" layout="row" layout-align="start center" flex="none">
-    <input id="search-input" placeholder="search" ng-click="doSearch()" ng-model="searchTerm" ng-change="doSearch()">
+    <input id="search-input" placeholder="search bus stop" ng-click="doSearch()" ng-model="searchTerm" ng-change="doSearch()">
 </div>
 <md-content flex class="main-content" layout="column">
     <div class="page-header" flex="none">
@@ -27,7 +43,7 @@
     </div>
 
     <div ng-show="!nearbyStops.length" layout="column" layout-align="center start">
-        <div>Waiting for location services...</div>
+        <div>Getting your current location...</div>
     </div>
     <md-list class="page-scrollable-content no-margin" hide show-gt-xs>
         <md-list-item class="nearbyStop-info" ng-repeat="stop in nearbyStops track by stop.stop_id"
