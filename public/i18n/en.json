@@ -5,25 +5,25 @@
 			"standard": "Welcome."
 		},
 		"default-subtitle": {
-			"funny": ["These are the closest bus stops I could fucking find.", "Do you know how long it took me to find these damn stops for you?", "Found some damn close bus stops. They on yo ass."],
-			"standard": "Nearby bus stops will be listed below from closest to furthest."
+			"funny": ["These are the closest bus stops I could fucking find.", "Do you know how long it took me to find these damn stops?", "Found some damn close bus stops. They on yo ass."],
+			"standard": "Here are some nearby bus shown below."
 		}
 	},
 	"StopDetails": {
 		"default-title": {
-			"funny": ["Don't miss it.", "Which one?", "I’m. Starving."],
+			"funny": ["Don't miss it.", "Yo!", "You see."],
 			"standard": "Choose a bus."
 		},
 		"default-subtitle": {
-			"funny": ["You gon miss it if you don’t use the damn timer.", "Bruh... we don’t have all fucking day here.", "Need. Food. Insert. Pizza."],
-			"standard": "Buses of this bus stop is listed below."
+			"funny": ["Use the damn timer, jk 4 fones dou.", "Here dem buses for this bus stop.", "When click bus, you get location of bus."],
+			"standard": "Buses of this bus stop are listed below."
 		},
 		"empty-bus-arrival-title": {
-			"funny": ["It's too late...", "You're screwed.", "Here's a poem:"],
+			"funny": ["Ey.", "You're screwed.", "Here's a poem:"],
 			"standard": "Sorry."
 		},
 		"empty-bus-arrival-subtitle": {
-			"funny": ["To catch a bus~ It’s tooo laaaate~<br>Call SafeRides instead: 217-265-7433", "Bettah find a damn bench...<br>or call SafeRides instead: 217-265-7433", "Roses are red.<br>Violets are blue.<br>Call SafeRides at 217-265-7433.<br>Cuz no buses are due."],
+			"funny": ["No buses be coming this late, take a hike kid.<br> or call SafeRides instead: 217-265-7433", "Bettah find a damn bench...<br>or call SafeRides instead: 217-265-7433", "Roses are red.<br>Violets are blue.<br>Call SafeRides at 217-265-7433.<br>Cuz no buses are due."],
 			"standard": "No buses will be arriving at {{stop.stop_name}} during these hours. Call SafeRides instead: 217-265-7433."
 		}
 	},
@@ -43,11 +43,11 @@
 			"standard": "Fill'm up."
 		},
 		"default-subtitle": {
-			"funny": ["These are some sweet ass stops you’ve saved up", "If you fill this page up, you be getting a free burrito (no promises)", "Why? Cuz these saves are fire!"],
+			"funny": ["These are some sweet ass stops you’ve saved up.", "If you fill this page up, you be getting a free burrito (no promises)", "Why? Cuz these saves are fire!"],
 			"standard": "These bus stops look really nice."
 		},
 		"empty-list": {
-			"funny": ["Nothing is here! To favorite a stop, press the heart icon next to a stop name."],
+			"funny": ["Yo why is this shit empty? Press dem hearts next to dem stop names."],
 			"standard": "To favorite a stop, press the heart icon next to a stop name."
 		}
 	},

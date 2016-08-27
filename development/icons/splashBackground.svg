@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="1366px" height="768px" viewBox="0 0 1366 768" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 39.1 (31720) - http://www.bohemiancoding.com/sketch -->
+    <title>Group</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Web" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Landing-Copy-18">
+            <g id="Group" transform="translate(-22.000000, -111.000000)">
+                <rect id="Rectangle-15-Copy" fill="#072437" x="22" y="111" width="1366" height="768"></rect>
+                <path d="M252,662 L0,662 L0,879 L287,879 L287,763 L398,763 L398,661 L252,661 L252,662 Z M988,959 L1099,959 L1099,753 L876,753 L876,788 L765,788 L765,994 L988,994 L988,959 Z M1251,495 L1251,446 L1149,446 L1149,788 L1194,788 L1194,935 L1417,935 L1417,495 L1251,495 Z M1061,194 L937,194 L937,351 L1028,351 L1028,400 L1251,400 L1251,194 L1061,194 Z M325,366 L325,297 L102,297 L102,399 L214,399 L214,583 L360,583 L360,366 L325,366 Z M489,245 L540,245 L540,143 L438,143 L438,194 L387,194 L387,400 L489,400 L489,245 Z M937,557 L1039,557 L1039,659 L937,659 L937,557 Z M0,60 L325,60 L325,245 L0,245 L0,60 Z M679,0 L1028,0 L1028,157 L679,157 L679,0 Z M1306,5 L1529,5 L1529,445 L1306,445 L1306,5 Z M445,788 L591,788 L591,994 L445,994 L445,788 Z" id="Combined-Shape" fill="#0D1C27"></path>
+            </g>
+        </g>
+    </g>
+</svg>
