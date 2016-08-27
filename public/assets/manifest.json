@@ -13,6 +13,6 @@
 	"name": "Rendestops",
 	"description": "Bus tracker for the Champaign-Urbana community.",
 	"background_color": "#011B2E",
-	"theme_color": "#011B2E",
+	"theme_color": "#060b10",
 	"scope": "/"
 }
