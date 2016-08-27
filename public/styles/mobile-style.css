@@ -1,3 +1,7 @@
+* {
+	-webkit-overflow-scrolling: touch;
+}
+
 #map{
 	touch-action: none;
 }
