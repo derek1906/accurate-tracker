@@ -259,7 +259,11 @@ md-list.no-margin md-list-item > .md-button{
 
 /* Overlays */
 #splash{
-    background: rgba(0, 0, 0, 0.6);
+    /*background: rgba(0, 0, 0, 0.6);*/
+    background-image: url('/assets/splash/background.svg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
 }
 #splash *{
     color: white;
