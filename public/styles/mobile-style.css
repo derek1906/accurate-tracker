@@ -42,7 +42,8 @@
 
 /* overmap-buttons */
 #overmap-buttons{
-	display: none;
+	padding: 0;
+	bottom: 4em;
 }
 
 .headbar{
