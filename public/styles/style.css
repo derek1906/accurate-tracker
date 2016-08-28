@@ -6,6 +6,8 @@ body{
     height: 100%;
     font-family: Montserrat;
 }
+
+/* scrollbars */
 *:hover::-webkit-scrollbar{
     width: 10px;
     height: 10px;

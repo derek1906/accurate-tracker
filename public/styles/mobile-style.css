@@ -1,7 +1,18 @@
+/* general overrides */
 * {
 	-webkit-overflow-scrolling: touch;
 }
+.md-button:hover{
+	background: none !important;
+}
 
+/* scrollbars */
+*:hover::-webkit-scrollbar{
+    width: 0px;
+    height: 0px;
+}
+
+/* disable pull to refresh */
 #map{
 	touch-action: none;
 }
