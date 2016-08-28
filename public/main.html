@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Rendestops</title>
+        <title>Hypebus</title>
 
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width">
 
@@ -105,7 +105,7 @@
                     $http.get("styles/map-style.json").then(function(styles){
                         // set up maps
                         MapComponentManager.load(document.getElementById("map-container"), {
-                                mapTypeControl: false, streetViewControl: false, 
+                                mapTypeControl: false, streetViewControl: false,
                                 scaleControl: false, zoomControl: false, scrollwheel: false, disableDoubleClickZoom: false,
                                 minZoom: 17, maxZoom: 17,
                                 disableDefaultUI: true, clickableIcons: false,
