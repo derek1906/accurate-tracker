@@ -21,7 +21,7 @@
 }
 .page-header > .page-subtitle{
 	display: block;
-	font-size: 0.6em;
+	font-size: 0.7em;
 	text-align: center;
 	background: #0490a1;
 	padding: 0px 0.3em;
@@ -36,7 +36,7 @@
 
 .headbar{
 	background: rgba(0, 0, 0, 0.6);
-	font-size: 0.7em;
+	font-size: 0.8em;
 	overflow: hidden;
 }
 
