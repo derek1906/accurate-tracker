@@ -1,10 +1,10 @@
-# Rendestops
+# Hypebus
 An open source bus tracker for the Champaign-Urbana area.
 
 ![Screenshot](/screenshot.png?raw=true)
 
 ## Libraries
-Rendestops uses AngularJS 1.5. This webapp contains three main files:
+Hypebus uses AngularJS 1.5. This webapp contains three main files:
 
 - `controllers.js`: Contains all controllers necessary
 - `directives.js`: Contains custom directives
@@ -14,7 +14,7 @@ Rendestops uses AngularJS 1.5. This webapp contains three main files:
 Access to [Google Maps API V3](https://developers.google.com/maps/) and the [CUMTD API](https://developer.cumtd.com/) are required.
 
 ## Build Notes
-Rendestops uses Bower to manage dependencies. Important dependencies includes:
+Hypebus uses Bower to manage dependencies. Important dependencies includes:
 
 - `angular`
 - `angular-route`
