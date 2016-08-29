@@ -24,7 +24,7 @@
 		},
 		"empty-bus-arrival-subtitle": {
 			"funny": ["No buses be coming this late, take a hike kid.<br> or call SafeRides instead: 217-265-7433", "Bettah find a damn bench...<br>or call SafeRides instead: 217-265-7433", "Roses are red.<br>Violets are blue.<br>Call SafeRides at 217-265-7433.<br>Cuz no buses are due."],
-			"standard": "No buses will be arriving at {{stop.stop_name}} during these hours. Call SafeRides instead: 217-265-7433."
+			"standard": "No buses will be arriving at {{stop.stop_name}} during these hours.<br>Call SafeRides instead: 217-265-7433."
 		}
 	},
 	"TripDetails": {

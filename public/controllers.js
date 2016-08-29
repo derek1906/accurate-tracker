@@ -400,15 +400,11 @@ function controllers(tracker){
 			}
 			
 			stop_points_list = $scope.stop_points_list = [combinedStop].concat(combinedStop.stop_points);
-
-			if(stopInfo.stop_point_id !== ""){
-				// stop point mode
-				console.log("stop point mode", combinedStop);
-			}
 		
 			MapComponentManager.loaded(function(commands){
-				targetMarker = commands.getMarker("all-stops", stopInfo.stop_id).showLabel().lightUp().center().setIcon("stop_selected_v2", true);
-				targetMarker.set("iconHoverable", false);
+				targetMarker = commands.getMarker("all-stops", stopInfo.stop_id);
+				targetMarker
+					.showLabel().lightUp().center().setIcon("stop_selected_v2", true).set("iconHoverable", false);
 			});
 
 			$scope.update();
@@ -447,7 +443,7 @@ function controllers(tracker){
 			// hide existing route
 			$scope.deselectRoute();
 
-			MapComponentManager.map.set("minZoom", 12);
+			//MapComponentManager.map.set("minZoom", 12);
 
 			var routeName = departure.route.route_id.toLowerCase().split(" ")[0];
 
@@ -505,7 +501,7 @@ function controllers(tracker){
 		};
 
 		$scope.deselectRoute = function(){
-			MapComponentManager.map.set("minZoom", 17);
+			//MapComponentManager.map.set("minZoom", 17);
 
 			if($scope.selectedDeparture.entry){
 				MapComponentManager.loaded(function(commands){

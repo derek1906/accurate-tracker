@@ -76,22 +76,6 @@ function services(tracker){
 	// icons generator
 	.service("icons", function icons(){
 		var icons = {
-			"home": {
-				url: "icons/map_icon_set.png",
-				size: {width: 66, height: 80},
-				origin: {x: 0, y: 0}
-			},
-			"stop": {
-				url: "icons/map_icon_set.png",
-				size: {width: 54, height: 65},
-				origin: {x: 0, y: 80}
-			},
-			"bus": {
-				url: "icons/map_icon_set.png",
-				size: {width: 70, height: 83},
-				origin: {x: 0, y: 145}
-			},
-
 			"home_v2": {
 				url: "icons/map_icon_set_v2.svg",
 				size: {width: 42, height: 76},
@@ -107,6 +91,22 @@ function services(tracker){
 				size: {width: 42, height: 76},
 				origin: {x: 0, y: 152}
 			}
+		}, icons_mini = {
+			"home_v2": {
+				url: "icons/map_icon_set_v2_mini.svg",
+				size: {width: 24, height: 24},
+				origin: {x: 0, y: 0}
+			},
+			"stop_v2": {
+				url: "icons/map_icon_set_v2_mini.svg",
+				size: {width: 24, height: 24},
+				origin: {x: 0, y: 24}
+			},
+			"stop_selected_v2": {
+				url: "icons/map_icon_set_v2_mini.svg",
+				size: {width: 24, height: 24},
+				origin: {x: 0, y: 48}
+			}
 
 		}, icons_hover = {};
 
@@ -116,6 +116,9 @@ function services(tracker){
 
 			var icon_hover = icons_hover[key] = angular.copy(icon);
 			icon_hover.origin.x += icon.size.width;
+
+			var icon_mini = icons_mini[key];
+			icon_mini.anchor = {x: icon_mini.size.width/2, y: icon_mini.size.height/2};
 		}
 
 		var busMarkerList = [
@@ -141,10 +144,13 @@ function services(tracker){
 			}
 		});
 
-		return function (name, isHover){
+		return function (name, isHover, useMini){
 			if(!name)       	return undefined;
 			if(!icons[name])	throw "Icon \"" + name + "\" does not exist.";
-			else            	return isHover ? icons_hover[name] : icons[name];
+
+			if(useMini && icons_mini[name]) 	return icons_mini[name]; 	// mini icons, mini overrides hover
+			if(isHover && icons_hover[name])	return icons_hover[name];	// hover icons
+			else                            	return icons[name];      	// fallback
 		}
 	})
 
@@ -487,11 +493,15 @@ function services(tracker){
 		};
 	})
 
-	.service("MapComponentManager", function MapComponentManager(icons, $q, delayedCall, isSmallScreen){
+	.service("MapComponentManager", function MapComponentManager(icons, $q, delayedCall, isSmallScreen, delayedCall){
 		var isLoaded = false,
 			smallScreen = isSmallScreen;	// initialize once at startup
 		
 		function setup(map){
+
+			function isMiniMode(){
+				return map.getZoom() < 16;
+			}
 
 			/**
 			 * @class A marker tooltip class
@@ -525,6 +535,7 @@ function services(tracker){
 					isHiding: false,
 					onGoingAnimation: undefined,
 					data: options.data,
+					supportsMini: !!options.supportsMini
 				});
 
 				// shared properties
@@ -564,14 +575,13 @@ function services(tracker){
 			MarkerTooltip.prototype = new google.maps.OverlayView;
 
 			MarkerTooltip.prototype.changed = function(property){
-				//console.log("Property changed: ", property, this.get(property));
 				var value = this.get(property);
 
 				switch(property){
 					case "position":
 						return this.draw();
 					case "iconName":
-						return this.calculateOffset();
+						return this.calculateOffset(), this.draw();
 					case "caption":
 						return this.modifyContent();
 					case "level":
@@ -634,8 +644,6 @@ function services(tracker){
 			}
 
 			MarkerTooltip.prototype.onAdd = function(){
-				//console.log("onAdd");
-				
 				// check if label previously showing
 				if(this.get("isLabelShowing")){
 					this.showLabel();
@@ -643,8 +651,6 @@ function services(tracker){
 			}
 
 			MarkerTooltip.prototype.draw = function(){
-				//console.log("draw");
-
 				var projection = this.getProjection(),
 					tooltip = this.tooltip,
 					position = this.get("position");
@@ -722,20 +728,20 @@ function services(tracker){
 			}
 
 			MarkerTooltip.prototype.lightUp = function(){
-				this.marker.setIcon(icons(this.get("iconName"), true));
+				this.marker.setIcon(icons(this.get("iconName"), true, isMiniMode()));
 
 				return this;
 			}
 
 			MarkerTooltip.prototype.lightOut = function(){
-				this.marker.setIcon(icons(this.get("iconName"), false));
+				this.marker.setIcon(icons(this.get("iconName"), false, isMiniMode()));
 
 				return this;
 			}
 
 			MarkerTooltip.prototype.setIcon = function(iconName, hoverState){
 				if(iconName){
-					this.marker.setIcon(icons(iconName, !!hoverState));
+					this.marker.setIcon(icons(iconName, !!hoverState, this.get("supportsMini") && isMiniMode()));
 					this.set("iconName", iconName);
 				}
 				return this;
@@ -762,8 +768,10 @@ function services(tracker){
 				this.set("onGoingAnimation", onGoingAnimation);
 			}
 
-			MarkerTooltip.prototype.center = function(){
+			MarkerTooltip.prototype.center = function(zoomLevel){
 				var map = manager.map, self = this;
+
+				if(zoomLevel)	map.setZoom(zoomLevel);
 
 
 				// Add to the end of execution queue
@@ -945,6 +953,25 @@ function services(tracker){
 				}
 
 			});
+
+			// set up automatic mini mode icon
+			var previousIsMini = isMiniMode();
+			var zoomChangedDelayedCallback = delayedCall(300, function(){
+				var currentIsMini = isMiniMode();
+
+				if(currentIsMini !== previousIsMini){
+					// update icons
+					for(var set_id in marker_sets){
+						var set = marker_sets[set_id];
+						for(var marker_id in set.markers){
+							var marker = set.markers[marker_id];
+							marker.setIcon(marker.get("iconName"), false);
+						}
+					}
+					previousIsMini = currentIsMini;
+				}
+			});
+			map.addListener("zoom_changed", zoomChangedDelayedCallback.call);
 
 			manager.proccessQueue.forEach(function(proccess){ proccess(); });
 			manager.proccessQueue = [];

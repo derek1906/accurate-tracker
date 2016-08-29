@@ -207,7 +207,7 @@ md-list.no-margin md-list-item > .md-button{
 /* Overmap buttons */
 #overmap-buttons{
     position: absolute;
-    right: 0px;
+    right: 30px;
     bottom: 0px;
     padding: 16px 32px;
     color: white;
