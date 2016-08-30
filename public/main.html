@@ -187,10 +187,10 @@
 
                     $mdIconProvider.iconSet("ui", "icons/ui_icon_set.svg", 24);
                 })
-                .run(function($location, MapComponentManager, loadStopsDetails, $http, isSmallScreen, DEFAULT_ZOOM_LEVEL, $mdToast){
+                .run(function($location, MapComponentManager, loadStopsDetails, $http, isSmallScreen, DEFAULT_ZOOM_LEVEL, $mdToast, $rootScope){
                     $http.get("styles/map-style.json").then(function(styles){
                         // set up maps
-                        MapComponentManager.load(document.getElementById("map-container"), {
+                        var loadMap = MapComponentManager.load(document.getElementById("map-container"), {
                                 mapTypeControl: false, streetViewControl: false,
                                 scaleControl: false, zoomControl: !isSmallScreen, scrollwheel: true, disableDoubleClickZoom: false,
                                 minZoom: 15, maxZoom: 18,
@@ -201,6 +201,23 @@
                                 backgroundColor: "none"
                             }
                         );
+
+                        loadMap.then(function(){
+                            window.addEventListener("online", function(){
+                                var toast = $mdToast.simple().position("top right").textContent("Reconnected.");
+                                $mdToast.show(toast);
+                            });
+                            window.addEventListener("offline", function(){
+                                var toast = $mdToast.simple().position("top right").textContent("Waiting for connection...");
+                                $mdToast.show(toast);
+                            });
+                        }, function(){
+                            // failed
+                            $rootScope.setOverlay("offline");
+                            window.addEventListener("online", function(){
+                                location.reload();
+                            });
+                        });
                     });
 
                     var loadStopsDetailsPromise = loadStopsDetails();
@@ -357,6 +374,9 @@
             </div>
             <div id="splash" ng-switch-when="splash" layout="column" layout-align="center center">
                 <img src="assets/splash/icon.svg">
+            </div>
+            <div id="offline" ng-switch-when="offline" layout="column" layout-align="center center">
+                Waiting for connection...
             </div>
         </div>
     </body>

@@ -1033,17 +1033,26 @@ function services(tracker){
 				}
 			},
 			load: function(element, options){
+				var deferred = $q.defer();
+
 				if(!isLoaded){
+					if(typeof google === "undefined"){
+						// offline
+						deferred.reject();
+						return deferred.promise;
+					}
+
 					var map = new google.maps.Map(element, options);
 
 					// add listener to run when the map is loaded
 					google.maps.event.addListenerOnce(map, "idle", function(){
 						setup(map);
 						isLoaded = true;
+						deferred.resolve();
 					});
 				}
 
-		        return manager.map;
+		        return deferred.promise;
 			},
 			sets: marker_sets,
 			commands: commands,

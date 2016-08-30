@@ -1,6 +1,6 @@
 function controllers(tracker){
 	tracker
-	.controller("Overall", function Overall($scope, $mdToast, $location, $http, 
+	.controller("Overall", function Overall($scope, $mdToast, $location, $http, $rootScope,
 									map, btn, getStopDetails, icons, TripManager, storage, MapComponentManager)
 	{
 		// Navigation button
@@ -44,10 +44,10 @@ function controllers(tracker){
 	    };
 
 		// overlay control
-		$scope.setOverlay = function(name){
+		$rootScope.setOverlay = function(name){
 			$scope.overlayPage = name;
 		};
-		$scope.clearOverlay = function(){
+		$rootScope.clearOverlay = function(){
 			$scope.setOverlay(undefined);
 		};
 
