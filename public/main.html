@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html manifest="assets/manifest.appcache">
     <head>
         <title>Hypebus</title>
 
@@ -45,13 +45,83 @@
         <!-- Google Maps API -->
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAoqsttDzqa1L8Z4fs8_eW5QouMx7txwF0"></script>
 
-        <script src="./services.js"></script>
-        <script src="./controllers.js"></script>
-        <script src="./filters.js"></script>
-        <script src="./directives.js"></script>
-        <script src="./initStorage.js"></script>
-        <script src="./route_colors.js"></script>
+        <script src="scripts/services.js"></script>
+        <script src="scripts/controllers.js"></script>
+        <script src="scripts/filters.js"></script>
+        <script src="scripts/directives.js"></script>
+        <script src="scripts/initStorage.js"></script>
+        <script src="scripts/route_colors.js"></script>
         <script>
+
+            // Simple Promise implementation
+            function simplePromise(task){
+                var result = {
+                    state: "pending",
+                    value: undefined
+                },
+                    pendingCallbacks = [];
+
+                function resolve(value){
+                    var previousState = result.state;
+
+                    result.state = "resolved";
+                    result.value = value;
+
+                    if(previousState === "pending") invokeCallbacks();
+                }
+
+                function reject(){
+                    var previousState = result.state;
+
+                    result.state = "rejected";
+                    result.value = value;
+
+                    if(previousState === "pending") invokeCallbacks();
+                }
+
+                function invokeCallbacks(){
+                    switch(result.state){
+                        case "pending": return;
+                        case "resolved":
+                            pendingCallbacks.forEach(function(callbacks){
+                                callbacks[0](result.value);
+                            });
+                            break;
+                        case "rejected":
+                            pendingCallbacks.forEach(function(callbacks){
+                                callbacks[1](result.value);
+                            });
+                            break;
+                    }
+
+                    pendingCallbacks = [];
+                }
+
+                task(resolve, reject);
+
+                return {
+                    then: function(resolvedCallback, rejectedCallback){
+                        var resolvedValue, rejectedValue;
+
+                        pendingCallbacks.push([function(value){
+                            if(resolvedCallback)    resolvedValue = resolvedCallback(value);
+                        }, function(value){
+                            if(rejectedCallback)    rejectedValue = rejectedCallback(value);
+                        }]);
+                        invokeCallbacks();
+
+                        return simplePromise(function(resolve, reject){
+                            pendingCallbacks.push([function(){
+                                resolve(resolvedValue);
+                            }, function(){
+                                reject(rejectedValue);
+                            }]);
+                        });
+                    }
+                };
+            }
+
+
             // Create module "tracker"
             var tracker = angular.module("tracker", ["ngMaterial", "ngRoute"]);
 
@@ -76,6 +146,12 @@
 
             // set up route color constants
             routeColors(tracker);
+
+            var cacheUpdateAvailable = simplePromise(function(resolve){
+                window.applicationCache.addEventListener("updateready", function(e){
+                    if(window.applicationCache.status === window.applicationCache.UPDATEREADY)  resolve();
+                });
+            });
 
             tracker
                 .value("stop_details", {stops:{}, loaded: false})
@@ -111,7 +187,7 @@
 
                     $mdIconProvider.iconSet("ui", "icons/ui_icon_set.svg", 24);
                 })
-                .run(function($location, MapComponentManager, loadStopsDetails, $http, isSmallScreen, DEFAULT_ZOOM_LEVEL){
+                .run(function($location, MapComponentManager, loadStopsDetails, $http, isSmallScreen, DEFAULT_ZOOM_LEVEL, $mdToast){
                     $http.get("styles/map-style.json").then(function(styles){
                         // set up maps
                         MapComponentManager.load(document.getElementById("map-container"), {
@@ -126,6 +202,8 @@
                             }
                         );
                     });
+
+                    var loadStopsDetailsPromise = loadStopsDetails();
 
                     MapComponentManager.loaded(function(commands){
                         commands.getAndCreateMarker("user", "self-location", {
@@ -142,10 +220,21 @@
                                 }
                             }
                         });
-                    });
 
-                    loadStopsDetails().then(function(stops){
-                        MapComponentManager.loaded(function(commands){
+                        commands.getAndCreateMarker("bus-route", "bus-location", {
+                            position: {lat: 0, lng: 0},
+                            visible: false,
+                            caption: "Bus was here a moment ago",
+                            iconHoverable: false,
+                            level: "top",
+                            events: {
+                                click: function(data, self){
+                                    self.center();
+                                }
+                            }
+                        });
+
+                        loadStopsDetailsPromise.then(function(stops){
                             var all_stops = commands.addSet("all-stops");
                             for(var stop_id in stops){
                                 var stop = stops[stop_id],
@@ -166,22 +255,12 @@
 
                                 all_stops.setMarker(stop_id, stop_marker);
                             }
-                        })
+                        });
                     });
 
-                    MapComponentManager.loaded(function(commands){
-                        commands.getAndCreateMarker("bus-route", "bus-location", {
-                            position: {lat: 0, lng: 0},
-                            visible: false,
-                            caption: "Bus was here a moment ago",
-                            iconHoverable: false,
-                            level: "top",
-                            events: {
-                                click: function(data, self){
-                                    self.center();
-                                }
-                            }
-                        })
+                    cacheUpdateAvailable.then(function(){
+                        var toast = $mdToast.simple().position("top right").textContent("A new version will be applied next time.");
+                        $mdToast.show(toast);
                     });
                 });
         </script>

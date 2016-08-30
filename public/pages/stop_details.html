@@ -105,7 +105,7 @@
                 ng-class="[(departure.route.route_id | lowercase), {selected: departure.vehicle_id == selectedDeparture.entry.vehicle_id}]">
             <div class="departure-info" layout="column" layout-align="center start">
                 <span class="headsign" layout="row" layout-align="start center">
-                    {{departure.headsign}} (est: {{departure.expected | date : "h:mm a"}})
+                    {{departure.headsign}} (eta: {{departure.expected | date : "h:mm a"}})
                     <md-icon class="istop-icon" md-svg-icon="ui:istop" ng-show="departure.is_istop">
                         <md-tooltip md-direction="right" md-delay="300">
                             Boarding is free<br>

@@ -1,0 +1,58 @@
+CACHE MANIFEST
+# Make Hypebus offline-able again!
+# 2016-08-30 build 1
+
+CACHE:
+# Pages
+/pages/favorites.html
+/pages/landing.html
+/pages/search.html
+/pages/stop_details.html
+
+# Templates
+/templates/set_timer.html
+
+# Scripts
+/scripts/controllers.js
+/scripts/directives.js
+/scripts/filters.js
+/scripts/initStorage.js
+/scripts/route_colors.js
+/scripts/services.js
+
+# Styles
+/styles/map-style.json
+/styles/mobile-style.css
+/styles/route-color.css
+/styles/style.css
+
+# Images
+/icons/bus_icon_set.svg
+/icons/map_icon_set_v2.svg
+/icons/map_icon_set_v2_mini.svg
+/icons/notification_icon.png
+/icons/ui_icon_set.svg
+/assets/avatars/derek.png
+/assets/avatars/vincent.png
+/assets/splash/background.svg
+/assets/splash/icon.svg
+
+# Audios
+/assets/alert.mp3
+
+# Misc
+/assets/manifest.json
+/i18n/en.json
+
+# Libraries
+/bower_components/angular/angular.js
+/bower_components/angular-animate/angular-animate.js
+/bower_components/angular-aria/angular-aria.js
+/bower_components/angular-material/angular-material.js
+/bower_components/angular-route/angular-route.js
+/bower_components/angular-messages/angular-messages.js
+/bower_components/jquery/dist/jquery.min.js
+
+
+NETWORK:
+*
