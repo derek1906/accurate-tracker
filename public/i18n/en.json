@@ -6,7 +6,7 @@
 		},
 		"default-subtitle": {
 			"funny": ["These are the closest bus stops I could fucking find.", "Do you know how long it took me to find these damn stops?", "Found some damn close bus stops. They on yo ass."],
-			"standard": "Here are some nearby bus shown below."
+			"standard": "Here are some nearby bus stops."
 		}
 	},
 	"StopDetails": {
