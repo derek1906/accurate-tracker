@@ -247,7 +247,16 @@ function services(tracker){
 
 				}, function(){
 					console.error("[loadStopsDetails]", "Cannot update");
-					deferred.reject();
+					
+					if(storage.exists(DATA_STORAGE_KEY)){
+						// use cached data
+						stop_details.stops = storage.get(DATA_STORAGE_KEY).stops;
+						stop_details.loaded = true;
+						deferred.resolve(stop_details.stops);
+					}else{
+						// no data available
+						deferred.reject();
+					}
 				});
 			}
 
