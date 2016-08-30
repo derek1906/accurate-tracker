@@ -426,7 +426,7 @@ function controllers(tracker){
 					$scope.isSearching = false;
 					$scope.departures = departures;
 				}, function(msg){
-					var toast = $mdToast.simple().textContent("Error: " + msg).position("top right");
+					var toast = $mdToast.simple().textContent("Failed to get data.").position("top right");
 					$mdToast.show(toast);
 				});
 
