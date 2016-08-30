@@ -236,7 +236,7 @@ function controllers(tracker){
 	})
 
 	.controller("Landing", function Landing($scope, $location, $mdToast, 
-			getNearbyStops, loadStopsDetails, geolocation, map, btn, MapComponentManager, delayedCall)
+			getNearbyStops, loadStopsDetails, geolocation, map, btn, MapComponentManager, delayedCall, DEFAULT_ZOOM_LEVEL)
 	{
 		$scope.nearbyStops = [];
 
@@ -260,7 +260,7 @@ function controllers(tracker){
 						text: "Center yourself",
 						onDisplay: false,
 						click: function(){
-							marker.center();
+							marker.center(DEFAULT_ZOOM_LEVEL);
 						}
 					}]);
 				});

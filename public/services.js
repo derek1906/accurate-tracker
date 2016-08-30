@@ -500,7 +500,7 @@ function services(tracker){
 		function setup(map){
 
 			function isMiniMode(){
-				return map.getZoom() < 16;
+				return map.getZoom() < 17;
 			}
 
 			/**

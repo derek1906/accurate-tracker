@@ -81,6 +81,7 @@
                 .value("stop_details", {stops:{}, loaded: false})
                 .value("DATA_STORAGE_KEY", "stop_data")
                 .value("DEPARTURE_UPDATE_INTERVAL", 60*1000)    // 60 seconds
+                .value("DEFAULT_ZOOM_LEVEL", 17)    // 60 seconds
                 .value("isSmallScreen", window.matchMedia("(max-width: 600px)").matches)
                 .config(function($routeProvider, $mdThemingProvider, $mdIconProvider){
                     $routeProvider
@@ -110,7 +111,7 @@
 
                     $mdIconProvider.iconSet("ui", "icons/ui_icon_set.svg", 24);
                 })
-                .run(function($location, MapComponentManager, loadStopsDetails, $http, isSmallScreen){
+                .run(function($location, MapComponentManager, loadStopsDetails, $http, isSmallScreen, DEFAULT_ZOOM_LEVEL){
                     $http.get("styles/map-style.json").then(function(styles){
                         // set up maps
                         MapComponentManager.load(document.getElementById("map-container"), {
@@ -119,7 +120,7 @@
                                 minZoom: 15, maxZoom: 18,
                                 disableDefaultUI: true, clickableIcons: false,
                                 center: { lat: 40.1069778, lng: -88.2272211 }, // main quad
-                                zoom: 17,
+                                zoom: DEFAULT_ZOOM_LEVEL,
                                 styles: styles.data,
                                 backgroundColor: "none"
                             }
