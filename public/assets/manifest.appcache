@@ -1,6 +1,6 @@
 CACHE MANIFEST
 # Make Hypebus offline-able again!
-# 2016-08-30 build 15
+# 2016-09-04 build 01
 
 CACHE:
 # Pages
@@ -52,6 +52,8 @@ CACHE:
 /bower_components/angular-route/angular-route.js
 /bower_components/angular-messages/angular-messages.js
 /bower_components/jquery/dist/jquery.min.js
+
+/bower_components/angular-material/angular-material.css
 
 
 NETWORK:
