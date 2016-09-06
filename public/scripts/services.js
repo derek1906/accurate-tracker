@@ -1178,6 +1178,13 @@ function services(tracker){
 			}
 			return stops;
 		};
+		StopsSet.prototype.getRecursiveList = function(){
+			var stops = this.getList();
+			for(var id in this.stops){
+				stops = stops.concat(this.stops[id].substops.getRecursiveList());
+			}
+			return stops;
+		};
 		StopsSet.prototype.getStop = function(id, level){
 			level = level || 0;
 			var parts = id.split(":");
@@ -1266,6 +1273,7 @@ function services(tracker){
 		};
 
 		var exports = {
+			/** Get all stops */
 			getAllStops: function(){
 				// if there exists an ongoing promise, it shouldn't make another request.
 				// instead it should wait on the previous one.
@@ -1290,6 +1298,18 @@ function services(tracker){
 					});
 
 				return app.getAllStopsOngoingPromise = promise;
+			},
+			/** Shortcut, Get a specific stop */
+			getStop: function(stopId, allMatches){
+				return exports
+					.getAllStops()
+					.then(function(stops){
+						var stop = stops.getStop(stopId);
+						if(!stop)	throw undefined;
+
+						if(allMatches)	return [stop].concat(stop.substops.getRecursiveList());	// get all matches
+						else          	return stop;                                           	// get best match
+					});
 			},
 			getNearbyStops: function(){
 				var promise = 
