@@ -8,10 +8,12 @@ function services(tracker){
 				return localStorage[key] !== undefined;
 			},
 			get: function(key){
-				return JSON.parse(localStorage[key]);
+				var data = localStorage.getItem(key);
+				if(data === null)	return null;
+				else             	return JSON.parse(localStorage[key]);
 			},
 			set: function(key, value){
-				localStorage[key] = JSON.stringify(value);
+				localStorage.setItem(key, JSON.stringify(value));
 			},
 			remove: function(key){
 				localStorage.removeItem(key);
@@ -1070,5 +1072,425 @@ function services(tracker){
 
 		window.manager = manager;
 		return manager;
-	});
+	})
+
+	.service("Transit", function Transit($q, $interval, geolocation, ChampaignTransitAdapter){
+
+		// temporary
+		var Adapter = ChampaignTransitAdapter;
+		var cachedStops;
+
+		function inherit(child, parent){
+			child.prototype = Object.create(parent.prototype);
+			child.prototype.constructor = child;
+		}
+
+		function applyDefault(preset, input){
+			for(var key in input){
+				preset[key] = input[key];
+			}
+			return preset;
+		}
+
+		/**
+		 * A generic type for observable
+		 * @param {String} id
+		 */
+		function Observable(id){
+			this.set({
+				id: String(id),
+				observers: [],
+				updatePromise: undefined
+			});
+		}
+		/** Implements .observe */
+		Observable.prototype.observe = function(fn){
+			var self = this;
+
+			// add observer to observers list
+			this.observers.push(fn);
+
+			// create timer, executes every 1 minute
+			if(!this.updatePromise){
+				this.updatePromise = $interval(function(){
+					self.update().then(function(rtn){
+						self.observers.forEach(function(observer){
+							observer.call(self, rtn);
+						});
+					}, function(){
+						console.warn("Failed to update " + self.constructor.name);
+					});
+				}, 1000 * 60);
+			}
+		};
+		/** Implements .clearObserve */
+		Observable.prototype.clearObserve = function(){
+			// reset list
+			this.observers = [];
+
+			// cancel any ongoing timer
+			$q.cancel(this.updatePromise);
+		}
+		/** Implements .set */
+		Observable.prototype.set = function(input, value){
+			if(typeof input === "string"){
+				this[input] = value;
+			}else if(typeof input === "object"){
+				for(var key in input){
+					if(input.hasOwnProperty(key))
+						this[key] = input[key];
+				}
+			}
+		};
+		/** Implements .update, returns a promise */
+		Observable.prototype.update = function(){
+			return $q.reject();
+		};
+
+
+		/**
+		 * An unordered set of stops
+		 * @param {[Array]} stops A description of stops
+		 */
+		function StopsSet(stops){
+			this.stops = Object.create(null);
+			
+			var self = this;
+
+			if(Array.isArray(stops)){
+				stops.forEach(function(stop){
+					self.add(stop);
+				});
+			}
+		}
+		StopsSet.prototype.add = function(stop){
+			this.stops[stop.id] = Stop.toStop(stop);
+		};
+		StopsSet.prototype.remove = function(stop){
+			if(stop)	delete this.stops[stop.id];
+		};
+		StopsSet.prototype.getList = function(){
+			var stops = [];
+			for(var id in this.stops){
+				// no need for .hasOwnProperty check
+				// this.stops is inherited from null
+				stops.push(this.stops[id]);
+			}
+			return stops;
+		};
+		StopsSet.prototype.getStop = function(id, level){
+			level = level || 0;
+			var parts = id.split(":");
+
+			if(parts.length - 1 <= level)	return this.stops[id] || null;
+			else {
+				var stop = this.stops[parts.slice(0, level + 1).join(":")];
+				return stop ? stop.substops.getStop(id, level + 1) : null;
+			}
+		};
+
+		/**
+		 * Describes a stop
+		 * @param {String} id
+		 * @param {Object} props Properties
+		 */
+		function Stop(id, props){
+			Observable.call(this, id);
+
+			this.set(applyDefault({
+				rootId: id,
+				name: "",
+				fullname: "",
+				location: {lat: 0, lng: 0},
+				substops: []
+			}, props));
+
+			// construct actual StopsSets
+			this.set("substops", new StopsSet(this.substops));
+		}
+		inherit(Stop, Observable);
+		/** Get incoming departures of a stop. Returns a promise */
+		Stop.prototype.getUpcomingDepartures = function(){
+			return $q.all([Adapter.getUpcomingDepartures(this.id), exports.getAllStops()])
+				.then(function(values){
+					var departures = values[0], stops = values[1];
+
+					return departures.map(function(departure){
+						departure.bus.origin = stops.getStop(departure.bus.origin);
+						departure.bus.destination = stops.getStop(departure.bus.destination);
+						departure.bus = new Bus(departure.bus.id, departure.bus);
+
+						return departure;
+					});
+				});
+		};
+		Stop.toStop = function(obj){
+			if(obj instanceof Stop)	return obj;
+			if(!obj)               	return null;
+			else                   	return new Stop(obj.id, obj);
+		};
+
+		/**
+		 * A description of a bus
+		 * @param {string} id
+		 * @param {Object} props Initial properties
+		 */
+		function Bus(id, props){
+			Observable.call(this, id);
+
+			this.set(applyDefault({
+				headsign: "",
+				location: {
+					lat: 0,
+					lng: 0
+				},
+				origin: null,
+				destination: null
+			}, props));
+
+			// convert stops to real stops
+			this.set({
+				origin: Stop.toStop(this.origin),
+				destination: Stop.toStop(this.destination)
+			});
+		}
+		inherit(Bus, Observable);
+		Bus.prototype.update = function(){
+			
+		}
+
+
+
+		var app = {
+			getAllStopsOngoingPromise: undefined
+		};
+
+		var exports = {
+			getAllStops: function(){
+				// if there exists an ongoing promise, it shouldn't make another request.
+				// instead it should wait on the previous one.
+				if(app.getAllStopsOngoingPromise)	return app.getAllStopsOngoingPromise;
+
+				// create promise
+				var deferred = $q.defer();
+
+				// data is cached already
+				if(cachedStops){
+					deferred.resolve(cachedStops);
+					return deferred.promise;
+				}
+
+				var promise = Adapter
+					.getAllStops()
+					.then(function(stops_data){
+						// clear ongoing promise
+						app.getAllStopsOngoingPromise = undefined;
+
+						return cachedStops = new StopsSet(stops_data);
+					});
+
+				return app.getAllStopsOngoingPromise = promise;
+			},
+			getNearbyStops: function(){
+				var promise = 
+					// get user location
+					geolocation()
+					// get all stops and nearby stop ids
+					.then(function(location){
+						return $q.all([
+							exports.getAllStops(),
+							Adapter.getStopsByLocation({lat: location.latitude, lng: location.longitude})
+						]);
+					})
+					// return stops
+					.then(function(values){
+						var stops = values[0];
+
+						return values[1].map(function(stopId){
+							return stops.getStop(stopId);
+						});
+					});
+
+				return promise;
+			},
+			searchStops: function(input){
+				if(!input){
+					// empty string
+					var deferred = $q.defer();
+					deferred.resolve(new StopsSet());
+					return deferred.promise;
+				}else{
+					// search
+					return $q.all([exports.getAllStops(), Adapter.searchStops(input)]).then(function(values){
+						var stops = values[0], matchedStops = values[1];
+						return matchedStops.map(function(stopId){
+							return stops.getStop(stopId);
+						});
+					});
+				}
+			},
+			getBusInformation: function(busId){
+				return $q.all([exports.getAllStops(), Adapter.getBusInformation(busId)]).then(function(values){
+					var stops = values[0], bus_data = values[1];
+
+					bus_data.origin = stops.getStop(bus_data.origin);
+					bus_data.destination = stops.getStop(bus_data.destination);
+
+					return new Bus(bus_data.id, bus_data); 
+				});
+			},
+			getDefaultMapSettings: function(){
+				return Adapter.getDefaultMapSettings();
+			},
+		};
+
+		window.Transit = exports;
+
+		return exports;
+	})
+
+	.service("ChampaignTransitAdapter", function ChampaignTransitAdapter($q, $http, getData, storage){
+
+		return {
+			getAllStops: function(){
+				var storedData = storage.get("adapter_storage:Champaign") || {};
+				
+				return getData("GetStops", {
+					changeset_id: storedData.changeset_id
+				}).then(function(res){
+					// no updates
+					if(!res.new_changeset){
+						return cachedStops = storedData.allStops;
+					}
+
+					// process update
+					var stops = res.stops,
+						output = [];
+
+					stops.forEach(function(stop){
+						var stopName = stop.stop_name,
+							stopLocation = stop.stop_points.reduce(function(prev, stop_point){
+								prev.lat += stop_point.stop_lat;
+								prev.lng += stop_point.stop_lon;
+
+								return prev;
+							}, {lat: 0, lng: 0}),
+							substops = [];
+
+						stopLocation.lat /= stop.stop_points.length;
+						stopLocation.lng /= stop.stop_points.length;
+
+						output.push({
+							id: stop.stop_id,
+							rootId: stop.stop_id,
+							name: stopName,
+							fullname: stopName,
+							location: stopLocation,
+							substops: substops
+						});
+
+						// create separate entries for all substops
+						stop.stop_points.forEach(function(stop_point){
+							substops.push({
+								id: stop_point.stop_id,
+								rootId: stop.stop_id,
+								name: stopName,
+								fullname: stop_point.stop_name,
+								location: {
+									lat: stop_point.stop_lat,
+									lng: stop_point.stop_lon
+								},
+								substops: []
+							});
+						});
+					});
+
+					storage.set("adapter_storage:Champaign", {
+						allStops: output,
+						changeset_id: res.changeset_id
+					});
+
+					return cachedStops = output;
+				});
+			},
+			getUpcomingDepartures: function(stopId){
+				return getData("GetDeparturesByStop", {
+					stop_id: stopId
+				})
+				.then(function(res){
+					return res.departures.map(function(departure){
+						return {
+							expectedMinutes: departure.expected_mins,
+							expectedTime: departure.expected,
+							attributes: {
+								"iStop": departure.is_istop,
+								"scheduled": departure.is_scheduled
+							},
+							bus: {
+								id: departure.vehicle_id,
+								headsign: departure.headsign,
+								location: {
+									lat: departure.location.lat,
+									lng: departure.location.lng
+								},
+								origin: departure.origin.stop_id,
+								destination: departure.destination.stop_id
+							}
+						};
+					})
+				});
+			},
+			getStopsByLocation: function(location){
+				var promise = getData("GetStopsByLatLon", {
+						lat: location.lat,
+						lon: location.lng,
+						count: 20
+					})
+					.then(function(res){
+						return res.stops.map(function(stop){ return stop.stop_id; });
+					});
+
+				return promise;
+			},
+			searchStops: function(input){
+				return $http.get("https://www.cumtd.com/autocomplete/Stops/v1.0/json/search", {
+					params: { query: input }
+				})
+				.then(function(res){
+					return res.data.map(function(stop){
+						// return stop id
+						return stop.i;
+					});
+				});
+			},
+			getBusInformation: function(busId){
+				return getData("GetVehicle", {
+					vehicle_id:	busId
+				}).then(function(res){
+					var bus = res.vehicles[0];
+
+					if(!bus)	throw undefined;
+
+					return {
+						headsign: bus.trip.trip_headsign,
+						location: {
+							lat: bus.location.lat,
+							lng: bus.location.lon
+						},
+						origin: bus.origin_stop_id,
+						destination: bus.destination_stop_id
+					};
+				})
+			},
+			getDefaultMapSettings: function(){
+				// main quad
+				return {
+					location: { lat: 40.1069778, lng: -88.2272211 },
+					zoomLevel: 17
+				};
+			}
+		};
+
+	})
+
 }

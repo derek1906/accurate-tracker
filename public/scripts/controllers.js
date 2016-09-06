@@ -1,7 +1,7 @@
 function controllers(tracker){
 	tracker
 	.controller("Overall", function Overall($scope, $mdToast, $location, $http, $rootScope,
-									map, btn, getStopDetails, icons, TripManager, storage, MapComponentManager)
+									map, btn, getStopDetails, icons, TripManager, storage, MapComponentManager, Transit)
 	{
 		// Navigation button
 		$scope.atLanding = true;
@@ -66,7 +66,8 @@ function controllers(tracker){
 			$location.path("/favorites");
 		};
 		$scope.goToStop = function(stop){
-			return $scope.goToStopId(stop.stop_id);
+			//return $scope.goToStopId(stop.stop_id);
+			return $scope.goToStopId(stop.id);
 		};
 		$scope.goToStopId = function(stop_id){
 			$location.path("/stop/" + stop_id);
@@ -235,37 +236,32 @@ function controllers(tracker){
 		});
 	})
 
-	.controller("Landing", function Landing($scope, $location, $mdToast, 
-			getNearbyStops, loadStopsDetails, geolocation, map, btn, MapComponentManager, delayedCall, DEFAULT_ZOOM_LEVEL)
-	{
+	.controller("Landing", function Landing($scope, $location, $mdToast, Transit, geolocation, btn, MapComponentManager, DEFAULT_ZOOM_LEVEL){
 		$scope.nearbyStops = [];
 
-		loadStopsDetails().then(function(){
+		// fill nearby list
+		Transit.getNearbyStops(20).then(function(stops){
+			$scope.nearbyStops = stops;
+		});
 
-			// Get nearby stops by user's geolocation
-			getNearbyStops(20).then(function(stops){
-				$scope.nearbyStops = stops;
+		geolocation().then(function(latlon){
+			MapComponentManager.loaded(function(commands){
+				var marker = commands.getMarker("user", "self-location");
+
+				marker.setPosition({lat: latlon.latitude, lng: latlon.longitude});
+				marker.set("visible", true);
+				marker.center();
+
+
+				btn("set", [{
+					text: "Center yourself",
+					onDisplay: false,
+					click: function(){
+						marker.center(DEFAULT_ZOOM_LEVEL);
+					}
+				}]);
 			});
-
-			geolocation().then(function(latlon){
-				MapComponentManager.loaded(function(commands){
-					var marker = commands.getMarker("user", "self-location");
-
-					marker.setPosition({lat: latlon.latitude, lng: latlon.longitude});
-					marker.set("visible", true);
-					marker.center();
-
-
-					btn("set", [{
-						text: "Center yourself",
-						onDisplay: false,
-						click: function(){
-							marker.center(DEFAULT_ZOOM_LEVEL);
-						}
-					}]);
-				});
-				
-			});
+			
 		});
 
 
@@ -277,38 +273,38 @@ function controllers(tracker){
 		$scope.centerStop = function(stop){
 			MapComponentManager.loaded(function(commands){
 				if(!MapComponentManager.dragging){
-					commands.getMarker("all-stops", stop.stop_id).delayedCenter().lightUp().showLabel().setIcon("stop_selected_v2", true);
+					commands.getMarker("all-stops", stop.id).delayedCenter().lightUp().showLabel().setIcon("stop_selected_v2", true);
 				}
 			});
 		};
 		$scope.decenterStop = function(stop){
 			MapComponentManager.loaded(function(commands){
-				commands.getMarker("all-stops", stop.stop_id).cancelDelayedCenter().lightOut().hideLabel().setIcon("stop_v2", false);
+				commands.getMarker("all-stops", stop.id).cancelDelayedCenter().lightOut().hideLabel().setIcon("stop_v2", false);
 			});
 		};
 	})
 
-	.controller("Search", function Search($scope, $location, geolocation, loadStopsDetails, getAutocomplete, map, MapComponentManager){
+	.controller("Search", function Search($scope, $location, geolocation, MapComponentManager, Transit){
 		// focus input
 		setTimeout(function(){
 			document.getElementById("search-input").focus();
 		});
 
-		loadStopsDetails()
-			.then(function(){
-				$scope.isSearching = false;
-				$scope.searchTerm = "";
-				$scope.searchResults = [];
-				$scope.performSearch = function(){
-					$scope.isSearching = true;
-					getAutocomplete($scope.searchTerm).then(function(list){
-						$scope.isSearching = false;
-						$scope.searchResults = list;
-					}, function(){
-						$scope.isSearching = false;
-					});
-				};
-			});
+		//loadStopsDetails()
+		//	.then(function(){
+		  		$scope.isSearching = false;
+		  		$scope.searchTerm = "";
+		  		$scope.searchResults = [];
+		  		$scope.performSearch = function(){
+		  			$scope.isSearching = true;
+		  			Transit.searchStops($scope.searchTerm).then(function(list){
+		  				$scope.isSearching = false;
+		  				$scope.searchResults = list;
+		  			}, function(){
+		  				$scope.isSearching = false;
+		  			});
+		  		};
+		//	});
 
 		var highlightedStop = null;
 
@@ -326,7 +322,7 @@ function controllers(tracker){
 			MapComponentManager.loaded(function(commands){
 				if(highlightedStop)	highlightedStop.set("iconHoverable", true);
 
-				highlightedStop = commands.getMarker("all-stops", stop.stop_id);
+				highlightedStop = commands.getMarker("all-stops", stop.id);
 				highlightedStop.delayedCenter().lightUp().showLabel().setIcon("stop_selected_v2", true);
 				highlightedStop.set("iconHoverable", false);
 			});
@@ -343,29 +339,30 @@ function controllers(tracker){
 		});
 	})
 
-	.controller("Favorites", function Favorites($scope, loadStopsDetails, storage, getStopDetails, getStopIdInfo, map, MapComponentManager){
-		loadStopsDetails().then(function(){
+	.controller("Favorites", function Favorites($scope, storage, MapComponentManager, Transit){
+		//loadStopsDetails().then(function(){
 
-			$scope.stops = storage.get("favorites").map(function(stop_id){
-				return getStopDetails(stop_id);
+		Transit.getAllStops().then(function(stops){
+			$scope.stops = storage.get("favorites").map(function(stopId){
+				return stops.getStop(stopId);
 			});
 		});
 
 
 		$scope.centerStop = function(stop){
-			var stop_id = getStopIdInfo(stop.stop_id).stop_id;
+			//var stop_id = getStopIdInfo(stop.stop_id).stop_id;
 
 			MapComponentManager.loaded(function(commands){
 				if(!MapComponentManager.dragging)
-					commands.getMarker("all-stops", stop_id).moveIntoBound().lightUp().showLabel().setIcon("stop_selected_v2", true);
+					commands.getMarker("all-stops", stop.rootId).delayedCenter().lightUp().showLabel().setIcon("stop_selected_v2", true);
 			});
 			
 		};
 		$scope.decenterStop = function(stop){
-			var stop_id = getStopIdInfo(stop.stop_id).stop_id;
+			//var stop_id = getStopIdInfo(stop.stop_id).stop_id;
 
 			MapComponentManager.loaded(function(commands){
-				commands.getMarker("all-stops", stop_id).lightOut().hideLabel().setIcon("stop_v2", false);
+				commands.getMarker("all-stops", stop.rootId).lightOut().hideLabel().setIcon("stop_v2", false);
 			});
 		};
 	})
