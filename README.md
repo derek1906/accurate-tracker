@@ -3,6 +3,9 @@ An open source bus tracker for the Champaign-Urbana area.
 
 ![Screenshot](/screenshot.png?raw=true)
 
+## Documentation
+Refer to the [repository wiki](https://github.com/derek1906/hypebus/wiki) for more details.
+
 ## Libraries
 Hypebus uses AngularJS 1.5. This webapp contains three main files:
 
