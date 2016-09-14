@@ -187,23 +187,26 @@
 
                     $mdIconProvider.iconSet("ui", "icons/ui_icon_set.svg", 24);
                 })
-                .run(function($location, MapComponentManager, $http, isSmallScreen, $mdToast, $rootScope, geolocation, Transit){
-                    $http.get("styles/map-style.json").then(function(styles){
+                .run(function($q, $location, MapComponentManager, $http, isSmallScreen, $mdToast, $rootScope, geolocation, Transit){
+                    // load map style
+                    $http.get("styles/map-style.json")
+                    .then(function(styles){
                         // set up maps
-                        var defaults = Transit.getDefaultMapSettings();
+                        var config = Transit.getConfig();
 
                         return MapComponentManager.load(document.getElementById("map-container"), {
                                 mapTypeControl: false, streetViewControl: false,
                                 scaleControl: false, zoomControl: !isSmallScreen, scrollwheel: true, disableDoubleClickZoom: false,
                                 minZoom: 15, maxZoom: 18,
                                 disableDefaultUI: true, clickableIcons: false,
-                                center: defaults.location, // main quad
-                                zoom: defaults.zoomLevel,
+                                center: config.defaultMapSettings.location,
+                                zoom: config.defaultMapSettings.zoomLevel,
                                 styles: styles.data,
                                 backgroundColor: "none"
-                            }
+                            }, onMapLoaded
                         );
-                    }).then(function(){
+                    })
+                    .then(function(){
                         window.addEventListener("online", function(){
                             var toast = $mdToast.simple().position("top right").textContent("Reconnected.");
                             $mdToast.show(toast);
@@ -222,7 +225,10 @@
 
                     //var loadStopsDetailsPromise = loadStopsDetails();
 
-                    MapComponentManager.loaded(function(commands){
+                    //MapComponentManager.loaded(function(commands){
+                    function onMapLoaded(commands){
+                        var mapLoadedPromise = $q.defer();
+
                         commands.getAndCreateMarker("user", "self-location", {
                             position: {lat: 0, lng: 0},
                             iconName: "home_v2",
@@ -251,7 +257,7 @@
                             }
                         });
 
-                        Transit.getAllStops().then(function(stops){
+                        return Transit.getAllStops().then(function(stops){
                             var all_stops = commands.addSet("all-stops");
                             /*
                             for(var stop_id in stops){
@@ -292,7 +298,9 @@
                                 all_stops.setMarker(stop.id, stop_marker);
                             });
                         });
-                    });
+                    }
+
+                    //});
 
                     cacheUpdateAvailable.then(function(){
                         var toast = $mdToast.simple().position("top right").textContent("A new version will be applied next time.");

@@ -983,9 +983,6 @@ function services(tracker){
 				}
 			});
 			map.addListener("zoom_changed", zoomChangedDelayedCallback.call);
-
-			manager.proccessQueue.forEach(function(proccess){ proccess(); });
-			manager.proccessQueue = [];
 		}
 
 
@@ -1043,7 +1040,7 @@ function services(tracker){
 					});
 				}
 			},
-			load: function(element, options){
+			load: function(element, options, onLoadPromise){
 				var deferred = $q.defer();
 
 				if(!isLoaded){
@@ -1057,9 +1054,16 @@ function services(tracker){
 
 					// add listener to run when the map is loaded
 					google.maps.event.addListenerOnce(map, "idle", function(){
-						setup(map);
 						isLoaded = true;
-						deferred.resolve();
+						setup(map);
+
+						var p = onLoadPromise(manager.commands) || $q.resolve();
+
+						p.then(function(){
+							manager.proccessQueue.forEach(function(proccess){ proccess(); });
+							manager.proccessQueue = [];
+							deferred.resolve();
+						});
 					});
 				}
 
@@ -1074,7 +1078,7 @@ function services(tracker){
 		return manager;
 	})
 
-	.service("Transit", function Transit($q, $interval, geolocation, ChampaignTransitAdapter){
+	.service("Transit", function Transit($q, $interval, geolocation, SampleAdapter, ChampaignTransitAdapter){
 
 		// temporary
 		var Adapter = ChampaignTransitAdapter;
@@ -1092,6 +1096,19 @@ function services(tracker){
 			return preset;
 		}
 
+		function Entity(){}
+		/** Implements .set */
+		Entity.prototype.set = function(input, value){
+			if(typeof input === "string"){
+				this[input] = value;
+			}else if(typeof input === "object"){
+				for(var key in input){
+					if(input.hasOwnProperty(key))
+						this[key] = input[key];
+				}
+			}
+		};
+
 		/**
 		 * A generic type for observable
 		 * @param {String} id
@@ -1103,8 +1120,19 @@ function services(tracker){
 				updatePromise: undefined
 			});
 		}
+		inherit(Observable, Entity);
 		/** Implements .observe */
 		Observable.prototype.observe = function(fn){
+			function doUpdate(){
+				self.update().then(function(rtn){
+					self.observers.forEach(function(observer){
+						observer.call(self, rtn);
+					});
+				}, function(){
+					console.warn("Failed to update " + self.constructor.name);
+				});
+			}
+
 			var self = this;
 
 			// add observer to observers list
@@ -1112,15 +1140,7 @@ function services(tracker){
 
 			// create timer, executes every 1 minute
 			if(!this.updatePromise){
-				this.updatePromise = $interval(function(){
-					self.update().then(function(rtn){
-						self.observers.forEach(function(observer){
-							observer.call(self, rtn);
-						});
-					}, function(){
-						console.warn("Failed to update " + self.constructor.name);
-					});
-				}, 1000 * 60);
+				this.updatePromise = $interval(doUpdate, 1000 * 60);
 			}
 		};
 		/** Implements .clearObserve */
@@ -1129,19 +1149,11 @@ function services(tracker){
 			this.observers = [];
 
 			// cancel any ongoing timer
-			$q.cancel(this.updatePromise);
+			$interval.cancel(this.updatePromise);
+
+			// clear promise
+			this.updatePromise = undefined;
 		}
-		/** Implements .set */
-		Observable.prototype.set = function(input, value){
-			if(typeof input === "string"){
-				this[input] = value;
-			}else if(typeof input === "object"){
-				for(var key in input){
-					if(input.hasOwnProperty(key))
-						this[key] = input[key];
-				}
-			}
-		};
 		/** Implements .update, returns a promise */
 		Observable.prototype.update = function(){
 			return $q.reject();
@@ -1163,6 +1175,7 @@ function services(tracker){
 				});
 			}
 		}
+		inherit(StopsSet, Entity);
 		StopsSet.prototype.add = function(stop){
 			this.stops[stop.id] = Stop.toStop(stop);
 		};
@@ -1202,9 +1215,8 @@ function services(tracker){
 		 * @param {Object} props Properties
 		 */
 		function Stop(id, props){
-			Observable.call(this, id);
-
 			this.set(applyDefault({
+				id: id,
 				rootId: id,
 				name: "",
 				fullname: "",
@@ -1215,9 +1227,10 @@ function services(tracker){
 			// construct actual StopsSets
 			this.set("substops", new StopsSet(this.substops));
 		}
-		inherit(Stop, Observable);
+		inherit(Stop, Entity);
 		/** Get incoming departures of a stop. Returns a promise */
 		Stop.prototype.getUpcomingDepartures = function(){
+			/*
 			return $q.all([Adapter.getUpcomingDepartures(this.id), exports.getAllStops()])
 				.then(function(values){
 					var departures = values[0], stops = values[1];
@@ -1230,12 +1243,41 @@ function services(tracker){
 						return departure;
 					});
 				});
+				*/
+			return new DeparturesList(this.id).update();
 		};
 		Stop.toStop = function(obj){
 			if(obj instanceof Stop)	return obj;
 			if(!obj)               	return null;
 			else                   	return new Stop(obj.id, obj);
 		};
+
+
+		function DeparturesList(id){
+			Observable.call(this, id);
+
+			this.set("departures", []);
+		}
+		inherit(DeparturesList, Observable);
+		DeparturesList.prototype.update = function(){
+			var self = this;
+
+			return $q.all([exports.getAllStops(), Adapter.getUpcomingDepartures(this.id)])
+				.then(function(values){
+					var stops = values[0], departures = values[1];
+
+					// build object from literals
+					departures.forEach(function(departure){
+						departure.origin = stops.getStop(departure.origin);
+						departure.destination = stops.getStop(departure.destination);
+						departure.bus = new Bus(departure.bus.id, departure.bus);
+					});
+
+					self.set("departures", departures);
+					return self;
+				});
+		};
+
 
 		/**
 		 * A description of a bus
@@ -1251,21 +1293,35 @@ function services(tracker){
 					lat: 0,
 					lng: 0
 				},
-				origin: null,
-				destination: null
+				routeId: "",
+				pathId: "",
+				routeColor: "#fff300"
 			}, props));
-
-			// convert stops to real stops
-			this.set({
-				origin: Stop.toStop(this.origin),
-				destination: Stop.toStop(this.destination)
-			});
 		}
 		inherit(Bus, Observable);
 		Bus.prototype.update = function(){
-			
-		}
+			var self = this;
 
+			return Adapter.getBusInformation(this.id).then(function(bus_info){
+				self.set(bus_info);
+
+				return self;
+			});
+		};
+		Bus.prototype.getCurrentRoute = function(){
+			if(!this.pathId)	return null;
+
+			return $q.all([
+				Adapter.getPathById(this.pathId),
+				Adapter.getStopsInPath(this.pathId)
+			]).then(function(values){
+				var path = values[0], stops = values[1];
+				return {
+					path: path,
+					stops: stops.map(function(id){ return id.split(":")[0]; })
+				};
+			});
+		};
 
 
 		var app = {
@@ -1299,18 +1355,19 @@ function services(tracker){
 
 				return app.getAllStopsOngoingPromise = promise;
 			},
-			/** Shortcut, Get a specific stop */
+			/** Get stops that match input id */
 			getStop: function(stopId, allMatches){
 				return exports
 					.getAllStops()
 					.then(function(stops){
 						var stop = stops.getStop(stopId);
-						if(!stop)	throw undefined;
+						if(!stop)	throw "Cannot find stop \"" + stopId + "\"";
 
 						if(allMatches)	return [stop].concat(stop.substops.getRecursiveList());	// get all matches
 						else          	return stop;                                           	// get best match
 					});
 			},
+			/** Get stops near user location */
 			getNearbyStops: function(){
 				var promise = 
 					// get user location
@@ -1333,12 +1390,11 @@ function services(tracker){
 
 				return promise;
 			},
+			/** Get stops that best match input string */
 			searchStops: function(input){
 				if(!input){
 					// empty string
-					var deferred = $q.defer();
-					deferred.resolve(new StopsSet());
-					return deferred.promise;
+					return $q.resolve([]);
 				}else{
 					// search
 					return $q.all([exports.getAllStops(), Adapter.searchStops(input)]).then(function(values){
@@ -1349,18 +1405,15 @@ function services(tracker){
 					});
 				}
 			},
+			/** Get bus information by bus id */
 			getBusInformation: function(busId){
-				return $q.all([exports.getAllStops(), Adapter.getBusInformation(busId)]).then(function(values){
-					var stops = values[0], bus_data = values[1];
-
-					bus_data.origin = stops.getStop(bus_data.origin);
-					bus_data.destination = stops.getStop(bus_data.destination);
-
+				return Adapter.getBusInformation(busId).then(function(bus_data){
 					return new Bus(bus_data.id, bus_data); 
 				});
 			},
-			getDefaultMapSettings: function(){
-				return Adapter.getDefaultMapSettings();
+			/** Get config */
+			getConfig: function(){
+				return Adapter.getConfig();
 			},
 		};
 
@@ -1369,7 +1422,88 @@ function services(tracker){
 		return exports;
 	})
 
-	.service("ChampaignTransitAdapter", function ChampaignTransitAdapter($q, $http, getData, storage){
+	.service("ChampaignTransitAdapter", function ChampaignTransitAdapter($q, $http, storage, getShapeAndStops, ROUTE_COLORS){
+		var key = "77b92e5ceef640868adfc924c1735ac3";
+
+		var AngularPromise = $q.resolve().constructor;
+
+		var dataCache = {
+			/*
+				This cache will store either an Angular Promise or an object
+				consisting data. When a Promise is stored, the corresponding
+				request is ongoing and should not initiate another request.
+			 */
+			cache: {},
+			get: function(method, data){
+				return this.cache[method + JSON.stringify(data)];
+			},
+			set: function(method, data, rtn){
+				this.cache[method + JSON.stringify(data)] = rtn;
+				console.log(this.cache);
+				return rtn;
+			}
+		};
+		function getData(method, data, onlyFetchOnce){
+			console.log("[getData]", method, data, onlyFetchOnce);
+
+			if(data === undefined)	data = {};	// default object
+
+			if(onlyFetchOnce){
+				var cachedData = dataCache.get(method, data);
+				if(cachedData){
+					if(cachedData instanceof AngularPromise)	return cachedData;
+
+					console.log("[getData] Fetched %s from cache", method);
+					return $q.resolve(cachedData);
+				}
+			}
+
+			var rtnPromise = $http
+			// initiate request
+			.get("https://developer.cumtd.com/api/v2.2/json/" + method, {
+				params: angular.extend({}, data, {key: key})
+			})
+			// data received
+			.then(function(res){
+				console.log("[getData] Server responded to %s with status %d", method, res.data.status.code);
+
+				if(res.data.status.code !== 200)	return $q.reject(res.data.status.msg);
+				else                            	return onlyFetchOnce ? dataCache.set(method, data, res.data) : res.data;
+			}, function(res){
+				return $q.reject(res.statusText);
+			})
+			// catch all errors
+			.catch(function(errMsg){
+				console.error("[" + method + "]", errMsg);
+
+				return $q.reject(errMsg);
+			});
+
+			// store promise in case another there is another request when the previous one isn't done yet
+			if(onlyFetchOnce)	dataCache.set(method, data, rtnPromise);
+
+			return rtnPromise;
+		}
+
+		function getBaseRouteId(routeId){
+			return routeId.toLowerCase().split(" ")[0];
+		}
+
+		var config = {
+			dataProvider: {
+				name: "CUMTD",
+				link: "https://www.cumtd.com/"
+			},
+			defaultMapSettings: {
+				// main quad
+				location: {
+					lat: 40.1069778,
+					lng: -88.2272211
+				},
+				zoomLevel: 17
+			}
+		};
+			
 
 		return {
 			getAllStops: function(){
@@ -1431,6 +1565,9 @@ function services(tracker){
 					});
 
 					return cachedStops = output;
+				}).catch(function(){
+					if(storedData.allStops)	return storedData.allStops;
+					else                   	return $q.reject();
 				});
 			},
 			getUpcomingDepartures: function(stopId){
@@ -1440,6 +1577,7 @@ function services(tracker){
 				.then(function(res){
 					return res.departures.map(function(departure){
 						return {
+							stopId: stopId,
 							expectedMinutes: departure.expected_mins,
 							expectedTime: departure.expected,
 							attributes: {
@@ -1451,11 +1589,15 @@ function services(tracker){
 								headsign: departure.headsign,
 								location: {
 									lat: departure.location.lat,
-									lng: departure.location.lng
+									lng: departure.location.lon
 								},
-								origin: departure.origin.stop_id,
-								destination: departure.destination.stop_id
-							}
+								routeId: departure.trip.route_id,
+								pathId: departure.trip.shape_id,
+								routeColor: ROUTE_COLORS[getBaseRouteId(departure.trip.route_id)]
+							},
+							origin: departure.origin.stop_id,
+							destination: departure.destination.stop_id,
+							routeId: departure.route.route_id
 						};
 					})
 				});
@@ -1492,22 +1634,164 @@ function services(tracker){
 					if(!bus)	throw undefined;
 
 					return {
-						headsign: bus.trip.trip_headsign,
+						id: busId,
+						headsign: bus.trip ? bus.trip.trip_headsign : "",
 						location: {
 							lat: bus.location.lat,
 							lng: bus.location.lon
 						},
-						origin: bus.origin_stop_id,
-						destination: bus.destination_stop_id
+						routeId: bus.trip ? bus.trip.route_id : "",
+						pathId: bus.trip ? bus.trip.shape_id : "",
+						routeColor: bus.trip ? ROUTE_COLORS[getBaseRouteId(bus.trip.route_id)] : ""
 					};
 				})
 			},
-			getDefaultMapSettings: function(){
+			getPathById: function(shapeId){
+				return getData("getShape", {
+					shape_id: shapeId
+				}, true)
+				.then(function(res){
+					return res.shapes.map(function(point){
+						return {
+							lat: point.shape_pt_lat,
+							lng: point.shape_pt_lon
+						};
+					});
+				});
+			},
+			getStopsInPath: function(shapeId){
+				return getData("getShape", {
+					shape_id: shapeId
+				}, true)
+				.then(function(res){
+					return res.shapes.filter(function(point){
+						return point.stop_id;
+					}).map(function(point){
+						return point.stop_id;
+					});
+				});
+			},
+			getConfig: function(){
+				return config;
+			}
+		};
+
+	})
+
+	.service("SampleAdapter", function ChampaignTransitAdapter($q){
+		var config = {
+			dataProvider: {
+				name: "Sample Provider",
+				link: "https://www.example.com/"
+			},
+			defaultMapSettings: {
 				// main quad
-				return {
-					location: { lat: 40.1069778, lng: -88.2272211 },
-					zoomLevel: 17
-				};
+				location: {
+					lat: 41.8794471,
+					lng: -87.6286177
+				},
+				zoomLevel: 17
+			}
+		};
+			
+		function getTimeAfterNMinutes(minutes){
+			var time = new Date();
+			time.setMinutes(time.getMinutes() + minutes);
+			return time;
+		}
+
+		return {
+			getAllStops: function(){
+				return $q.resolve([{
+					id: "1119",
+					rootId: "1119",
+					name: "Michigan & Randolph",
+					fullname: "Michigan & Randolph",
+					location: {
+						lat: 41.8846829,
+						lng: -87.6243509
+					},
+					substops: []
+				}, {
+					id: "1106",
+					rootId: "1106",
+					name: "Michigan & Washington",
+					fullname: "Michigan & Washington",
+					location: {
+						lat: 41.8842248,
+						lng: -87.6249312
+					},
+					substops: []
+				}]);
+			},
+			getUpcomingDepartures: function(stopId){
+				return this.getAllStops()
+				.then(function(stops){
+					var stop = stops.find(function(stop){ return stop.id === stopId; });
+					if(stop){
+
+						return [{
+							stopId: stop.id,
+							expectedMinutes: 3,
+							expectedTime: getTimeAfterNMinutes(3).toISOString(),
+							attributes: {
+								"free": false
+							},
+							bus: {
+								id: "0001",
+								headsign: "3N",
+								location: {
+									lat: 41.880828,
+									lng: -87.624457
+								},
+								pathId: "path_01"
+							},
+							origin: "1106",
+							destination: "1119",
+							routeId: "3"
+						}];
+					}else{
+						return $q.reject();
+					}
+				});
+			},
+			getStopsByLocation: function(location){
+				return this.getAllStops()
+				.then(function(stops){
+					return stops.map(function(stop){ return stop.id; });
+				});
+			},
+			searchStops: function(input){
+				input = input.toLowerCase();
+
+				return this.getAllStops().then(function(stops){
+					return stops.filter(function(stop){
+						return stop.fullname.toLowerCase().indexOf(input) > -1;
+					}).map(function(stop){
+						return stop.id;
+					});
+				});
+			},
+			getBusInformation: function(busId){
+				if(busId === "0001"){
+					return $q.resolve({
+						id: "0001",
+						headsign: "3N",
+						location: {
+							lat: 41.880828,
+							lng: -87.624457
+						},
+						pathId: "path_01"
+					});
+				}else{
+					return $q.reject();
+				}
+			},
+			getPathById: function(shapeId){
+				return $q.reject();
+			},
+			getConfig: function(){
+				return config;
 			}
 		};
 

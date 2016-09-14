@@ -32,7 +32,7 @@ function controllers(tracker){
 	    // when map is loaded
 		MapComponentManager.loaded(function(commands){
 			console.log("[Map]", "Map loaded.");
-			$scope.clearOverlay();
+			//$scope.clearOverlay();
 		});
 
 	    // Global functions
@@ -77,6 +77,8 @@ function controllers(tracker){
 				$location.replace();
 			}
 		};
+
+		$rootScope.clearOverlay();
 	})
 
 	.controller("overmapTimers", function OvermapTimers($scope, $mdDialog, $interval, $mdToast, storage, uuid, getStopDetails){
@@ -292,21 +294,24 @@ function controllers(tracker){
 
 		//loadStopsDetails()
 		//	.then(function(){
-		  		$scope.isSearching = false;
-		  		$scope.searchTerm = "";
-		  		$scope.searchResults = [];
-		  		$scope.performSearch = function(){
-		  			$scope.isSearching = true;
-		  			Transit.searchStops($scope.searchTerm).then(function(list){
-		  				$scope.isSearching = false;
-		  				$scope.searchResults = list;
-		  			}, function(){
-		  				$scope.isSearching = false;
-		  			});
-		  		};
-		//	});
+		
+		$scope.isSearching = false;	// searching state
+		$scope.searchTerm = "";    	// for textfield binding
+		$scope.searchResults = []; 	// stores search results
 
-		var highlightedStop = null;
+		var highlightedStop = null;	// stores currently highlighted stop
+
+		// performa searching
+		$scope.performSearch = function(){
+			$scope.isSearching = true;
+			Transit.searchStops($scope.searchTerm).then(function(list){
+				$scope.searchResults = list;
+			})
+			.finally(function(){
+				$scope.isSearching = false;
+			});
+		};
+		//	});
 
 		// go to first stop in search results
 		$scope.goToFirstOption = function(e){
@@ -334,8 +339,9 @@ function controllers(tracker){
 			});
 		};
 
+		// reset when destroying
 		$scope.$on("$destroy", function(){
-			if(highlightedStop) highlightedStop.set("iconHoverable", true);
+			if(highlightedStop) $scope.dehighlightStop(highlightedStop);
 		});
 	})
 
@@ -369,15 +375,17 @@ function controllers(tracker){
 
 	.controller("StopDetails", function StopDetails($scope, $routeParams, $interval, $mdToast,
 			loadStopsDetails, getStopDetails, getStopIdInfo, getUpcomingBuses, map, timer, DEPARTURE_UPDATE_INTERVAL,
-			MapComponentManager, getShapeAndStops, ROUTE_COLORS, getData)
+			MapComponentManager, getShapeAndStops, ROUTE_COLORS, getData, Transit)
 	{
-		var stop = $scope.id = {};
-		var stop_id = $scope.stop_id = $routeParams.id;
-		var stop_points_list = $scope.stop_points_list = [];
-		var refreshInterval = undefined;
+		$scope.stop = null;              	// Target stop
+		$scope.stop_id = $routeParams.id;	// Target stop id
+		$scope.stop_points_list = [];    	// List of substops
+		$scope.departures = undefined;   	// List of Departures
+		$scope.stopNotExists = false;    	// True if stop cannot be found
 
-		// target marker
-		var targetMarker = null;
+		var departuresList;     	// Observable DeparturesList
+		var targetMarker = null;	// Target marker
+		//var refreshInterval = undefined;
 
 		// store data about selected departure
 		$scope.selectedDeparture = {
@@ -385,6 +393,50 @@ function controllers(tracker){
 			entry: null
 		};
 
+		Transit
+		// get matched stops
+		.getStop($scope.stop_id, true)
+		// handle matched stops list
+		.then(function(stops){
+			// select stop
+			$scope.stop = stops[0];
+			// inflate substop dropdown list
+			$scope.stop_points_list = stops;
+			// highlight stop marker
+			MapComponentManager.loaded(function(commands){
+				targetMarker = commands.getMarker("all-stops", $scope.stop.rootId);
+				targetMarker.showLabel().lightUp().center().setIcon("stop_selected_v2", true).set("iconHoverable", false);
+			});
+
+			return $scope.stop;
+		})
+		// get departures
+		.then(function(stop){
+			return stop.getUpcomingDepartures();
+		})
+		// set up departures observer
+		.then(function(list){
+			departuresList = list;
+			$scope.departures = list.departures;
+			list.observe(function(){
+				console.log("[StopDetails]", "Last updated on " + new Date());
+				$scope.departures = list.departures;
+			});
+		})
+		// if any of the previous operations failed
+		.catch(function(){
+			$scope.stopNotExists = true;	// stop not exist
+		});
+
+		// on destroy
+		$scope.$on("$destroy", function(){
+			// clear departures updating
+			if(departuresList)	departuresList.clearObserve();
+			// reset marker state
+			if(targetMarker)	targetMarker.hideLabel().lightOut().setIcon("stop_v2").set("iconHoverable", true);
+		});
+
+		/*
 		loadStopsDetails().then(function(){
 			var stop = $scope.stop = getStopDetails(stop_id),
 				stopInfo = getStopIdInfo(stop_id);
@@ -406,8 +458,10 @@ function controllers(tracker){
 
 			$scope.update();
 			refreshInterval = $interval($scope.update, DEPARTURE_UPDATE_INTERVAL);
-		}, function(){/*error*/});
+		}, function(){/*error*\/});
+	*/
 
+	/*
 		$scope.$on("$destroy", function(){
 			if(refreshInterval)	$interval.cancel(refreshInterval);
 			//if(targetMarker) targetMarker.hideLabel().lightOut().set("iconHoverable", true);
@@ -415,7 +469,9 @@ function controllers(tracker){
 
 			$scope.deselectRoute();
 		});
+		*/
 
+/*
 		$scope.update = function(){
 			$scope.isSearching = true;
 			getUpcomingBuses(stop_id)
@@ -429,11 +485,76 @@ function controllers(tracker){
 
 			// TODO: update bus location
 		};
+*/
+
 
 		$scope.addTimer = function(departure){
 			timer("prompt", departure);
 		};
 
+
+		$scope.selectedBus = null;
+		var mapRoutePolyline;
+		$scope.selectRoute = function(bus){
+			console.log(bus);
+			function displayRoute(bus){
+				bus.getCurrentRoute().then(function(route){
+					MapComponentManager.loaded(function(commands){
+						// return if user selected another route to display
+						if($scope.selectedBus !== bus)	return;
+
+						// display path
+						mapRoutePolyline = new google.maps.Polyline({
+							path: route.path,
+							geodesic: true,
+							strokeColor: bus.routeColor,
+							strokeOpacity: 1.0,
+							strokeWeight: 5
+						});
+						mapRoutePolyline.setMap(MapComponentManager.map);
+
+						// filter stops
+						commands.getSet("all-stops").hide();
+						route.stops.forEach(function(stopId){
+							commands.getMarker("all-stops", stopId).show();
+						});
+					});
+				});
+			}
+
+			var onlyDeselecting = $scope.selectedBus && bus.id === $scope.selectedBus.id;
+			if(onlyDeselecting){
+				// hide existing route
+				$scope.deselectRoute();
+				return true;
+			}else{
+				$scope.selectedBus = bus;
+			}
+
+			// observe bus location
+			bus.observe(function(bus){
+				console.log("Updated bus", bus);
+			});
+
+			// display route
+			displayRoute(bus);
+		}
+
+		$scope.deselectRoute = function(){
+			// clear observe
+			if($scope.selectedBus){
+				$scope.selectedBus.clearObserve();
+				$scope.selectedBus = null;
+			}
+
+			// clear path polyline
+			if(mapRoutePolyline){
+				mapRoutePolyline.setMap(null);
+				mapRoutePolyline = null;
+			}
+		};
+
+		/*
 		$scope.selectRoute = function(departure){
 			var onlyDeselecting = $scope.selectedDeparture.entry && departure.vehicle_id === $scope.selectedDeparture.entry.vehicle_id;
 
@@ -519,5 +640,6 @@ function controllers(tracker){
 				});
 			}
 		};
+		*/
 	})
 }

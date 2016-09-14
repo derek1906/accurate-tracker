@@ -20,7 +20,7 @@
     </div>
 
     <md-list class="page-scrollable-content departures no-margin" ng-show="stops.length">
-        <md-list-item class="favStop-info" ng-repeat="stop in stops track by stop.stop_id"
+        <md-list-item class="favStop-info" ng-repeat="stop in stops track by stop.id"
                     ng-click="goToStop(stop)" ng-mouseover="centerStop(stop)" ng-mouseout="decenterStop(stop)">
             <fav-button stop-id="stop.id" class="md-primary"></fav-button>
             <span>{{stop.fullname}}</span>

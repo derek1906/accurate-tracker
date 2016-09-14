@@ -11,6 +11,11 @@
         font-size: 14px;
         line-height: normal;
     }
+    .departures .eta_time{
+        font-size: 10px;
+        white-space: nowrap;
+        line-height: normal;
+    }
 
     .istop-icon{
         height: 1em;
@@ -65,14 +70,14 @@
 </style>
 <link href="./styles/route-color.css" rel="stylesheet" />
 <div class="headbar" layout="row" layout-align="start center" flex="nogrow">
-    <fav-button stop-id="stop.stop_id" ng-show="!stopNotExists"
+    <fav-button stop-id="stop.id" ng-show="!stopNotExists"
         flex-order="0" flex-order-xs="2"></fav-button>
     <h2 flex-order="1" flex-order-xs="0" flex="nogrow">
-        <span ng-if="!combinedStop.stop_name">nope.avi</span>
-        <md-select class="md-no-underline" ng-if="combinedStop.stop_name" ng-model="stop_id" ng-change="goToStopId(stop_id)"
+        <span ng-if="!stop">nope.avi</span>
+        <md-select class="md-no-underline" ng-if="stop.fullname" ng-model="stop_id" ng-change="goToStopId(stop_id)"
             aria-label="Stop point">
-            <md-option ng-repeat="stop_point in stop_points_list" ng-value="stop_point.stop_id">
-                {{stop_point.stop_name}}
+            <md-option ng-repeat="substop in stop_points_list" ng-value="substop.id">
+                {{substop.fullname}}
             </md-option>
         </md-select>
     </h2>
@@ -101,31 +106,32 @@
 
     <md-list class="page-scrollable-content departures no-margin">
         <md-list-item class="departure-list-item"
-                ng-repeat="departure in departures" ng-click="selectRoute(departure)"
-                ng-class="[(departure.route.route_id | lowercase), {selected: departure.vehicle_id == selectedDeparture.entry.vehicle_id}]">
+                ng-repeat="departure in departures" ng-click="selectRoute(departure.bus)"
+                ng-class="[(departure.routeId | lowercase), {selected: departure.bus.id == selectedBus.id}]">
             <div class="departure-info" layout="column" layout-align="center start">
                 <span class="headsign" layout="row" layout-align="start center">
-                    {{departure.headsign}} (eta: {{departure.expected | date : "h:mm a"}})
-                    <md-icon class="istop-icon" md-svg-icon="ui:istop" ng-show="departure.is_istop">
+                    {{departure.bus.headsign}}
+                    <md-icon class="istop-icon" md-svg-icon="ui:istop" ng-show="departure.attributes.iStop">
                         <md-tooltip md-direction="right" md-delay="300">
                             Boarding is free<br>
                             (no iCard is needed)
                         </md-tooltip>
                     </md-icon>
                 </span>
-                <span class="destination">To {{departure.destination.stop_id | stopID}}</span>
+                <span class="destination">To {{departure.destination.name}}</span>
             </div>
             <!-- Expected minutes remaining -->
-            <div class="md-secondary" layout="column" layout-align="center center" ng-show="departure.expected_mins">
-                <span class="expected_mins">{{departure.expected_mins}}</span>
+            <div class="md-secondary" layout="column" layout-align="center center" ng-show="departure.expectedMinutes">
+                <span class="expected_mins">{{departure.expectedMinutes}}</span>
                 <span class="min_label">min</span>
+                <span class="eta_time">{{departure.expectedTime | date : "h:mm a"}}</span>
             </div>
             <!-- "Due" text: Shows only when expected time is within 1 minute -->
-            <div class="md-secondary" layout="column" layout-align="center center" ng-show="!departure.expected_mins">
+            <div class="md-secondary" layout="column" layout-align="center center" ng-show="!departure.expectedMinutes">
                 <span class="expected_mins">Due</span>
             </div>
-            <!-- Timer icon: Shows only when expected time is greater than 1 minute -->
-            <md-button class="md-icon-button md-secondary" ng-show="departure.expected_mins" ng-click="addTimer(departure)" aria-label="Set timer" hide-xs>
+            <!-- Timer icon: Shows only when expected time is >= than 1 minute -->
+            <md-button class="md-icon-button md-secondary" ng-show="departure.expectedMinutes" ng-click="addTimer(departure)" aria-label="Set timer" hide-xs>
                 <md-icon md-svg-icon="ui:timer"></md-icon>
             </md-button>
         </md-list-item>
