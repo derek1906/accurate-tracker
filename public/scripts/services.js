@@ -869,12 +869,14 @@ function services(tracker){
 				for(var marker_id in this.markers){
 					this.markers[marker_id].show();
 				}
+				return this;
 			}
 			MarkerSet.prototype.hide = function(){
 				this.isHiding = true;
 				for(var marker_id in this.markers){
 					this.markers[marker_id].hide();
 				}
+				return this;
 			}
 
 
@@ -1593,6 +1595,7 @@ function services(tracker){
 								},
 								routeId: departure.trip.route_id,
 								pathId: departure.trip.shape_id,
+								routeName: getBaseRouteId(departure.trip.route_id),
 								routeColor: ROUTE_COLORS[getBaseRouteId(departure.trip.route_id)]
 							},
 							origin: departure.origin.stop_id,
@@ -1642,6 +1645,7 @@ function services(tracker){
 						},
 						routeId: bus.trip ? bus.trip.route_id : "",
 						pathId: bus.trip ? bus.trip.shape_id : "",
+						routeName: bus.trip ? getBaseRouteId(bus.trip.route_id) : "",
 						routeColor: bus.trip ? ROUTE_COLORS[getBaseRouteId(bus.trip.route_id)] : ""
 					};
 				})

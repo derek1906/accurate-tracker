@@ -374,24 +374,19 @@ function controllers(tracker){
 	})
 
 	.controller("StopDetails", function StopDetails($scope, $routeParams, $interval, $mdToast,
-			loadStopsDetails, getStopDetails, getStopIdInfo, getUpcomingBuses, map, timer, DEPARTURE_UPDATE_INTERVAL,
-			MapComponentManager, getShapeAndStops, ROUTE_COLORS, getData, Transit)
+			map, timer, MapComponentManager, Transit)
 	{
 		$scope.stop = null;              	// Target stop
 		$scope.stop_id = $routeParams.id;	// Target stop id
 		$scope.stop_points_list = [];    	// List of substops
 		$scope.departures = undefined;   	// List of Departures
 		$scope.stopNotExists = false;    	// True if stop cannot be found
+		$scope.selectedBus = null;       	// Selected bus
 
 		var departuresList;     	// Observable DeparturesList
 		var targetMarker = null;	// Target marker
-		//var refreshInterval = undefined;
+		var mapRoutePolyline;   	// Bus route path, defined when a bus is selected
 
-		// store data about selected departure
-		$scope.selectedDeparture = {
-			route: null,
-			entry: null
-		};
 
 		Transit
 		// get matched stops
@@ -434,74 +429,30 @@ function controllers(tracker){
 			if(departuresList)	departuresList.clearObserve();
 			// reset marker state
 			if(targetMarker)	targetMarker.hideLabel().lightOut().setIcon("stop_v2").set("iconHoverable", true);
-		});
-
-		/*
-		loadStopsDetails().then(function(){
-			var stop = $scope.stop = getStopDetails(stop_id),
-				stopInfo = getStopIdInfo(stop_id);
-
-			var combinedStop = $scope.combinedStop = getStopDetails(stopInfo.stop_id);
-
-			if(!stop){
-				$scope.stopNotExists = true;
-				return;
-			}
-			
-			stop_points_list = $scope.stop_points_list = [combinedStop].concat(combinedStop.stop_points);
-		
-			MapComponentManager.loaded(function(commands){
-				targetMarker = commands.getMarker("all-stops", stopInfo.stop_id);
-				targetMarker
-					.showLabel().lightUp().center().setIcon("stop_selected_v2", true).set("iconHoverable", false);
-			});
-
-			$scope.update();
-			refreshInterval = $interval($scope.update, DEPARTURE_UPDATE_INTERVAL);
-		}, function(){/*error*\/});
-	*/
-
-	/*
-		$scope.$on("$destroy", function(){
-			if(refreshInterval)	$interval.cancel(refreshInterval);
-			//if(targetMarker) targetMarker.hideLabel().lightOut().set("iconHoverable", true);
-			if(targetMarker) targetMarker.hideLabel().lightOut().setIcon("stop_v2").set("iconHoverable", true);
-
+			// deselect any selected route
 			$scope.deselectRoute();
 		});
-		*/
-
-/*
-		$scope.update = function(){
-			$scope.isSearching = true;
-			getUpcomingBuses(stop_id)
-				.then(function(departures){
-					$scope.isSearching = false;
-					$scope.departures = departures;
-				}, function(msg){
-					var toast = $mdToast.simple().textContent("Failed to get data.").position("top right");
-					$mdToast.show(toast);
-				});
-
-			// TODO: update bus location
-		};
-*/
-
+		
 
 		$scope.addTimer = function(departure){
 			timer("prompt", departure);
 		};
 
-
-		$scope.selectedBus = null;
-		var mapRoutePolyline;
-		$scope.selectRoute = function(bus){
-			console.log(bus);
+		// display a bus route
+		$scope.displayBusRoute = function(bus){
 			function displayRoute(bus){
 				bus.getCurrentRoute().then(function(route){
 					MapComponentManager.loaded(function(commands){
 						// return if user selected another route to display
 						if($scope.selectedBus !== bus)	return;
+
+						// display bus location
+						var location = commands.getMarker("bus-route", "bus-location");
+						location.setIcon("bus-" + bus.routeName);
+						location.setPosition(bus.location);
+						location.set("caption", "Bus #" + bus.id + " was here a moment ago");
+						location.set("visible", true);
+						location.center();
 
 						// display path
 						mapRoutePolyline = new google.maps.Polyline({
@@ -514,123 +465,51 @@ function controllers(tracker){
 						mapRoutePolyline.setMap(MapComponentManager.map);
 
 						// filter stops
-						commands.getSet("all-stops").hide();
+						commands.getSet("all-stops").hide().isHiding = false;
 						route.stops.forEach(function(stopId){
 							commands.getMarker("all-stops", stopId).show();
+						});
+
+						// observe bus location
+						bus.observe(function(bus){
+							console.log("Updated bus", bus);
+							location.setPosition(bus.location);
+							location.center();
 						});
 					});
 				});
 			}
 
 			var onlyDeselecting = $scope.selectedBus && bus.id === $scope.selectedBus.id;
+
+			// hide existing route
+			$scope.deselectRoute();
+			
 			if(onlyDeselecting){
-				// hide existing route
-				$scope.deselectRoute();
+				// we are done
 				return true;
 			}else{
 				$scope.selectedBus = bus;
 			}
 
-			// observe bus location
-			bus.observe(function(bus){
-				console.log("Updated bus", bus);
-			});
-
 			// display route
 			displayRoute(bus);
 		}
 
+		// remove bus route from map
 		$scope.deselectRoute = function(){
-			// clear observe
 			if($scope.selectedBus){
+				// clear observe
 				$scope.selectedBus.clearObserve();
 				$scope.selectedBus = null;
-			}
-
-			// clear path polyline
-			if(mapRoutePolyline){
-				mapRoutePolyline.setMap(null);
-				mapRoutePolyline = null;
-			}
-		};
-
-		/*
-		$scope.selectRoute = function(departure){
-			var onlyDeselecting = $scope.selectedDeparture.entry && departure.vehicle_id === $scope.selectedDeparture.entry.vehicle_id;
-
-			// hide existing route
-			$scope.deselectRoute();
-
-			//MapComponentManager.map.set("minZoom", 12);
-
-			var routeName = departure.route.route_id.toLowerCase().split(" ")[0];
-
-			// return if user is trying to deselect entry
-			if(onlyDeselecting)	return true;
-
-			// create new route
-			getShapeAndStops(departure.trip.shape_id).then(function(data){
-				MapComponentManager.loaded(function(commands){
-					// return if user selected another route to display
-					if(!departure.selected)	return;
-
-					// display path
-					var latlngs = data.path.map(function(point){
-						return {lat: point.shape_pt_lat, lng: point.shape_pt_lon};
-					});
-
-					$scope.selectedDeparture.route = new google.maps.Polyline({
-						path: latlngs,
-						geodesic: true,
-						strokeColor: ROUTE_COLORS[routeName],
-						strokeOpacity: 1.0,
-						strokeWeight: 5
-					});
-					$scope.selectedDeparture.route.setMap(MapComponentManager.map);
-
-					// filter stops
-					commands.getSet("all-stops").hide();
-					data.stops.forEach(function(stop){
-						commands.getMarker("all-stops", stop.stop_id.split(":")[0]).show();
-					});
-				});
-			});
-
-			getData("GetVehicle", {vehicle_id: departure.vehicle_id}).then(function(res){
-				var vehicle = res.vehicles[0];
-				
-				// return if user selected another route to display
-				if(!departure.selected)	return;
 
 				MapComponentManager.loaded(function(commands){
-					var location = commands.getMarker("bus-route", "bus-location");
-					location.setIcon("bus-" + routeName);
-					location.setPosition({
-						lat: vehicle.location.lat, lng: vehicle.location.lon
-					});
-					location.set("visible", true);
-					location.center();
-				});
-			});
-
-			// mark as selected
-			$scope.selectedDeparture.entry = departure;
-			$scope.selectedDeparture.entry.selected = true;
-		};
-
-		$scope.deselectRoute = function(){
-			//MapComponentManager.map.set("minZoom", 17);
-
-			if($scope.selectedDeparture.entry){
-				MapComponentManager.loaded(function(commands){
-					$scope.selectedDeparture.route.setMap(null);
-					$scope.selectedDeparture.route = null;
-
-					$scope.selectedDeparture.entry.selected = false;
-					$scope.selectedDeparture.entry = null;
-
 					// hide bus location
 					commands.getMarker("bus-route", "bus-location").set("visible", false);
+
+					// clear path polyline
+					mapRoutePolyline.setMap(null);
+					mapRoutePolyline = null;
 
 					// display all stops
 					commands.getSet("all-stops").show();
@@ -640,6 +519,5 @@ function controllers(tracker){
 				});
 			}
 		};
-		*/
 	})
 }

@@ -11,7 +11,7 @@
         font-size: 14px;
         line-height: normal;
     }
-    .departures .eta_time{
+    .departures .eta_time, .departures .bus_id{
         font-size: 10px;
         white-space: nowrap;
         line-height: normal;
@@ -106,7 +106,7 @@
 
     <md-list class="page-scrollable-content departures no-margin">
         <md-list-item class="departure-list-item"
-                ng-repeat="departure in departures" ng-click="selectRoute(departure.bus)"
+                ng-repeat="departure in departures" ng-click="displayBusRoute(departure.bus)"
                 ng-class="[(departure.routeId | lowercase), {selected: departure.bus.id == selectedBus.id}]">
             <div class="departure-info" layout="column" layout-align="center start">
                 <span class="headsign" layout="row" layout-align="start center">
@@ -119,6 +119,7 @@
                     </md-icon>
                 </span>
                 <span class="destination">To {{departure.destination.name}}</span>
+                <span class="bus_id">Bus {{departure.bus.id}}</span>
             </div>
             <!-- Expected minutes remaining -->
             <div class="md-secondary" layout="column" layout-align="center center" ng-show="departure.expectedMinutes">
