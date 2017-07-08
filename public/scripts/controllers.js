@@ -242,10 +242,18 @@ function controllers(tracker){
 		$scope.nearbyStops = [];
 
 		// fill nearby list
-		Transit.getNearbyStops(20).then(function(stops){
-			$scope.nearbyStops = stops;
-		});
+		function updateList(){
+			MapComponentManager.loaded(function(commands){
+				var selfLocationMarker = commands.getMarker("user", "self-location");
+				selfLocationMarker.center();
+			});
 
+			Transit.getNearbyStops(20).then(function(stops){
+				$scope.nearbyStops = stops;
+			});
+		}
+
+		/*
 		geolocation().then(function(latlon){
 			MapComponentManager.loaded(function(commands){
 				var marker = commands.getMarker("user", "self-location");
@@ -264,6 +272,28 @@ function controllers(tracker){
 				}]);
 			});
 			
+		});*/
+		MapComponentManager.loaded(function(commands){
+			var selfLocationMarker = commands.getMarker("user", "self-location");
+			selfLocationMarker.center();
+
+			btn("set", [{
+				text: "Center yourself",
+				click: function(){
+					selfLocationMarker.center(DEFAULT_ZOOM_LEVEL);
+				}
+			}]);
+		});
+
+		geolocation.watch("Landing", function(){
+			console.log("location changed")
+			updateList();
+		});
+
+		updateList();
+
+		$scope.$on("$destroy", function(){
+			geolocation.unwatch("Landing");
 		});
 
 
@@ -445,10 +475,12 @@ function controllers(tracker){
 					MapComponentManager.loaded(function(commands){
 						// return if user selected another route to display
 						if($scope.selectedBus !== bus)	return;
+						// return if no route exists
+						if(!bus.route)	return;
 
 						// display bus location
 						var location = commands.getMarker("bus-route", "bus-location");
-						location.setIcon("bus-" + bus.routeName);
+						location.setIcon("bus-" + bus.route.name);
 						location.setPosition(bus.location);
 						location.set("caption", "Bus #" + bus.id + " was here a moment ago");
 						location.set("visible", true);
@@ -458,7 +490,7 @@ function controllers(tracker){
 						mapRoutePolyline = new google.maps.Polyline({
 							path: route.path,
 							geodesic: true,
-							strokeColor: bus.routeColor,
+							strokeColor: bus.route.color,
 							strokeOpacity: 1.0,
 							strokeWeight: 5
 						});

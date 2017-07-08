@@ -26,34 +26,55 @@ function services(tracker){
 		return methods;
 	})
 
-	// Geolocation - returns a deferred promise
+	// Geolocation wrapper
 	.service("geolocation", function geolocation($q){
-		var ongoingRequest = false;	// This is to deal with bullshit Firefox behavior
-		                           	//  where .getCurrentPosition only fires once
-		                           	//  even when called multiple times
+		var watchIdList = {}, ongoingRequestPromise = undefined;
 
-		return function(){
+		function fetchLocation(){
+			if(ongoingRequestPromise)	return ongoingRequestPromise;
+
 			var deferred = $q.defer();
+			navigator.geolocation.getCurrentPosition(function(position){
+				// success
+				deferred.resolve(parsePosition(position));
+				deferred = undefined;
+			}, function(){
+				// failed
+				deferred.reject();
+				deferred = undefined;
+			});
 
-			if(!ongoingRequest){
-				ongoingRequest = deferred.promise;
-				navigator.geolocation.getCurrentPosition(function(pos){
-					deferred.resolve({latitude: pos.coords.latitude, longitude: pos.coords.longitude});
-					ongoingRequest = undefined;
-				}, function(){
-					deferred.reject();
-					ongoingRequest = undefined;
-				});
-			}else{
-				ongoingRequest.then(function(latlng){
-					deferred.resolve(latlng);
-				}, function(){
-					deferred.reject();
-				});
+			ongoingRequestPromise = deferred.promise;
+
+			return ongoingRequestPromise;
+		}
+
+		function parsePosition(position){
+			return {
+				lat: position.coords.latitude,
+                lng: position.coords.longitude
+			};
+		}
+
+		var methods = {
+			watch: function(name, success, failed){
+				watchIdList[name] = navigator.geolocation.watchPosition(function(position){
+					success(parsePosition(position));
+				}, failed);
+			},
+			unwatch: function(name){
+				if(name && watchIdList[name]){
+					navigator.geolocation.clearWatch(watchIdList[name]);
+					delete watchIdList[name];
+				}
 			}
-
-			return deferred.promise;
 		};
+
+		for(var name in methods){
+			fetchLocation[name] = methods[name];
+		}
+
+		return fetchLocation;
 	})
 
 	// shortcut for broadcasting map events
@@ -181,11 +202,6 @@ function services(tracker){
 				return v.toString(16);
 			});
 		}
-	})
-
-	// route colors
-	.service("routeColor", function routeColor(){
-		
 	})
 
 	// Load stops database - Fetch from web if data is outdated or missing
@@ -1289,15 +1305,18 @@ function services(tracker){
 		function Bus(id, props){
 			Observable.call(this, id);
 
-			this.set(applyDefault({
+			this.set(angular.merge({
 				headsign: "",
 				location: {
 					lat: 0,
 					lng: 0
 				},
-				routeId: "",
-				pathId: "",
-				routeColor: "#fff300"
+				route: {
+					id: "",
+					pathId: "",
+					color: "#fff300",
+					name: ""
+				}
 			}, props));
 		}
 		inherit(Bus, Observable);
@@ -1311,11 +1330,11 @@ function services(tracker){
 			});
 		};
 		Bus.prototype.getCurrentRoute = function(){
-			if(!this.pathId)	return null;
+			if(!this.route.pathId)	return null;
 
 			return $q.all([
-				Adapter.getPathById(this.pathId),
-				Adapter.getStopsInPath(this.pathId)
+				Adapter.getPathById(this.route.pathId),
+				Adapter.getStopsInPath(this.route.pathId)
 			]).then(function(values){
 				var path = values[0], stops = values[1];
 				return {
@@ -1378,7 +1397,7 @@ function services(tracker){
 					.then(function(location){
 						return $q.all([
 							exports.getAllStops(),
-							Adapter.getStopsByLocation({lat: location.latitude, lng: location.longitude})
+							Adapter.getStopsByLocation(location)
 						]);
 					})
 					// return stops
@@ -1593,10 +1612,12 @@ function services(tracker){
 									lat: departure.location.lat,
 									lng: departure.location.lon
 								},
-								routeId: departure.trip.route_id,
-								pathId: departure.trip.shape_id,
-								routeName: getBaseRouteId(departure.trip.route_id),
-								routeColor: ROUTE_COLORS[getBaseRouteId(departure.trip.route_id)]
+								route: {
+									id: departure.trip.route_id,
+									pathId: departure.trip.shape_id,
+									name: getBaseRouteId(departure.trip.route_id),
+									color: ROUTE_COLORS[getBaseRouteId(departure.trip.route_id)]
+								}
 							},
 							origin: departure.origin.stop_id,
 							destination: departure.destination.stop_id,
@@ -1610,7 +1631,7 @@ function services(tracker){
 						lat: location.lat,
 						lon: location.lng,
 						count: 20
-					})
+					}, true)
 					.then(function(res){
 						return res.stops.map(function(stop){ return stop.stop_id; });
 					});
@@ -1643,10 +1664,12 @@ function services(tracker){
 							lat: bus.location.lat,
 							lng: bus.location.lon
 						},
-						routeId: bus.trip ? bus.trip.route_id : "",
-						pathId: bus.trip ? bus.trip.shape_id : "",
-						routeName: bus.trip ? getBaseRouteId(bus.trip.route_id) : "",
-						routeColor: bus.trip ? ROUTE_COLORS[getBaseRouteId(bus.trip.route_id)] : ""
+						route: {
+							id: bus.trip ? bus.trip.route_id : "",
+							pathId: bus.trip ? bus.trip.shape_id : "",
+							name: bus.trip ? getBaseRouteId(bus.trip.route_id) : "",
+							color: bus.trip ? ROUTE_COLORS[getBaseRouteId(bus.trip.route_id)] : ""
+						}
 					};
 				})
 			},

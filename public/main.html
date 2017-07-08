@@ -223,16 +223,12 @@
                         });
                     });
 
-                    //var loadStopsDetailsPromise = loadStopsDetails();
-
-                    //MapComponentManager.loaded(function(commands){
                     function onMapLoaded(commands){
                         var mapLoadedPromise = $q.defer();
 
-                        commands.getAndCreateMarker("user", "self-location", {
-                            position: {lat: 0, lng: 0},
+                        var selfLocationMarker = commands.getAndCreateMarker("user", "self-location", {
+                            position: Transit.getConfig().defaultMapSettings.location,
                             iconName: "home_v2",
-                            visible: false,
                             caption: "You are here",
                             iconHoverable: true,
                             level: "focus",
@@ -242,6 +238,11 @@
                                     self.center();
                                 }
                             }
+                        });
+
+                        // watch position
+                        geolocation.watch("Global", function(position) {
+                            selfLocationMarker.setPosition(position);
                         });
 
                         commands.getAndCreateMarker("bus-route", "bus-location", {
@@ -259,26 +260,6 @@
 
                         return Transit.getAllStops().then(function(stops){
                             var all_stops = commands.addSet("all-stops");
-                            /*
-                            for(var stop_id in stops){
-                                var stop = stops[stop_id],
-                                    stop_marker = commands.createMarker({
-                                        position: {lat: stop.mid_lat, lng: stop.mid_lon},
-                                        iconName: "stop_v2",
-                                        caption: stop.stop_name,
-                                        iconHoverable: true,
-                                        level: "common",
-                                        data: stop,
-                                        supportsMini: true,
-                                        events: {
-                                            click: function(stop){
-                                                $location.path("/stop/" + stop.stop_id);
-                                            }
-                                        }
-                                    });
-
-                                all_stops.setMarker(stop_id, stop_marker);
-                            }*/
                             stops.getList().forEach(function(stop){
                                 var stop_marker = commands.createMarker({
                                         position: stop.location,
@@ -299,8 +280,6 @@
                             });
                         });
                     }
-
-                    //});
 
                     cacheUpdateAvailable.then(function(){
                         var toast = $mdToast.simple().position("top right").textContent("A new version will be applied next time.");
